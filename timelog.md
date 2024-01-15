@@ -1,3 +1,3 @@
-| Date | Alice | Victor | Selena | Carson | Jason | | Task |
+| Date | Alice | Victor | Selena | Carson | Jason | Wanda | Task |
 |------------|--------|--------|--------|--------|--------|--------|------|
 | 2024/01/08 |

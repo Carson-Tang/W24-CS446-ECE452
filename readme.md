@@ -3,5 +3,5 @@
 - Victor Yun (vyun, @victoranyun)
 - Selena Chen (sy36chen)
 - Carson Tang (c233tang, @Carson-Tang)
-- Jason Lin (jy26lin)
-- Wanda Song (xy4song)
+- Jason Lin (jy26lin, @jasonjylin)
+- Wanda Song (xy4song, @nil-cipher)

@@ -29,7 +29,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ca.uwaterloo.cs.ui.theme.HelloAndroidTheme
+import ca.uwaterloo.cs.ui.theme.ZenJourneyTheme
 import ca.uwaterloo.cs.ui.theme.InstagramOrange
 import ca.uwaterloo.cs.ui.theme.InstagramPeach
 import ca.uwaterloo.cs.ui.theme.InstagramPurple
@@ -40,7 +40,7 @@ class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContent {
-      HelloAndroidTheme {
+      ZenJourneyTheme {
         MainContent()
       }
     }

@@ -10,7 +10,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
 
 @Composable
-fun HelloAndroidTheme(content: @Composable () -> Unit) {
+fun ZenJourneyTheme(content: @Composable () -> Unit) {
   val darkColors = darkColors(
     background = Color.VeryDarkGray,
     surface = Color.VeryDarkGray,

@@ -14,9 +14,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.an.room.model.User
-
+/* TODO: not used!! */
 @Composable
-fun LoginPage(context: Context) {
+fun LoginPageTemp(context: Context) {
     val firstNameState = remember { mutableStateOf("") }
     val lastNameState = remember { mutableStateOf("") }
 

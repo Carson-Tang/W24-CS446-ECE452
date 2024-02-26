@@ -23,6 +23,8 @@ fun ZenJourneyTheme(content: @Composable () -> Unit) {
         background = Color(0xFF99D5BF),
         primaryContainer = Color.White,
         onPrimaryContainer = Color(0xFF99D5BF),
+        secondaryContainer = Color(0xFF8FCAB5),
+        onSecondaryContainer = Color(0xFFB3E2D0),
         onBackground = Color.White,
         onSurface = Color(0xFF99D5BF),
     )
@@ -41,6 +43,11 @@ fun ZenJourneyTheme(content: @Composable () -> Unit) {
             fontWeight = FontWeight.SemiBold,
             fontSize = 22.sp,
             color = lightColors.onBackground
+        ),
+        labelMedium = androidx.compose.ui.text.TextStyle(
+            fontWeight = FontWeight.Bold,
+            fontSize = 25.sp,
+            color = lightColors.onSecondaryContainer
         ),
     )
     MaterialTheme(

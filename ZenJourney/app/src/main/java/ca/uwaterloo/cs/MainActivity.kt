@@ -17,33 +17,37 @@ import kotlinx.coroutines.GlobalScope
 
 class MainActivity : ComponentActivity() {
 
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
-    setContent {
-      ZenJourneyTheme {
-        MainContent(this)
-      }
+        setContent {
+            ZenJourneyTheme {
+                MainContent(this)
+            }
+        }
     }
-  }
 }
 
 @Composable
 fun MainContent(context: Context) {
-  val pageState = remember { mutableStateOf(PageStates.WELCOME) }
-  if (pageState.value == PageStates.WELCOME) {
-    WelcomePage()
-  } else if (pageState.value == PageStates.LOGIN) {
-    LoginPage(context)
-  }
+    val pageState = remember { mutableStateOf(PageStates.WELCOME) }
+    val nameState = remember { mutableStateOf("") }
+
+    when (pageState.value) {
+        PageStates.WELCOME -> WelcomePage(pageState)
+        PageStates.LOGIN -> LoginPage(pageState)
+        PageStates.SIGNUP_STEP1 -> SignUpPage1(pageState, nameState)
+        PageStates.SIGNUP_STEP2 -> SignUpPage2(pageState, nameState)
+        PageStates.HOME -> HomePage()
+    }
 }
 
 @OptIn(DelicateCoroutinesApi::class)
 fun saveUser(user: User, context: Context) {
-  GlobalScope.launch {
-    val userDao = UserDB.getDB(context).userDao()
-    userDao.insert(user)
-    val allUsers = userDao.getAll()
-    Log.e("users", "$allUsers")
-  }
+    GlobalScope.launch {
+        val userDao = UserDB.getDB(context).userDao()
+        userDao.insert(user)
+        val allUsers = userDao.getAll()
+        Log.e("users", "$allUsers")
+    }
 }

@@ -12,5 +12,6 @@ dependencyResolutionManagement {
     mavenCentral()
   }
 }
+
 rootProject.name = "ZenJourney"
-include ':app'
+include(":app")

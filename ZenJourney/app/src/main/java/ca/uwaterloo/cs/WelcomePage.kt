@@ -18,9 +18,32 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.*
+import io.ktor.client.*
+import io.ktor.client.request.*
+import kotlinx.coroutines.launch
+import kotlin.math.log
+import io.ktor.client.engine.android.*
+import io.ktor.client.*
+import io.ktor.client.engine.android.*
+import java.net.Proxy
+import java.net.InetSocketAddress
 
 @Composable
 fun WelcomePage(pageState: MutableState<PageStates>) {
+    // Create a coroutine scope
+    val coroutineScope = rememberCoroutineScope()
+
+    // Create an HttpClient for making requests
+    val httpClient = HttpClient() {
+//        engine {
+//            // this: AndroidEngineConfig
+//            connectTimeout = 100_000
+//            socketTimeout = 100_000
+//            proxy = Proxy(Proxy.Type.HTTP, InetSocketAddress("localhost", 8080))
+//        }
+    }
+
     Column(
         Modifier
             .background(MaterialTheme.colorScheme.background)
@@ -63,6 +86,25 @@ fun WelcomePage(pageState: MutableState<PageStates>) {
             TextButton(onClick = { pageState.value = PageStates.LOGIN }) {
                 Text("I have an account", style = MaterialTheme.typography.headlineSmall)
             }
+        }
+        // Add the new button for making Ktor request
+        TextButton(
+            onClick = {
+                // Launch a coroutine to make the request
+                coroutineScope.launch {
+                    try {
+                        println("123")
+                        val response = httpClient.get("https://10.0.2.2:8080/")
+                        // Handle the response here
+                        println(response)
+                    } catch (e: Exception) {
+                        println(e)
+                        // Handle exceptions
+                    }
+                }
+            }
+        ) {
+            Text("Make Ktor Request", style = MaterialTheme.typography.headlineSmall)
         }
     }
 }

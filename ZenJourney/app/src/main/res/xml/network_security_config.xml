@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <!-- Disallow cleartext (non-encrypted) traffic -->
+        <trust-anchors>
+            <!-- Define trusted certificates -->
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
+
+    <!-- Add specific configurations for domains -->
+    <domain-config cleartextTrafficPermitted="true">
+        <!-- Define a specific domain and its certificate -->
+        <domain includeSubdomains="true">localhost</domain>
+<!--        <trust-anchors>-->
+<!--            &lt;!&ndash; Define trusted certificates for this domain &ndash;&gt;-->
+<!--            <certificates src="@raw/example_certificate" />-->
+<!--        </trust-anchors>-->
+    </domain-config>
+
+    <!-- You can add more domain-config elements for additional domains -->
+</network-security-config>

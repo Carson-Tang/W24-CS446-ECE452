@@ -40,12 +40,13 @@ dependencies {
   implementation("androidx.compose.ui:ui-tooling:1.6.2")
   implementation("io.coil-kt:coil-compose:2.1.0")                            // For loading images.
   implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.7")                // For making HTTP calls.
-  implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")   // For serializing/deserializing JSON.
+  implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")   // For serializing/deserializing JSON.
 
   implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
   implementation("androidx.test.ext:junit-ktx:1.1.5")
 
   implementation("androidx.compose.material3:material3:1.2.0")
+  implementation("androidx.compose.material3:material3-android:1.2.0")
 
   testImplementation("junit:junit:4.13.2")
   testImplementation("androidx.test.ext:junit:1.1.5")
@@ -79,4 +80,13 @@ dependencies {
   // optional - Paging 3 Integration
   implementation("androidx.room:room-paging:$roomVersion")
 
+  val ktorVersion = "2.3.8"
+
+  implementation("io.ktor:ktor-client-core:$ktorVersion")
+  implementation("io.ktor:ktor-client-json:$ktorVersion")
+  implementation("io.ktor:ktor-client-serialization:$ktorVersion")
+  implementation("io.ktor:ktor-client-logging:$ktorVersion")
+  implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
+  implementation("io.ktor:ktor-client-cio:$ktorVersion")
+  implementation("io.ktor:ktor-client-android:$ktorVersion")
 }

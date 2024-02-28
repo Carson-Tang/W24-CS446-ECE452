@@ -236,6 +236,5 @@ fun HomePage(pageState: MutableState<PageStates>) {
             }
         }
     }
-    Footer(pageState)
 }
 

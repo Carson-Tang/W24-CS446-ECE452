@@ -95,4 +95,7 @@ dependencies {
 
   // The compose calendar library
   implementation ("com.kizitonwose.calendar:compose:2.5.0")
+
+  // Used for adding material 3 icons
+  implementation("androidx.compose.material:material-icons-extended:1.6.2")
 }

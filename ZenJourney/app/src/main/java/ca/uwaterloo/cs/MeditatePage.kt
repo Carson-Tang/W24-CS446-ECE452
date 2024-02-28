@@ -19,6 +19,5 @@ fun MeditatePage(pageState: MutableState<PageStates>) {
     ) {
 
     }
-    Footer(pageState)
 }
 

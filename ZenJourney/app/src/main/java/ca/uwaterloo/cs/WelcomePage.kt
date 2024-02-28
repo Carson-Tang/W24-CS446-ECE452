@@ -16,18 +16,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.runtime.*
-import io.ktor.client.*
-import io.ktor.client.request.*
-import kotlinx.coroutines.launch
-import kotlin.math.log
-import io.ktor.client.engine.android.*
-import io.ktor.client.*
-import io.ktor.client.engine.android.*
-import java.net.Proxy
-import java.net.InetSocketAddress
 
 @Composable
 fun WelcomePage(pageState: MutableState<PageStates>) {

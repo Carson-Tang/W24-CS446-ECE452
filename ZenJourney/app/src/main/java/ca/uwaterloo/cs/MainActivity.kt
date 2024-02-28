@@ -30,7 +30,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainContent(context: Context) {
-    val pageState = remember { mutableStateOf(PageStates.WELCOME) }
+    val pageState = remember { mutableStateOf(PageStates.SETTINGS) }
     val nameState = remember { mutableStateOf("") }
 
     when (pageState.value) {
@@ -38,7 +38,15 @@ fun MainContent(context: Context) {
         PageStates.LOGIN -> LoginPage(pageState)
         PageStates.SIGNUP_STEP1 -> SignUpPage1(pageState, nameState)
         PageStates.SIGNUP_STEP2 -> SignUpPage2(pageState, nameState)
-        PageStates.HOME -> HomePage()
+        PageStates.HOME -> HomePage(pageState)
+        PageStates.MEDITATE -> MeditatePage(pageState)
+        PageStates.AFFIRMATION -> AffirmationPage(pageState)
+        PageStates.PHOTOBOOK -> PhotobookPage(pageState)
+        PageStates.JOURNAL_STEP1 -> JournalPage1(pageState)
+        PageStates.JOURNAL_STEP2 -> JournalPage2(pageState)
+        PageStates.JOURNAL_STEP3 -> JournalPage3(pageState)
+        PageStates.PAST_JOURNAL -> PastJournalPage(pageState)
+        PageStates.SETTINGS -> SettingsPage(pageState)
     }
 }
 

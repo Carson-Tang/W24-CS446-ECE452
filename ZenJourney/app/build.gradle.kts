@@ -89,4 +89,10 @@ dependencies {
   implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
   implementation("io.ktor:ktor-client-cio:$ktorVersion")
   implementation("io.ktor:ktor-client-android:$ktorVersion")
+
+  // The view calendar library
+  implementation ("com.kizitonwose.calendar:view:2.5.0")
+
+  // The compose calendar library
+  implementation ("com.kizitonwose.calendar:compose:2.5.0")
 }

@@ -12,7 +12,7 @@ import org.bson.BsonValue
 import org.bson.types.ObjectId
 
 class UserRepositoryImpl(
-        private val mongoDatabase: MongoDatabase
+    private val mongoDatabase: MongoDatabase
 ) : UserRepository {
 
     companion object {
@@ -22,7 +22,7 @@ class UserRepositoryImpl(
     override suspend fun insertOne(user: User): BsonValue? {
         try {
             val result = mongoDatabase.getCollection<User>(USER_COLLECTION).insertOne(
-                    user
+                user
             )
             return result.insertedId
         } catch (e: MongoException) {
@@ -33,7 +33,8 @@ class UserRepositoryImpl(
 
     override suspend fun deleteById(objectId: ObjectId): Long {
         try {
-            val result = mongoDatabase.getCollection<User>(USER_COLLECTION).deleteOne(Filters.eq("_id", objectId))
+            val result = mongoDatabase.getCollection<User>(USER_COLLECTION)
+                .deleteOne(Filters.eq("_id", objectId))
             return result.deletedCount
         } catch (e: MongoException) {
             System.err.println("Unable to delete due to an error: $e")
@@ -42,7 +43,7 @@ class UserRepositoryImpl(
     }
 
     override suspend fun findById(objectId: ObjectId): User? =
-            mongoDatabase.getCollection<User>(USER_COLLECTION).withDocumentClass<User>()
-                    .find(Filters.eq("_id", objectId))
-                    .firstOrNull()
+        mongoDatabase.getCollection<User>(USER_COLLECTION).withDocumentClass<User>()
+            .find(Filters.eq("_id", objectId))
+            .firstOrNull()
 }

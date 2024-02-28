@@ -30,7 +30,7 @@ fun AffirmationPage(pageState: MutableState<PageStates>) {
         Column(
             modifier = Modifier
                 .padding(all = 20.dp)
-                .size(width = 500.dp, height = 620.dp),
+                .size(width = 500.dp, height = 550.dp),
         ) {
             Column(
                 modifier = Modifier
@@ -65,13 +65,12 @@ fun AffirmationPage(pageState: MutableState<PageStates>) {
                     .background(color = Color(0xFF7BB6A1), shape = RoundedCornerShape(16.dp))
             ) {
                 Button(
-                    onClick = { pageState.value = PageStates.HOME },
+                    onClick = { /* TODO: change to next affirmation */ },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
-                    modifier = Modifier
-                        .fillMaxSize()
+                    modifier = Modifier.fillMaxSize()
                 ) {
                     Text(
-                        text = "Done",
+                        text = "Next",
                         style = MaterialTheme.typography.headlineSmall,
                         textAlign = TextAlign.Center,
                         color = Color.White
@@ -80,6 +79,5 @@ fun AffirmationPage(pageState: MutableState<PageStates>) {
             }
         }
     }
-    Footer(pageState)
 }
 

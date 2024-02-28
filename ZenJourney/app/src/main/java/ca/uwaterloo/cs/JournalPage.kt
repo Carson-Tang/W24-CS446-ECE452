@@ -52,7 +52,6 @@ fun JournalPage1(pageState: MutableState<PageStates>) {
 
 
     }
-    Footer(pageState)
 }
 
 @Composable
@@ -115,7 +114,6 @@ fun JournalPage2(pageState: MutableState<PageStates>) {
             }
         }
     }
-    Footer(pageState)
 }
 
 @Composable
@@ -222,7 +220,6 @@ fun JournalPage3(pageState: MutableState<PageStates>) {
             }
         }
     }
-    Footer(pageState)
 }
 
 @Composable
@@ -314,7 +311,6 @@ fun PastJournalPage(pageState: MutableState<PageStates>) {
             }
         }
     }
-    Footer(pageState)
 }
 
 

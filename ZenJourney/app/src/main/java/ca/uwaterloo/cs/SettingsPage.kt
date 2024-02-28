@@ -139,6 +139,5 @@ fun SettingsPage(pageState: MutableState<PageStates>) {
             }
         }
     }
-    Footer(pageState)
 }
 

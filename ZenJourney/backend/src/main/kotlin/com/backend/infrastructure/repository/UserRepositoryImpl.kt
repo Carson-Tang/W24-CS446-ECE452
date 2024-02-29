@@ -14,7 +14,7 @@ class UserRepositoryImpl(
 ) : UserRepository {
 
     companion object {
-        const val USER_COLLECTION = "user"
+        const val USER_COLLECTION = "users"
     }
 
     override suspend fun insertOne(user: User): BsonValue? {

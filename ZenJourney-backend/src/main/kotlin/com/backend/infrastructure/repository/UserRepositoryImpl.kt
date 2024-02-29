@@ -1,11 +1,9 @@
 package com.backend.infrastructure.repository
 
-import com.mongodb.MongoException
-import com.mongodb.client.model.Filters
-import com.mongodb.client.model.UpdateOptions
-import com.mongodb.client.model.Updates
 import com.backend.domain.entity.User
 import com.backend.domain.ports.UserRepository
+import com.mongodb.MongoException
+import com.mongodb.client.model.Filters
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import kotlinx.coroutines.flow.firstOrNull
 import org.bson.BsonValue

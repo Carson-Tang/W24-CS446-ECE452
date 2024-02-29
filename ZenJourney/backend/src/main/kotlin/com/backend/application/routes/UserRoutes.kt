@@ -1,7 +1,5 @@
 package com.backend.application.routes
 
-import com.backend.application.request.UserRequest
-import com.backend.application.request.toDomain
 import com.backend.domain.ports.UserRepository
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
@@ -13,9 +11,10 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
-import io.ktor.server.routing.patch
 import org.bson.types.ObjectId
 import org.koin.ktor.ext.inject
+import users.UserRequest
+import users.toDomain
 
 fun Route.userRoutes() {
     val repository by inject<UserRepository>()

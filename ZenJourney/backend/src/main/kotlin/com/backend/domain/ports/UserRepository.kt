@@ -1,8 +1,8 @@
 package com.backend.domain.ports
 
-import com.backend.domain.entity.User
 import org.bson.BsonValue
 import org.bson.types.ObjectId
+import users.User
 
 interface UserRepository {
     suspend fun insertOne(user: User): BsonValue?

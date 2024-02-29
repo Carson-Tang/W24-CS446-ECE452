@@ -2,7 +2,7 @@ package com.backend.domain.ports
 
 import org.bson.BsonValue
 import org.bson.types.ObjectId
-import users.User
+import user.User
 
 interface UserRepository {
     suspend fun insertOne(user: User): BsonValue?

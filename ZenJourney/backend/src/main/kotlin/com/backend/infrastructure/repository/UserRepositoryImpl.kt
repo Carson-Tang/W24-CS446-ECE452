@@ -7,14 +7,14 @@ import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import kotlinx.coroutines.flow.firstOrNull
 import org.bson.BsonValue
 import org.bson.types.ObjectId
-import users.User
+import user.User
 
 class UserRepositoryImpl(
     private val mongoDatabase: MongoDatabase
 ) : UserRepository {
 
     companion object {
-        const val USER_COLLECTION = "users"
+        const val USER_COLLECTION = "user"
     }
 
     override suspend fun insertOne(user: User): BsonValue? {

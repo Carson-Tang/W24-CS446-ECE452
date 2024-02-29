@@ -1,4 +1,4 @@
-package users
+package user
 
 data class UserResponse(
     val id: String,

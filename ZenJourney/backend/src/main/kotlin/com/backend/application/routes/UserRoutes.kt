@@ -13,8 +13,8 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import org.bson.types.ObjectId
 import org.koin.ktor.ext.inject
-import users.UserRequest
-import users.toDomain
+import user.UserRequest
+import user.toDomain
 
 fun Route.userRoutes() {
     val repository by inject<UserRepository>()

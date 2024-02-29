@@ -33,6 +33,7 @@ dependencies {
     implementation("io.insert-koin:koin-ktor:3.5.3")
     implementation("io.insert-koin:koin-logger-slf4j:3.5.3")
     implementation("ch.qos.logback:logback-classic:$logback_version")
+    implementation(project(":shared"))
     testImplementation("io.ktor:ktor-server-tests-jvm")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 }

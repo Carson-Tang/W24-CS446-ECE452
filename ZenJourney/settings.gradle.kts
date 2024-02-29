@@ -14,4 +14,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "ZenJourney"
-include(":app")
+include(":app", ":backend")

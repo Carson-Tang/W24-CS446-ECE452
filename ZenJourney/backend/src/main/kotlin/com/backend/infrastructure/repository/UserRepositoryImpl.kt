@@ -24,7 +24,7 @@ class UserRepositoryImpl(
             )
             return result.insertedId
         } catch (e: MongoException) {
-            System.err.println("Unable to insert due to an error: $e")
+            System.err.println("Unable to insert a user due to an error: $e")
         }
         return null
     }
@@ -35,7 +35,7 @@ class UserRepositoryImpl(
                 .deleteOne(Filters.eq("_id", objectId))
             return result.deletedCount
         } catch (e: MongoException) {
-            System.err.println("Unable to delete due to an error: $e")
+            System.err.println("Unable to delete a user due to an error: $e")
         }
         return 0
     }

@@ -17,12 +17,12 @@ import user.UserRequest
 import user.toDomain
 
 fun Route.userRoutes() {
-    val repository by inject<UserRepository>()
+    val userRepository by inject<UserRepository>()
     route("/user") {
         post {
             val user = call.receive<UserRequest>()
-            val insertedId = repository.insertOne(user.toDomain())
-            call.respond(HttpStatusCode.Created, "Created user with id $insertedId")
+            val insertedId = userRepository.insertOne(user.toDomain())
+            call.respond(HttpStatusCode.Created, "Created user with id: $insertedId")
         }
 
         delete("/{id?}") {
@@ -30,9 +30,9 @@ fun Route.userRoutes() {
                     text = "Missing user id",
                     status = HttpStatusCode.BadRequest
             )
-            val delete: Long = repository.deleteById(ObjectId(id))
+            val delete: Long = userRepository.deleteById(ObjectId(id))
             if (delete == 1L) {
-                return@delete call.respondText("User Deleted successfully", status = HttpStatusCode.OK)
+                return@delete call.respondText("User deleted successfully", status = HttpStatusCode.OK)
             }
             return@delete call.respondText("User not found", status = HttpStatusCode.NotFound)
         }
@@ -45,9 +45,9 @@ fun Route.userRoutes() {
                         status = HttpStatusCode.BadRequest
                 )
             }
-            repository.findById(ObjectId(id))?.let {
+            userRepository.findById(ObjectId(id))?.let {
                 call.respond(it.toResponse())
-            } ?: call.respondText("No records found for id $id")
+            } ?: call.respondText("No records found for id: $id")
         }
     }
 }

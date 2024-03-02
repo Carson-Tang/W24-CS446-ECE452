@@ -19,6 +19,7 @@ import org.bson.types.ObjectId
 import org.koin.ktor.ext.inject
 import java.time.DateTimeException
 import java.time.LocalDate
+import toStatusResponse
 
 fun Route.journalRoutes() {
     val journalRepository by inject<JournalRepository>()
@@ -30,34 +31,36 @@ fun Route.journalRoutes() {
             try {
                 val date = LocalDate.of(journal.year, journal.month, journal.day)
                 if (date.isAfter(LocalDate.now())) {
-                    return@post call.respondText(
-                        "The date of the journal cannot be in the future",
-                        status = HttpStatusCode.BadRequest
+                    return@post call.respond(
+                        HttpStatusCode.BadRequest,
+                        toStatusResponse(false, "The date of the journal cannot be in the future")
                     )
                 }
             } catch (e: DateTimeException) {
-                return@post call.respondText(
-                    "The year, month, or day provided is invalid",
-                    status = HttpStatusCode.BadRequest
+                return@post call.respond(
+                    HttpStatusCode.BadRequest,
+                    toStatusResponse(false, "The year, month, or day provided is invalid")
                 )
             }
             if (journalRepository.findByDate(journal.year, journal.month, journal.day) != null) {
-                return@post call.respondText(
-                    "A journal already exists for this date",
-                    status = HttpStatusCode.BadRequest
+                return@post call.respond(
+                    HttpStatusCode.BadRequest,
+                    toStatusResponse(false, "A journal already exists for this date")
                 )
             }
             if (userRepository.findById(ObjectId(journal.userId)) == null) {
-                return@post call.respondText(
-                    "The user provided cannot be found",
-                    status = HttpStatusCode.NotFound
+                return@post call.respond(
+                    HttpStatusCode.NotFound,
+                    toStatusResponse(false, "The user provided cannot be found")
                 )
             }
             val insertedId = journalRepository.insertOne(journal.toDomain())
-            call.respond(
-                HttpStatusCode.Created,
-                "Created journal with id: ${insertedId.toString()}"
-            )
+            if (insertedId != null) {
+                call.respond(
+                    HttpStatusCode.Created,
+                    toStatusResponse(true, "Created journal with id: ${insertedId.asObjectId().value}")
+                )
+            }
         }
         put("/{id?}") {
             val journalId = call.parameters["id"] ?: return@put call.respondText(
@@ -66,40 +69,46 @@ fun Route.journalRoutes() {
             )
             val updatedJournal = call.receive<JournalRequest>()
             if (journalRepository.updateOne(ObjectId(journalId), updatedJournal) != 1L) {
-                return@put call.respondText(
-                    "The requested journal could not be updated",
-                    status = HttpStatusCode.BadRequest
+                return@put call.respond(
+                    status = HttpStatusCode.BadRequest,
+                    toStatusResponse(false, "The requested journal could not be updated")
                 )
             }
-            call.respond(HttpStatusCode.OK, "Updated journal with id: $journalId")
+            call.respond(
+                HttpStatusCode.OK,
+                toStatusResponse(true, "Updated journal with id: $journalId")
+            )
         }
         delete("/{id?}") {
-            val journalId = call.parameters["id"] ?: return@delete call.respondText(
-                text = "Missing journal id",
-                status = HttpStatusCode.BadRequest
+            val journalId = call.parameters["id"] ?: return@delete call.respond(
+                HttpStatusCode.BadRequest,
+                toStatusResponse(false, "Missing journal id")
             )
             if (journalRepository.deleteById(ObjectId(journalId)) != 1L) {
-                return@delete call.respondText(
-                    "The requested journal could not be deleted",
-                    status = HttpStatusCode.BadRequest
+                return@delete call.respond(
+                    HttpStatusCode.BadRequest,
+                    toStatusResponse(false, "The requested journal could not be deleted")
                 )
             }
-            call.respond(HttpStatusCode.OK, "Deleted journal with id: $journalId")
+            call.respond(
+                HttpStatusCode.OK,
+                toStatusResponse(true, "Deleted journal with id: $journalId")
+            )
         }
         get {
             val year = call.request.queryParameters["year"]
             val month = call.request.queryParameters["month"]
             val day = call.request.queryParameters["day"]
             if (year == null || month == null || day == null) {
-                return@get call.respondText(
-                    "Missing date query parameters (year, month, or day)",
-                    status = HttpStatusCode.BadRequest
+                return@get call.respond(
+                    status = HttpStatusCode.BadRequest,
+                    toStatusResponse(false, "Missing date query parameters (year, month, or day)")
                 )
             }
             val journal = journalRepository.findByDate(year.toInt(), month.toInt(), day.toInt())
-                ?: return@get call.respondText(
-                    "The requested journal could not be found",
-                    status = HttpStatusCode.NotFound
+                ?: return@get call.respond(
+                    HttpStatusCode.NotFound,
+                    toStatusResponse(false, "The requested journal could not be found")
                 )
             call.respond(HttpStatusCode.OK, journal.toResponse())
         }

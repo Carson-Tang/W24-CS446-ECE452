@@ -5,7 +5,6 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
-import io.ktor.server.response.respondText
 import io.ktor.server.routing.route
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
@@ -13,6 +12,7 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import org.bson.types.ObjectId
 import org.koin.ktor.ext.inject
+import toStatusResponse
 import user.UserRequest
 import user.toDomain
 
@@ -22,32 +22,47 @@ fun Route.userRoutes() {
         post {
             val user = call.receive<UserRequest>()
             val insertedId = userRepository.insertOne(user.toDomain())
-            call.respond(HttpStatusCode.Created, "Created user with id: $insertedId")
+
+            if (insertedId != null) {
+                call.respond(
+                    HttpStatusCode.Created,
+                    toStatusResponse(true, "Created user with id: ${insertedId.asObjectId().value}")
+                )
+            }
         }
 
         delete("/{id?}") {
-            val id = call.parameters["id"] ?: return@delete call.respondText(
-                    text = "Missing user id",
-                    status = HttpStatusCode.BadRequest
+            val id = call.parameters["id"] ?: return@delete call.respond(
+                HttpStatusCode.BadRequest,
+                toStatusResponse(false, "Missing user id")
             )
             val delete: Long = userRepository.deleteById(ObjectId(id))
             if (delete == 1L) {
-                return@delete call.respondText("User deleted successfully", status = HttpStatusCode.OK)
+                return@delete call.respond(
+                    HttpStatusCode.OK,
+                    toStatusResponse(true, "User deleted successfully")
+                )
             }
-            return@delete call.respondText("User not found", status = HttpStatusCode.NotFound)
+            return@delete call.respond(
+                HttpStatusCode.NotFound,
+                toStatusResponse(false, "User not found")
+            )
         }
 
         get("/{id?}") {
             val id = call.parameters["id"]
             if (id.isNullOrEmpty()) {
-                return@get call.respondText(
-                        text = "Missing id",
-                        status = HttpStatusCode.BadRequest
+                return@get call.respond(
+                    HttpStatusCode.BadRequest,
+                    toStatusResponse(false, "Missing id")
                 )
             }
             userRepository.findById(ObjectId(id))?.let {
                 call.respond(it.toResponse())
-            } ?: call.respondText("No records found for id: $id")
+            } ?: call.respond(
+                HttpStatusCode.NotFound,
+                toStatusResponse(false, "No records found for id: $id")
+            )
         }
     }
 }

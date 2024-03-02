@@ -45,7 +45,6 @@ fun LoginPageTemp(context: Context) {
 
                 if (firstName.isNotBlank() && lastName.isNotBlank()) {
                     val user = User(firstName = firstName, lastName = lastName)
-                    saveUser(user, context)
                 }
             },
             modifier = Modifier.padding(16.dp)

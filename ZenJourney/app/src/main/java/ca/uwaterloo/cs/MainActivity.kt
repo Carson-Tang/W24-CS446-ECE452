@@ -73,13 +73,3 @@ fun PageContent(pageState: MutableState<PageStates>, nameState: MutableState<Str
         PageStates.SETTINGS -> SettingsPage(pageState)
     }
 }
-
-@OptIn(DelicateCoroutinesApi::class)
-fun saveUser(user: User, context: Context) {
-    GlobalScope.launch {
-        val userDao = UserDB.getDB(context).userDao()
-        userDao.insert(user)
-        val allUsers = userDao.getAll()
-        Log.e("users", "$allUsers")
-    }
-}

@@ -10,3 +10,8 @@
 | 2024/02/12 | | 1.5 hours | | | | | Buddy Team's Evaluation |
 | 2024/02/13 | 2 hours| | | | | | Buddy Team's Evaluation |
 | 2024/02/16 | | 1 hour | | | | | Buddy Team's Evaluation |
+| 2024/02/26 | 3 hours | 3 hours | | | | | Project/Prototype Demo |
+| 2024/02/27 | | 1 hour | | | | | Project/Prototype Demo |
+| 2024/02/28 | | 5.5 hours | | | | | Project/Prototype Demo |
+| 2024/02/29 | 2 hours | 3 hours | | | | | Project/Prototype Demo |
+| 2024/03/02 | | 1 hour | | | | | Project/Prototype Demo |

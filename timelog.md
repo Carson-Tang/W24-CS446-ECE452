@@ -2,16 +2,16 @@
 |------------|--------|--------|--------|--------|--------|--------|------|
 | 2024/01/24 | 1 hour | 1.5 hours | | | | | Project Proposal |
 | 2024/01/26 | | | 1.5 hours | 4 hours | | | Project Proposal |
-| 2024/01/27 | | | |  | | | Project Proposal |
+| 2024/01/27 | 1 hour | | |  | | | Project Proposal |
 | 2024/01/28 | 2 hours | 2 hours | 2 hours | | | | Project Proposal |
 | 2024/01/29 | | | | 1 hour | | | Project Proposal |
 | 2024/01/30 | 2.5 hours | 2 hours | | 1 hour | | | Project Proposal |
 | 2024/01/31 | | | 2.5 hours | | | | Project Proposal |
 | 2024/02/12 | | 1.5 hours | | | | | Buddy Team's Evaluation |
-| 2024/02/13 | 2 hours| | | | | | Buddy Team's Evaluation |
+| 2024/02/13 | 2 hours | | | | | | Buddy Team's Evaluation |
 | 2024/02/16 | | 1 hour | | | | | Buddy Team's Evaluation |
-| 2024/02/26 | 3 hours | 3 hours | | | | | Project/Prototype Demo |
+| 2024/02/26 | 5 hours | 3 hours | | | | | Project/Prototype Demo |
 | 2024/02/27 | | 1 hour | | | | | Project/Prototype Demo |
-| 2024/02/28 | | 5.5 hours | | | | | Project/Prototype Demo |
+| 2024/02/28 | 3.5 hours| 5.5 hours | | | | | Project/Prototype Demo |
 | 2024/02/29 | 2 hours | 3 hours | | | | | Project/Prototype Demo |
 | 2024/03/02 | | 1 hour | | | | | Project/Prototype Demo |

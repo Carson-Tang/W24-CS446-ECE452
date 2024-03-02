@@ -32,7 +32,7 @@ fun WelcomePage(pageState: MutableState<PageStates>) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                "\uD83D\uDC4B\n\nHi there!\n Welcome to your ZenJourney",
+                "\uD83D\uDC4B\n\nHi there!\n Welcome to your\nZenJourney",
                 style = MaterialTheme.typography.headlineLarge,
                 textAlign = TextAlign.Center
             )

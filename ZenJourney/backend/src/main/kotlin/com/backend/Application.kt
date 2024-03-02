@@ -25,10 +25,12 @@ fun Application.module() {
     install(Koin) {
         slf4jLogger()
         modules(module {
-            single { MongoClient.create(
-                ("mongodb+srv://admin:admin@cluster0.m9o59vc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0\n" +
-                        "\n") ?: throw RuntimeException("Failed to access MongoDB URI.")
-            ) }
+            single {
+                MongoClient.create(
+                    (System.getenv("MONGO_URI"))
+                        ?: throw RuntimeException("Failed to access MongoDB URI.")
+                )
+            }
             single { get<MongoClient>().getDatabase("ZenJourney") }
         }, module {
             single<UserRepository> { UserRepositoryImpl(get()) }

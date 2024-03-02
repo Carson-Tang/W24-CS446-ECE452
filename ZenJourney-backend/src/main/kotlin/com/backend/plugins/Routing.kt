@@ -1,5 +1,6 @@
 package com.backend.plugins
 
+import com.backend.application.routes.photoRoutes
 import io.ktor.server.application.*
 import io.ktor.server.http.content.*
 import io.ktor.server.response.*
@@ -12,8 +13,9 @@ fun Application.configureRouting() {
             call.respondText("Hello World!")
         }
         userRoutes()
+        photoRoutes()
         // Static plugin. Try to access `/static/index.html`
-        static("/static") {
+        staticResources("/static", "static") {
             resources("static")
         }
     }

@@ -46,7 +46,7 @@ class PhotoRepositoryImpl(
         } catch (e: MongoException) {
             System.err.println("Unable to deleteByUserId due to an error: $e")
         }
-        return 0
+        return -1
     }
     override suspend fun findByUserId(userid: ObjectId): List<Photo> =
         mongoDatabase.getCollection<Photo>(PHOTO_COLLECTION).withDocumentClass<Photo>()

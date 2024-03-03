@@ -37,7 +37,7 @@ fun SignUpPage1(pageState: MutableState<PageStates>, nameState: MutableState<Str
             modifier = Modifier.padding(top = 64.dp, bottom = 104.dp),
         )
         TextFieldComponent(nameState, "My name is...", errorState)
-        Button(
+        ElevatedButton(
             onClick = {
                 if (nameState.value.isNotBlank()) pageState.value = PageStates.SIGNUP_STEP2
                 else {
@@ -106,7 +106,7 @@ fun SignUpLoginPage(
             TextFieldComponent(passwordState, "Password", passwordErrorState, true)
         }
         ElevatedButton(
-            /* TODO: Add validation, error message for email and password rules */
+            /* TODO: Still need to check with BE */
             onClick = {
                 if (emailState.value.isNotBlank() && passwordState.value.isNotBlank()) {
                     // check if email and password is valid (InputErrorStates.NONE)

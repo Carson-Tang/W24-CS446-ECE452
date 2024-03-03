@@ -1,0 +1,13 @@
+package com.backend.domain.ports
+
+import journal.Journal
+import journal.JournalRequest
+import org.bson.BsonValue
+import org.bson.types.ObjectId
+
+interface JournalRepository {
+    suspend fun insertOne(journal: Journal): BsonValue?
+    suspend fun updateOne(journalId: ObjectId, journal: JournalRequest): Long
+    suspend fun deleteById(objectId: ObjectId): Long
+    suspend fun findByDate(year: Int, month: Int, day: Int): Journal?
+}

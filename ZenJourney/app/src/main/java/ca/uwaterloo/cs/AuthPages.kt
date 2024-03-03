@@ -98,7 +98,7 @@ fun SignUpLoginPage(
             TextFieldComponent(passwordState, "Password", true)
         }
         ElevatedButton(
-            /* TODO: Add validation!!! */
+            /* TODO: Add validation, error message for email and password rules */
             onClick = {
                 if (emailState.value.isNotBlank() && passwordState.value.isNotBlank()) pageState.value =
                     PageStates.HOME

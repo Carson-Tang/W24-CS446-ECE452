@@ -1,0 +1,71 @@
+package com.backend.infrastructure.repository
+
+import com.backend.domain.ports.JournalRepository
+import com.mongodb.MongoException
+import com.mongodb.client.model.Filters
+import com.mongodb.client.model.Updates
+import com.mongodb.kotlin.client.coroutine.MongoDatabase
+import journal.Journal
+import journal.JournalRequest
+import kotlinx.coroutines.flow.firstOrNull
+import org.bson.BsonValue
+import org.bson.types.ObjectId
+
+class JournalRepositoryImpl(
+    private val mongoDatabase: MongoDatabase
+) : JournalRepository {
+    companion object {
+        const val JOURNAL_COLLECTION = "journals"
+    }
+
+    override suspend fun insertOne(journal: Journal): BsonValue? {
+        try {
+            val result = mongoDatabase.getCollection<Journal>(JOURNAL_COLLECTION).insertOne(
+                journal
+            )
+            return result.insertedId
+        } catch (e: MongoException) {
+            System.err.println("Unable to insert a journal due to an error: $e")
+        }
+        return null
+    }
+
+    override suspend fun updateOne(journalId: ObjectId, journal: JournalRequest): Long {
+        try {
+            val result = mongoDatabase.getCollection<Journal>(JOURNAL_COLLECTION).updateOne(
+                Filters.eq("_id", journalId),
+                Updates.combine(
+                    Updates.set("moods", journal.moods),
+                    Updates.set("content", journal.content)
+                )
+            )
+            return result.modifiedCount
+        } catch (e: MongoException) {
+            System.err.println("Unable to update a journal due to an error: $e")
+        }
+        return 0
+    }
+
+    override suspend fun deleteById(objectId: ObjectId): Long {
+        try {
+            val result = mongoDatabase.getCollection<Journal>(JOURNAL_COLLECTION)
+                .deleteOne(Filters.eq("_id", objectId))
+            return result.deletedCount
+        } catch (e: MongoException) {
+            System.err.println("Unable to delete a journal due to an error: $e")
+        }
+        return 0
+    }
+
+    override suspend fun findByDate(year: Int, month: Int, day: Int): Journal? {
+        return mongoDatabase.getCollection<Journal>(JOURNAL_COLLECTION).withDocumentClass<Journal>()
+            .find(
+                Filters.and(
+                    Filters.eq("year", year),
+                    Filters.eq("month", month),
+                    Filters.eq("day", day)
+                )
+            )
+            .firstOrNull()
+    }
+}

@@ -9,3 +9,10 @@ enum class PageStates {
     PHOTOBOOK,
     SETTINGS
 }
+
+enum class InputErrorStates {
+    NONE,
+    EMPTY_INPUT,
+    INVALID_EMAIL,
+    INVALID_PASSWORD
+}

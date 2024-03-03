@@ -14,6 +14,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import ca.uwaterloo.cs.ui.theme.ZenJourneyTheme
 
+import java.time.LocalDate
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,6 +31,10 @@ class MainActivity : ComponentActivity() {
 fun MainContent(context: Context) {
     val pageState = remember { mutableStateOf(PageStates.WELCOME) }
     val nameState = remember { mutableStateOf("") }
+    val selectedDate = remember { mutableStateOf(LocalDate.now()) }
+    val selectedMoods = remember { mutableStateOf(listOf<String>()) }
+    val journalEntry = remember { mutableStateOf("") }
+
     Scaffold(
         bottomBar = {
             if (pageState.value !in arrayOf(
@@ -47,6 +53,9 @@ fun MainContent(context: Context) {
                 context,
                 pageState,
                 nameState,
+                selectedDate,
+                selectedMoods,
+                journalEntry
             )
         }
     }
@@ -56,7 +65,10 @@ fun MainContent(context: Context) {
 fun PageContent(
     context: Context,
     pageState: MutableState<PageStates>,
-    nameState: MutableState<String>
+    nameState: MutableState<String>,
+    selectedDate: MutableState<LocalDate>,
+    selectedMoods: MutableState<List<String>>,
+    journalEntry: MutableState<String>
 ) {
     when (pageState.value) {
         PageStates.WELCOME -> WelcomePage(pageState)
@@ -67,9 +79,9 @@ fun PageContent(
         PageStates.MEDITATE -> MeditatePage(pageState)
         PageStates.AFFIRMATION -> AffirmationPage(pageState)
         PageStates.PHOTOBOOK -> PhotobookPage(context, pageState)
-        PageStates.JOURNAL_STEP1 -> JournalPage1(pageState)
-        PageStates.JOURNAL_STEP2 -> JournalPage2(pageState)
-        PageStates.JOURNAL_STEP3 -> JournalPage3(pageState)
+        PageStates.JOURNAL_STEP1 -> JournalPage1(pageState, selectedDate)
+        PageStates.JOURNAL_STEP2 -> JournalPage2(pageState, selectedDate, selectedMoods)
+        PageStates.JOURNAL_STEP3 -> JournalPage3(pageState, selectedDate, journalEntry)
         PageStates.PAST_JOURNAL -> PastJournalPage(pageState)
         PageStates.SETTINGS -> SettingsPage(pageState)
     }

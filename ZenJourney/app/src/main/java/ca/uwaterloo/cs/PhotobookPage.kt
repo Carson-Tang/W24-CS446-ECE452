@@ -1,6 +1,10 @@
 package ca.uwaterloo.cs
 
-import androidx.annotation.DrawableRes
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -12,20 +16,23 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
 import java.time.LocalDate
 
 data class PhotobookPhoto(
     val date: String,
-    @DrawableRes val imageResourceId: Int
+    val image: Bitmap
 )
 
 @Composable
@@ -50,7 +57,7 @@ fun ImageListItem(photo: PhotobookPhoto) {
             style = MaterialTheme.typography.headlineSmall,
         )
         Image(
-            painter = painterResource(photo.imageResourceId),
+            bitmap = photo.image.asImageBitmap(),
             contentDescription = null,
             modifier = Modifier
                 .size(180.dp)
@@ -64,10 +71,38 @@ fun capitalize(s: String): String {
 }
 
 @Composable
-fun PhotobookPage(pageState: MutableState<PageStates>) {
+fun PhotobookPage(context: Context, pageState: MutableState<PageStates>) {
     val currentDate = LocalDate.now()
     val currentMonth = currentDate.month.toString()
     val currentYear = currentDate.year.toString()
+    /* TODO: remove hardcoded list */
+    val photoState = remember {
+        mutableStateListOf(
+            PhotobookPhoto(
+                "21 Wed",
+                BitmapFactory.decodeResource(context.resources, R.drawable.tonton_1)
+            ),
+            PhotobookPhoto(
+                "20 Tue",
+                BitmapFactory.decodeResource(context.resources, R.drawable.totoro_2)
+            ),
+            PhotobookPhoto(
+                "19 Mon",
+                BitmapFactory.decodeResource(context.resources, R.drawable.pikachu_3)
+            )
+        )
+    }
+    val getContent =
+        rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) {
+            /* TODO: upload bitmap to server and update UI */
+            if (it != null) {
+                photoState.add(0, PhotobookPhoto("22 Thu", it))
+            }
+        }
+
+    fun openCamera() {
+        getContent.launch(null)
+    }
 
     Column(
         Modifier
@@ -76,6 +111,9 @@ fun PhotobookPage(pageState: MutableState<PageStates>) {
             .padding(top = 100.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Button(onClick = { openCamera() }) {
+            Text("+")
+        }
         Column(
             modifier = Modifier
                 .padding(all = 20.dp)
@@ -95,16 +133,7 @@ fun PhotobookPage(pageState: MutableState<PageStates>) {
                         .background(color = Color.White, shape = RoundedCornerShape(16.dp))
                         .padding(top = 20.dp)
                 ) {
-                    ScrollablePhotoList(
-                        listOf(
-                            PhotobookPhoto("21 Wed", R.drawable.tonton_1),
-                            PhotobookPhoto("20 Tue", R.drawable.totoro_2),
-                            PhotobookPhoto("19 Mon", R.drawable.pikachu_3),
-                            PhotobookPhoto("18 Sun", R.drawable.tonton_1),
-                            PhotobookPhoto("17 Sat", R.drawable.totoro_2),
-                            PhotobookPhoto("16 Fri", R.drawable.pikachu_3)
-                        )
-                    )
+                    ScrollablePhotoList(photoState)
                 }
             }
         }

@@ -1,6 +1,8 @@
 package com.backend.application.response
 
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class PhotoResponse(
         val id: String,
         val userid: String,

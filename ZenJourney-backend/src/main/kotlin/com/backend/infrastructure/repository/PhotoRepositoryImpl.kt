@@ -7,6 +7,7 @@ import com.mongodb.client.model.Filters
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.toList
+import org.bson.BsonString
 import org.bson.BsonValue
 import org.bson.Document
 import org.bson.types.ObjectId
@@ -17,12 +18,12 @@ class PhotoRepositoryImpl(
     companion object {
         const val PHOTO_COLLECTION = "photos"
     }
-    override suspend fun insertPhoto(photo: Photo): BsonValue?{
+    override suspend fun insertPhoto(photo: Photo): String? {
         try {
             val result = mongoDatabase.getCollection<Photo>(PHOTO_COLLECTION).insertOne(
                 photo
             )
-            return result.insertedId
+            return result.insertedId?.asObjectId()?.value.toString()
         } catch (e: MongoException) {
             System.err.println("Unable to insertPhoto due to an error: $e")
         }
@@ -49,12 +50,12 @@ class PhotoRepositoryImpl(
         return -1
     }
     override suspend fun findByUserId(userid: ObjectId): List<Photo> =
-        mongoDatabase.getCollection<Photo>(PHOTO_COLLECTION).withDocumentClass<Photo>()
+        mongoDatabase.getCollection<Photo>(PHOTO_COLLECTION)
             .find(Filters.eq("userid", userid))
             .sort(Document("uploadDate", 1)) // sort by uploadDate string in ascending order
             .toList()
     override suspend fun findById(id: ObjectId): Photo? =
-        mongoDatabase.getCollection<Photo>(PHOTO_COLLECTION).withDocumentClass<Photo>()
+        mongoDatabase.getCollection<Photo>(PHOTO_COLLECTION)
             .find(Filters.eq("_id", id))
             .firstOrNull()
 }

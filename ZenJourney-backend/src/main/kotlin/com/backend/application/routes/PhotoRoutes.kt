@@ -32,7 +32,7 @@ fun Route.photoRoutes() {
             if (insertedId == null){
                 call.respond(HttpStatusCode.InternalServerError, "Failed to create photo")
             }else{
-                call.respond(HttpStatusCode.Created, "Created photo with id $insertedId")
+                call.respond(HttpStatusCode.Created, mapOf("id" to "$insertedId"))
             }
         }
 
@@ -87,8 +87,11 @@ fun Route.photoRoutes() {
                     text = "Missing user id in photo GET", status = HttpStatusCode.BadRequest
                 )
             }
-            repository.findByUserId(ObjectId(id))?.let {
-                call.respond(ListResponse(it))
+            repository.findByUserId(ObjectId(id))?.let { list ->
+                val listRes = list.map {
+                    it.toResponse()
+                }
+                call.respond(ListResponse(listRes))
             } ?: call.respondText("No records found for user id $id")
         }
     }

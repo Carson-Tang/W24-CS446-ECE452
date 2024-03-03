@@ -87,8 +87,7 @@ fun SettingsPage(pageState: MutableState<PageStates>) {
             )
 
             Column(
-                modifier = Modifier.
-                    padding(top = 10.dp)
+                modifier = Modifier.padding(top = 10.dp)
             ) {
                 Text(
                     text = "Disclaimer text here",
@@ -98,8 +97,7 @@ fun SettingsPage(pageState: MutableState<PageStates>) {
             }
 
             Column(
-                modifier = Modifier.
-                padding(top = 10.dp)
+                modifier = Modifier.padding(top = 10.dp)
             ) {
                 Text(
                     text = "............................................................................\n" +

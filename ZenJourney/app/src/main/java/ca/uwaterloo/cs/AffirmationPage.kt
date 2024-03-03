@@ -65,7 +65,7 @@ fun AffirmationPage(pageState: MutableState<PageStates>) {
                     .background(color = Color(0xFF7BB6A1), shape = RoundedCornerShape(16.dp))
             ) {
                 Button(
-                    onClick = { /* TODO: change to next affirmation */ },
+                    onClick = { /* TODO: change to next affirmation - fetch from API or stored list */ },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
                     modifier = Modifier.fillMaxSize()
                 ) {

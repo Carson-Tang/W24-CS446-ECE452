@@ -16,12 +16,6 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import org.bson.types.ObjectId
 import org.koin.ktor.ext.inject
-
-//insertPhoto(photo: Photo)        /photo
-//suspend fun deleteById(id: ObjectId): Long                /photo/{id}
-//suspend fun deleteByUserId(userid: ObjectId): Long        /{id?}/photo
-//suspend fun findByUserId(userid: ObjectId): List<Photo>?  /{id?}/photo
-//suspend fun findById(id: ObjectId): Photo?                /photo/{id}
 fun Route.photoRoutes() {
     val repository by inject<PhotoRepository>()
     //insertPhoto(photo: Photo)        /photo
@@ -92,7 +86,7 @@ fun Route.photoRoutes() {
                     it.toResponse()
                 }
                 call.respond(ListResponse(listRes))
-            } ?: call.respondText("No records found for user id $id")
+            } ?: call.respondText("No photos found for user id $id")
         }
     }
 }

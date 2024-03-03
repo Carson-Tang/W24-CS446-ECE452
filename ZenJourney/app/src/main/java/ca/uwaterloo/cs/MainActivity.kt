@@ -21,6 +21,8 @@ import com.an.room.db.UserDB
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 
+import java.time.LocalDate
+
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,6 +40,10 @@ class MainActivity : ComponentActivity() {
 fun MainContent(context: Context) {
     val pageState = remember { mutableStateOf(PageStates.WELCOME) }
     val nameState = remember { mutableStateOf("") }
+    val selectedDate = remember { mutableStateOf(LocalDate.now()) }
+    val selectedMoods = remember { mutableStateOf(listOf<String>()) }
+    val journalEntry = remember { mutableStateOf("") }
+
     Scaffold(
         bottomBar = {
             if (pageState.value !in arrayOf(
@@ -51,12 +57,26 @@ fun MainContent(context: Context) {
             }
         },
     ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding)) { PageContent(pageState, nameState) }
+        Box(modifier = Modifier.padding(innerPadding)) {
+            PageContent(
+                pageState,
+                nameState,
+                selectedDate,
+                selectedMoods,
+                journalEntry
+            )
+        }
     }
 }
 
 @Composable
-fun PageContent(pageState: MutableState<PageStates>, nameState: MutableState<String>) {
+fun PageContent(
+    pageState: MutableState<PageStates>,
+    nameState: MutableState<String>,
+    selectedDate: MutableState<LocalDate>,
+    selectedMoods: MutableState<List<String>>,
+    journalEntry: MutableState<String>
+) {
     when (pageState.value) {
         PageStates.WELCOME -> WelcomePage(pageState)
         PageStates.LOGIN -> LoginPage(pageState)
@@ -66,9 +86,9 @@ fun PageContent(pageState: MutableState<PageStates>, nameState: MutableState<Str
         PageStates.MEDITATE -> MeditatePage(pageState)
         PageStates.AFFIRMATION -> AffirmationPage(pageState)
         PageStates.PHOTOBOOK -> PhotobookPage(pageState)
-        PageStates.JOURNAL_STEP1 -> JournalPage1(pageState)
-        PageStates.JOURNAL_STEP2 -> JournalPage2(pageState)
-        PageStates.JOURNAL_STEP3 -> JournalPage3(pageState)
+        PageStates.JOURNAL_STEP1 -> JournalPage1(pageState, selectedDate)
+        PageStates.JOURNAL_STEP2 -> JournalPage2(pageState, selectedDate, selectedMoods)
+        PageStates.JOURNAL_STEP3 -> JournalPage3(pageState, selectedDate, journalEntry)
         PageStates.PAST_JOURNAL -> PastJournalPage(pageState)
         PageStates.SETTINGS -> SettingsPage(pageState)
     }

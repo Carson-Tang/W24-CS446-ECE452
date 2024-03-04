@@ -1,16 +1,14 @@
 package com.backend.infrastructure.repository
 
-import com.backend.domain.entity.Photo
 import com.backend.domain.ports.PhotoRepository
 import com.mongodb.MongoException
 import com.mongodb.client.model.Filters
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.toList
-import org.bson.BsonString
-import org.bson.BsonValue
 import org.bson.Document
 import org.bson.types.ObjectId
+import photo.Photo
 
 class PhotoRepositoryImpl(
     private val mongoDatabase: MongoDatabase

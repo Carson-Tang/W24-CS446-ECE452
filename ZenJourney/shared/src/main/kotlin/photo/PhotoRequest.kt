@@ -1,7 +1,5 @@
-package com.backend.application.request
+package photo
 
-import com.backend.domain.entity.Photo
-import com.backend.domain.entity.User
 import kotlinx.serialization.Serializable
 import org.bson.types.ObjectId
 

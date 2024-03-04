@@ -1,4 +1,4 @@
-package com.backend.application.response
+package photo
 
 import kotlinx.serialization.Serializable
 

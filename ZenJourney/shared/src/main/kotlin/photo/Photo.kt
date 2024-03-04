@@ -1,6 +1,5 @@
-package com.backend.domain.entity
+package photo
 
-import com.backend.application.response.PhotoResponse
 import org.bson.codecs.pojo.annotations.BsonId
 import org.bson.types.ObjectId
 

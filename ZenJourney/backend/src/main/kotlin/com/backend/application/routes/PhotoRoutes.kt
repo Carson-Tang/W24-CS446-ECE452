@@ -1,8 +1,5 @@
 package com.backend.application.routes
 
-import com.backend.application.request.PhotoRequest
-import com.backend.application.request.toDomain
-import com.backend.application.response.ListResponse
 import com.backend.domain.ports.PhotoRepository
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
@@ -16,6 +13,10 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import org.bson.types.ObjectId
 import org.koin.ktor.ext.inject
+import photo.ListResponse
+import photo.PhotoRequest
+import photo.toDomain
+
 fun Route.photoRoutes() {
     val repository by inject<PhotoRepository>()
     //insertPhoto(photo: Photo)        /photo

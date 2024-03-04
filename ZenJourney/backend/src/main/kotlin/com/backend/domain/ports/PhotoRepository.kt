@@ -1,8 +1,7 @@
 package com.backend.domain.ports
 
-import com.backend.domain.entity.Photo
-import org.bson.BsonValue
 import org.bson.types.ObjectId
+import photo.Photo
 
 interface PhotoRepository {
     suspend fun insertPhoto(photo: Photo): String?

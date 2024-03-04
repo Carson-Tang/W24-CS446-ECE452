@@ -1,17 +1,15 @@
 package com.backend
 
-import com.backend.application.request.PhotoRequest
-import com.backend.application.response.ListResponse
-import com.backend.application.response.PhotoResponse
 import com.backend.plugins.*
 import com.google.gson.Gson
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
-import org.bson.types.ObjectId
-import org.junit.BeforeClass
 import org.koin.core.context.GlobalContext.stopKoin
+import photo.ListResponse
+import photo.PhotoRequest
+import photo.PhotoResponse
 import kotlin.test.*
 
 class ApplicationTest {

@@ -50,7 +50,12 @@ fun Footer(pageState: MutableState<PageStates>) {
                 )
             })
         NavigationBarItem(
-            selected = pageState.value == PageStates.JOURNAL_STEP1,
+            selected = pageState.value in arrayOf(
+                PageStates.JOURNAL_STEP1,
+                PageStates.JOURNAL_STEP2,
+                PageStates.JOURNAL_STEP3,
+                PageStates.PAST_JOURNAL
+            ),
             onClick = { pageState.value = PageStates.JOURNAL_STEP1 },
             icon = {
                 Icon(

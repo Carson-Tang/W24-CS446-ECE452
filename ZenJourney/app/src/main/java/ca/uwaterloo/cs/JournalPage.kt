@@ -423,9 +423,9 @@ fun PastJournalPage(pageState: MutableState<PageStates>,
         }
 
         LazyVerticalGrid(
-            columns = GridCells.Fixed(3), // Or adapt the number of columns based on screen size or content
+            columns = GridCells.Fixed(3), // need to make this dynamic in future
             contentPadding = PaddingValues(16.dp),
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(top = 2.dp, start = 16.dp, end = 16.dp, bottom = 2.dp)
         ) {
             items(pastSelectedMoods.value) { mood ->
                 val emoji = wordToEmojiMap[mood] ?: "❓"
@@ -459,7 +459,7 @@ fun PastJournalPage(pageState: MutableState<PageStates>,
 
         Column(
             modifier = Modifier
-                .padding(all = 20.dp)
+                .padding(top = 4.dp, start = 20.dp, end = 20.dp)
                 .size(width = 500.dp, height = 200.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -477,7 +477,7 @@ fun PastJournalPage(pageState: MutableState<PageStates>,
 
         Column(
             modifier = Modifier
-                .padding(top = 20.dp, start = 20.dp, end = 20.dp)
+                .padding(top = 8.dp, start = 20.dp, end = 20.dp)
                 .size(width = 460.dp, height = 75.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {

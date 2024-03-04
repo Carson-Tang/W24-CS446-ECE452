@@ -20,6 +20,4 @@ application {
 
 dependencies {
     implementation("org.mongodb:bson-kotlinx:4.11.0")
-
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")   // For serializing/deserializing JSON.
 }

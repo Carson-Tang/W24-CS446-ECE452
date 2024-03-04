@@ -18,9 +18,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import android.util.Patterns.EMAIL_ADDRESS
 
 @Composable
 fun SignUpPage1(pageState: MutableState<PageStates>, nameState: MutableState<String>) {
+    val errorState = remember { mutableStateOf(InputErrorStates.NONE) }
     Column(
         Modifier
             .background(MaterialTheme.colorScheme.background)
@@ -33,10 +35,13 @@ fun SignUpPage1(pageState: MutableState<PageStates>, nameState: MutableState<Str
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 64.dp, bottom = 104.dp),
         )
-        TextFieldComponent(nameState, "My name is...")
+        TextFieldComponent(nameState, "My name is...", errorState)
         ElevatedButton(
             onClick = {
                 if (nameState.value.isNotBlank()) pageState.value = PageStates.SIGNUP_STEP2
+                else {
+                    errorState.value = InputErrorStates.EMPTY_INPUT
+                }
             },
             modifier = Modifier
                 .padding(top = 224.dp)
@@ -79,6 +84,8 @@ fun SignUpLoginPage(
 ) {
     val emailState = remember { mutableStateOf("") }
     val passwordState = remember { mutableStateOf("") }
+    val emailErrorState = remember { mutableStateOf(InputErrorStates.NONE) }
+    val passwordErrorState = remember { mutableStateOf(InputErrorStates.NONE) }
     Column(
         Modifier
             .background(MaterialTheme.colorScheme.background)
@@ -94,14 +101,32 @@ fun SignUpLoginPage(
         Column(
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            TextFieldComponent(emailState, "Email")
-            TextFieldComponent(passwordState, "Password", true)
+            TextFieldComponent(emailState, "Email", emailErrorState)
+            TextFieldComponent(passwordState, "Password", passwordErrorState, true)
         }
         ElevatedButton(
-            /* TODO: Add validation!!! */
+            /* TODO: Still need to check with BE */
             onClick = {
-                if (emailState.value.isNotBlank() && passwordState.value.isNotBlank()) pageState.value =
-                    PageStates.HOME
+                if (emailState.value.isNotBlank() && passwordState.value.isNotBlank()) {
+                    // check if email and password is valid (InputErrorStates.NONE)
+                    emailErrorState.value =
+                        if (!EMAIL_ADDRESS.matcher(emailState.value)
+                                .matches()
+                        ) InputErrorStates.INVALID_EMAIL else InputErrorStates.NONE
+
+                    passwordErrorState.value =
+                        if (passwordState.value.length < 6) InputErrorStates.INVALID_PASSWORD
+                        else InputErrorStates.NONE
+
+                    // if both valid, switch to home page
+                    if (emailErrorState.value == InputErrorStates.NONE && passwordErrorState.value == InputErrorStates.NONE) {
+                        pageState.value = PageStates.HOME
+                    }
+                } else if (emailState.value.isBlank()) {
+                    emailErrorState.value = InputErrorStates.EMPTY_INPUT
+                } else if (passwordState.value.isBlank()) {
+                    passwordErrorState.value = InputErrorStates.EMPTY_INPUT
+                }
             },
             modifier = Modifier
                 .padding(top = 208.dp)

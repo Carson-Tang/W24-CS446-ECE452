@@ -366,7 +366,7 @@ fun PastJournalPage(pageState: MutableState<PageStates>) {
                     .background(color = Color.White, shape = RoundedCornerShape(16.dp))
             ) {
                 Text(
-                    text = "Non editable text ..... (for now)",
+                    text = "Non editable text .....",
                     color = Color.Black,
                 )
             }

@@ -1,7 +1,6 @@
 package ca.uwaterloo.cs
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,16 +17,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun WithInfo() {
@@ -37,11 +33,10 @@ fun WithInfo() {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            text = "You're doing great today!",
+            text = "⛰\uFE0F\nYou're doing great today!",
             style = MaterialTheme.typography.headlineLarge,
             textAlign = TextAlign.Center,
-            color = Color(0xFF3D3D3D),
-
+            color = Color(0xFF3D3D3D)
         )
     }
 
@@ -51,27 +46,34 @@ fun WithInfo() {
     ) {
         Row(
             modifier = Modifier
+                .background(color = Color.White, shape = RoundedCornerShape(16.dp))
+                .padding(5.dp)
                 .fillMaxWidth()
+                .size(height = 60.dp, width = 140.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .background(color = Color.White, shape = RoundedCornerShape(16.dp))
-                    .padding(start = 20.dp)
-                    .fillMaxWidth()
-                    .size(height = 100.dp, width = 140.dp)
-            ) {
+            Text(
+                text = "\uD83D\uDE04",
+                style = TextStyle(
+                    fontSize = 40.sp
+                )
+            )
+            Spacer(modifier = Modifier.padding(start = 10.dp))
+            Column {
                 Text(
                     text = "Today, Feb 21",
                     style = TextStyle(
                         color = Color(0xFF8FCAB5),
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp
                     )
                 )
                 Text(
-                    text = "\nI'm feeling happy!",
+                    text = "I'm feeling happy!",
                     style = TextStyle(
                         color = Color.Black,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp
                     )
                 )
             }
@@ -81,7 +83,7 @@ fun WithInfo() {
 
 @Composable
 fun WithoutInfo() {
-    Text (
+    Text(
         text = "\uD83E\uDD20\n Stay positive!",
         style = MaterialTheme.typography.headlineLarge,
         textAlign = TextAlign.Center,
@@ -113,7 +115,7 @@ fun HomePage(pageState: MutableState<PageStates>) {
             modifier = Modifier.padding(top = 128.dp)
         ) {
             // TODO: only show one of these depending on state
-             WithInfo()
+            WithInfo()
 //            WithoutInfo()
         }
 
@@ -128,8 +130,7 @@ fun HomePage(pageState: MutableState<PageStates>) {
                 Box(
                     modifier = Modifier
                         .background(color = Color.White, shape = RoundedCornerShape(16.dp))
-                        .padding(start = 30.dp)
-                        .size(height = 86.dp, width = 100.dp)
+                        .size(height = 86.dp, width = 120.dp)
                 ) {
                     Button(
                         onClick = { pageState.value = PageStates.AFFIRMATION },
@@ -138,13 +139,21 @@ fun HomePage(pageState: MutableState<PageStates>) {
                             .align(Alignment.Center)
                             .fillMaxSize()
                     ) {
-                        Text(
-                            text = "Affirmation",
-                            style = TextStyle(
-                                color = Color.Black,
-                                fontWeight = FontWeight.Bold
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = "☺\uFE0F",
+                                style = TextStyle(
+                                    fontSize = 30.sp
+                                )
                             )
-                        )
+                            Text(
+                                text = "Affirmation",
+                                style = TextStyle(
+                                    color = Color.Black,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            )
+                        }
                     }
                 }
 
@@ -153,26 +162,32 @@ fun HomePage(pageState: MutableState<PageStates>) {
                 Box(
                     modifier = Modifier
                         .background(color = Color.White, shape = RoundedCornerShape(16.dp))
-                        .padding(start = 20.dp)
-                        .size(height = 86.dp, width = 100.dp)
+                        .size(height = 86.dp, width = 120.dp)
                 ) {
                     Button(
-                    onClick = { pageState.value = PageStates.JOURNAL_STEP1 },
+                        onClick = { pageState.value = PageStates.JOURNAL_STEP1 },
                         colors = ButtonDefaults.buttonColors(containerColor = Color.White),
                         modifier = Modifier
                             .align(Alignment.Center)
                             .fillMaxSize()
                     ) {
-                        Text(
-                            text = "Journal",
-                            style = TextStyle(
-                                color = Color.Black,
-                                fontWeight = FontWeight.Bold
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = "\uD83D\uDCA1",
+                                style = TextStyle(
+                                    fontSize = 30.sp
+                                )
                             )
-                        )
+                            Text(
+                                text = "Journal",
+                                style = TextStyle(
+                                    color = Color.Black,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            )
+                        }
                     }
                 }
-
                 Spacer(modifier = Modifier.padding(end = 64.dp))
             }
 
@@ -187,8 +202,7 @@ fun HomePage(pageState: MutableState<PageStates>) {
                     Box(
                         modifier = Modifier
                             .background(color = Color.White, shape = RoundedCornerShape(16.dp))
-                            .padding(start = 20.dp)
-                            .size(height = 86.dp, width = 100.dp)
+                            .size(height = 86.dp, width = 120.dp)
                     ) {
                         Button(
                             onClick = { pageState.value = PageStates.MEDITATE },
@@ -197,13 +211,21 @@ fun HomePage(pageState: MutableState<PageStates>) {
                                 .align(Alignment.Center)
                                 .fillMaxSize()
                         ) {
-                            Text(
-                                text = "Meditate",
-                                style = TextStyle(
-                                    color = Color.Black,
-                                    fontWeight = FontWeight.Bold
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = "\uD83E\uDDD8",
+                                    style = TextStyle(
+                                        fontSize = 30.sp
+                                    )
                                 )
-                            )
+                                Text(
+                                    text = "Meditate",
+                                    style = TextStyle(
+                                        color = Color.Black,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                )
+                            }
                         }
                     }
 
@@ -212,8 +234,7 @@ fun HomePage(pageState: MutableState<PageStates>) {
                     Box(
                         modifier = Modifier
                             .background(color = Color.White, shape = RoundedCornerShape(16.dp))
-                            .padding(start = 20.dp)
-                            .size(height = 86.dp, width = 100.dp)
+                            .size(height = 86.dp, width = 120.dp)
                     ) {
                         Button(
                             onClick = { pageState.value = PageStates.PHOTOBOOK },
@@ -222,19 +243,26 @@ fun HomePage(pageState: MutableState<PageStates>) {
                                 .align(Alignment.Center)
                                 .fillMaxSize()
                         ) {
-                            Text(
-                                text = "Photobook",
-                                style = TextStyle(
-                                    color = Color.Black,
-                                    fontWeight = FontWeight.Bold
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = "\uD83D\uDDBC",
+                                    style = TextStyle(
+                                        fontSize = 30.sp
+                                    )
                                 )
-                            )
+                                Text(
+                                    text = "Photobook",
+                                    style = TextStyle(
+                                        color = Color.Black,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                )
+                            }
                         }
+                        Spacer(modifier = Modifier.padding(end = 64.dp))
                     }
-                    Spacer(modifier = Modifier.padding(end = 64.dp))
                 }
             }
         }
     }
 }
-

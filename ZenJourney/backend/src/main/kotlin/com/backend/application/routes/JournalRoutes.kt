@@ -25,7 +25,6 @@ fun Route.journalRoutes() {
     val journalRepository by inject<JournalRepository>()
     val userRepository by inject<UserRepository>()
     route("/journal") {
-        // assumes only 1 journal per date
         post {
             val journal = call.receive<JournalRequest>()
             try {
@@ -42,16 +41,16 @@ fun Route.journalRoutes() {
                     toStatusResponse(false, "The year, month, or day provided is invalid")
                 )
             }
-            if (journalRepository.findByDate(journal.year, journal.month, journal.day) != null) {
-                return@post call.respond(
-                    HttpStatusCode.BadRequest,
-                    toStatusResponse(false, "A journal already exists for this date")
-                )
-            }
             if (userRepository.findById(ObjectId(journal.userId)) == null) {
                 return@post call.respond(
                     HttpStatusCode.NotFound,
                     toStatusResponse(false, "The user provided cannot be found")
+                )
+            }
+            if (journalRepository.findByDateAndUser(journal.userId, journal.year, journal.month, journal.day) != null) {
+                return@post call.respond(
+                    HttpStatusCode.BadRequest,
+                    toStatusResponse(false, "A journal already exists for this date and user")
                 )
             }
             val insertedId = journalRepository.insertOne(journal.toDomain())
@@ -106,6 +105,26 @@ fun Route.journalRoutes() {
                 )
             }
             val journal = journalRepository.findByDate(year.toInt(), month.toInt(), day.toInt())
+                ?: return@get call.respond(
+                    HttpStatusCode.NotFound,
+                    toStatusResponse(false, "The requested journal could not be found")
+                )
+            call.respond(HttpStatusCode.OK, journal.toResponse())
+        }
+    }
+    route("/journal/user") {
+        get {
+            val userId = call.request.queryParameters["user"]
+            val year = call.request.queryParameters["year"]
+            val month = call.request.queryParameters["month"]
+            val day = call.request.queryParameters["day"]
+            if (userId == null || year == null || month == null || day == null) {
+                return@get call.respond(
+                    status = HttpStatusCode.BadRequest,
+                    toStatusResponse(false, "Missing date query parameters (user, year, month, or day)")
+                )
+            }
+            val journal = journalRepository.findByDateAndUser(userId, year.toInt(), month.toInt(), day.toInt())
                 ?: return@get call.respond(
                     HttpStatusCode.NotFound,
                     toStatusResponse(false, "The requested journal could not be found")

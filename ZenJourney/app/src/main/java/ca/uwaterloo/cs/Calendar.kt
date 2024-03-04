@@ -18,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.CalendarDay
+import com.kizitonwose.calendar.compose.CalendarState
 import com.kizitonwose.calendar.core.firstDayOfWeekFromLocale
 import java.time.YearMonth
 import java.time.DayOfWeek
@@ -36,25 +38,20 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.runtime.MutableState
+import kotlinx.coroutines.launch
+import ca.uwaterloo.cs.api.ApiService
 import java.time.LocalDate
+
+
 @Composable
-fun CalendarWithHeader(pageState: MutableState<PageStates>, selectedDate: MutableState<LocalDate>) {
+fun CalendarWithHeader(pageState: MutableState<PageStates>, selectedDate: MutableState<LocalDate>,
+                       pastSelectedMoods: MutableState<List<String>>,
+                       pastJournalEntry: MutableState<String>,
+                       pastDate: MutableState<LocalDate>
+) {
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
+    val coroutineScope = rememberCoroutineScope()
 
-    Column {
-        MonthNavigationHeader(
-            currentMonth = currentMonth,
-            onMonthChanged = { newMonth ->
-                currentMonth = newMonth
-            }
-        )
-        HorizontalDivider()
-
-        Calendar(currentMonth, pageState, selectedDate)
-    }
-}
-@Composable
-fun Calendar(currentMonth: YearMonth = remember { YearMonth.now() }, pageState: MutableState<PageStates>, selectedDate: MutableState<LocalDate>) {
     val startMonth = remember { currentMonth.minusMonths(100) }
     val endMonth = remember { currentMonth.plusMonths(100) }
     val firstDayOfWeek = remember { firstDayOfWeekFromLocale() }
@@ -65,6 +62,33 @@ fun Calendar(currentMonth: YearMonth = remember { YearMonth.now() }, pageState: 
         firstVisibleMonth = currentMonth,
         firstDayOfWeek = firstDayOfWeek
     )
+
+    Column {
+        MonthNavigationHeader(
+            currentMonth = currentMonth,
+            onMonthChanged = { newMonth ->
+                currentMonth = newMonth
+                coroutineScope.launch {
+                    state.scrollToMonth(newMonth)
+                }
+            }
+        )
+        HorizontalDivider()
+
+        Calendar(currentMonth, pageState, selectedDate, pastSelectedMoods, pastJournalEntry, pastDate, state)
+    }
+}
+
+@Composable
+fun Calendar(currentMonth: YearMonth = remember { YearMonth.now() },
+             pageState: MutableState<PageStates>,
+             selectedDate: MutableState<LocalDate>,
+             pastSelectedMoods: MutableState<List<String>>,
+             pastJournalEntry: MutableState<String>,
+             pastDate: MutableState<LocalDate>,
+             state: CalendarState
+) {
+
 
     HorizontalCalendar(
         state = state,
@@ -81,26 +105,55 @@ fun Calendar(currentMonth: YearMonth = remember { YearMonth.now() }, pageState: 
             }
         },
         dayContent = { day ->
-            Day(day, pageState, selectedDate)
+            Day(day, pageState, selectedDate, pastSelectedMoods, pastJournalEntry, pastDate, currentMonth)
         }
     )
 }
 
 
 @Composable
-fun Day(day: CalendarDay, pageState: MutableState<PageStates>, selectedDate: MutableState<LocalDate>) {
+fun Day(day: CalendarDay, pageState: MutableState<PageStates>,
+        selectedDate: MutableState<LocalDate>,
+        pastSelectedMoods: MutableState<List<String>>,
+        pastJournalEntry: MutableState<String>,
+        pastDate: MutableState<LocalDate>,
+        currentMonth: YearMonth
+) {
+    val coroutineScope = rememberCoroutineScope()
+
+    val isInCurrentMonth = day.date.month == currentMonth.month && day.date.year == currentMonth.year
+
     Box(
         modifier = Modifier
             .aspectRatio(1f)
             .clickable {
-                pageState.value = PageStates.JOURNAL_STEP2
                 selectedDate.value = day.date
+                coroutineScope.launch {
+                    try {
+                        val journalResponse = ApiService.getJournalByDateAndUser(
+                            userId = "65e5664b99258c800b3ab381", // Example user ID
+                            year = day.date.year,
+                            month = day.date.monthValue,
+                            day = day.date.dayOfMonth
+                        )
+                        if (journalResponse != null) {
+                            pastJournalEntry.value = journalResponse.content
+                            pastSelectedMoods.value = journalResponse.moods
+                            pastDate.value = LocalDate.of(journalResponse.year, journalResponse.month, journalResponse.day)
+                            pageState.value = PageStates.PAST_JOURNAL
+                        } else {
+                            pageState.value = PageStates.JOURNAL_STEP2
+                        }
+                    } catch (e: Exception) {
+                        println(e.message)
+                    }
+                }
             },
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = day.date.dayOfMonth.toString(),
-            color = Color.Black
+            color = if (isInCurrentMonth) Color.Black else Color.Gray
         )
     }
 }

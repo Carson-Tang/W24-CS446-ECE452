@@ -25,6 +25,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,10 +35,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.time.format.DateTimeFormatter
+import kotlinx.coroutines.launch
+import ca.uwaterloo.cs.api.ApiService
+import journal.JournalRequest
 import java.time.LocalDate
 
 @Composable
-fun JournalPage1(pageState: MutableState<PageStates>, selectedDate: MutableState<LocalDate>) {
+fun JournalPage1(pageState: MutableState<PageStates>, selectedDate: MutableState<LocalDate>,
+                 pastSelectedMoods: MutableState<List<String>>, pastJournalEntry: MutableState<String>,
+                 pastDate: MutableState<LocalDate>
+) {
     Column(
         Modifier
             .background(color = MaterialTheme.colorScheme.background)
@@ -68,7 +76,7 @@ fun JournalPage1(pageState: MutableState<PageStates>, selectedDate: MutableState
                 .padding(top = 20.dp)
         )
         {
-            CalendarWithHeader(pageState, selectedDate)
+            CalendarWithHeader(pageState, selectedDate, pastSelectedMoods, pastJournalEntry, pastDate)
         }
     }
 }
@@ -86,6 +94,7 @@ fun JournalPage2(pageState: MutableState<PageStates>, selectedDate: MutableState
         "\uD83D\uDE0E" to "Cool",
         "\uD83E\uDD73" to "Party"
     )
+
 
     Column(
         Modifier
@@ -180,8 +189,28 @@ fun JournalPage2(pageState: MutableState<PageStates>, selectedDate: MutableState
 }
 
 @Composable
-fun JournalPage3(pageState: MutableState<PageStates>, selectedDate: MutableState<LocalDate>, journalEntry: MutableState<String>) {
+fun JournalPage3(pageState: MutableState<PageStates>,
+                 selectedDate: MutableState<LocalDate>,
+                 journalEntry: MutableState<String>,
+                 selectedMoods: MutableState<List<String>>,
+                 pastSelectedMoods: MutableState<List<String>>,
+                 pastJournalEntry: MutableState<String>,
+                 pastDate: MutableState<LocalDate>
+) {
     val charLimit = 2000
+    val coroutineScope = rememberCoroutineScope()
+
+    val emojiToWordMap = mapOf(
+        "\uD83D\uDE0A" to "Happy",
+        "\uD83D\uDE22" to "Sad",
+        "\uD83D\uDE20" to "Angry",
+        "\uD83D\uDE31" to "Shocked",
+        "\uD83D\uDE1E" to "Disappointed",
+        "\uD83D\uDE0D" to "Loved",
+        "\uD83E\uDD2F" to "Mind Blown",
+        "\uD83D\uDE0E" to "Cool",
+        "\uD83E\uDD73" to "Party"
+    )
 
     Column(
         Modifier
@@ -291,7 +320,45 @@ fun JournalPage3(pageState: MutableState<PageStates>, selectedDate: MutableState
                         .background(color = Color(0xFF7BB6A1), shape = RoundedCornerShape(16.dp))
                 ) {
                     Button(
-                        onClick = { pageState.value = PageStates.PAST_JOURNAL },
+                        onClick = {
+                            val selectedMoodsInWords = selectedMoods.value.map { emoji ->
+                                emojiToWordMap[emoji] ?: "Unknown"
+                            }
+                            coroutineScope.launch {
+                                val journalRequest = JournalRequest(
+                                    year = selectedDate.value.year,
+                                    month = selectedDate.value.monthValue,
+                                    day = selectedDate.value.dayOfMonth,
+                                    moods = selectedMoodsInWords,
+                                    content = journalEntry.value,
+                                    userId = "65e5664b99258c800b3ab381" // Hardcoded test user for now
+                                )
+                                try {
+                                    // we can change this flow in the future, but this current creation doesnt return
+                                    // the actual journal response, so we just query it again
+                                    val response = ApiService.createJournal(journalRequest)
+                                    val journalResponse = ApiService.getJournalByDateAndUser(
+                                        userId = "65e5664b99258c800b3ab381", // Example user ID
+                                        year = selectedDate.value.year,
+                                        month = selectedDate.value.monthValue,
+                                        day = selectedDate.value.dayOfMonth,
+                                    )
+                                    if (journalResponse != null) {
+                                        pastJournalEntry.value = journalResponse.content
+                                        pastSelectedMoods.value = journalResponse.moods
+                                        pastDate.value = LocalDate.of(journalResponse.year, journalResponse.month, journalResponse.day)
+                                        pageState.value = PageStates.PAST_JOURNAL
+                                    } else {
+                                        // failure case, not handled for now
+                                        pageState.value = PageStates.HOME
+                                    }
+                                } catch (e: Exception) {
+                                    // handle in future
+                                }
+                            }
+
+
+                        },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
                         modifier = Modifier
                             .padding(start = 32.dp)
@@ -311,7 +378,32 @@ fun JournalPage3(pageState: MutableState<PageStates>, selectedDate: MutableState
 }
 
 @Composable
-fun PastJournalPage(pageState: MutableState<PageStates>) {
+fun PastJournalPage(pageState: MutableState<PageStates>,
+                    pastSelectedMoods: MutableState<List<String>>,
+                    pastJournalEntry: MutableState<String>,
+                    pastDate: MutableState<LocalDate>)
+{
+
+    DisposableEffect(Unit) {
+        onDispose {
+            pastDate.value = LocalDate.now()
+            pastSelectedMoods.value = listOf<String>()
+            pastJournalEntry.value = ""
+        }
+    }
+
+    val wordToEmojiMap = mapOf(
+        "Happy" to "\uD83D\uDE0A",
+        "Sad" to "\uD83D\uDE22",
+        "Angry" to "\uD83D\uDE20",
+        "Shocked" to "\uD83D\uDE31",
+        "Disappointed" to "\uD83D\uDE1E",
+        "Loved" to "\uD83D\uDE0D",
+        "Mind Blown" to "\uD83E\uDD2F",
+        "Cool" to "\uD83D\uDE0E",
+        "Party" to "\uD83E\uDD73"
+    )
+
     Column(
         Modifier
             .background(color = MaterialTheme.colorScheme.background)
@@ -323,28 +415,39 @@ fun PastJournalPage(pageState: MutableState<PageStates>) {
                 .padding(top = 64.dp)
         ) {
             Text(
-                text = "February 22, 2024",
+                text = pastDate.value.format(DateTimeFormatter.ofPattern("MMMM d, yyyy")),
                 style = MaterialTheme.typography.headlineMedium,
                 textAlign = TextAlign.Center,
                 color = Color(0xFF649E8A)
             )
         }
 
-        Column(
-            Modifier
-                .padding(top = 32.dp)
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(3), // need to make this dynamic in future
+            contentPadding = PaddingValues(16.dp),
+            modifier = Modifier.padding(top = 2.dp, start = 16.dp, end = 16.dp, bottom = 2.dp)
         ) {
-            Text(
-                text = "You felt: \n\uD83D\uDE0C\n Relaxed",
-                style = MaterialTheme.typography.headlineMedium,
-                textAlign = TextAlign.Center,
-                color = Color(0xFF3D3D3D)
-            )
+            items(pastSelectedMoods.value) { mood ->
+                val emoji = wordToEmojiMap[mood] ?: "❓"
+
+                Box(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .clip(RoundedCornerShape(8.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(text = emoji, fontSize = 40.sp)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(text = mood, fontSize = 12.sp)
+                    }
+                }
+            }
         }
 
         Column(
             Modifier
-                .padding(top = 32.dp)
+                .padding(top = 12.dp)
         ) {
             Text(
                 text = "What is something you accomplished today?",
@@ -356,7 +459,7 @@ fun PastJournalPage(pageState: MutableState<PageStates>) {
 
         Column(
             modifier = Modifier
-                .padding(all = 20.dp)
+                .padding(top = 4.dp, start = 20.dp, end = 20.dp)
                 .size(width = 500.dp, height = 200.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -366,7 +469,7 @@ fun PastJournalPage(pageState: MutableState<PageStates>) {
                     .background(color = Color.White, shape = RoundedCornerShape(16.dp))
             ) {
                 Text(
-                    text = "Non editable text .....",
+                    text = pastJournalEntry.value,
                     color = Color.Black,
                 )
             }
@@ -374,7 +477,7 @@ fun PastJournalPage(pageState: MutableState<PageStates>) {
 
         Column(
             modifier = Modifier
-                .padding(top = 120.dp, start = 20.dp, end = 20.dp)
+                .padding(top = 8.dp, start = 20.dp, end = 20.dp)
                 .size(width = 460.dp, height = 75.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {

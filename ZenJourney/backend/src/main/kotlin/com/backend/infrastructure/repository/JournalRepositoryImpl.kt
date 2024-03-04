@@ -68,4 +68,17 @@ class JournalRepositoryImpl(
             )
             .firstOrNull()
     }
+
+    override suspend fun findByDateAndUser(userId: String, year: Int, month: Int, day: Int): Journal? {
+        return mongoDatabase.getCollection<Journal>(JOURNAL_COLLECTION).withDocumentClass<Journal>()
+            .find(
+                Filters.and(
+                    Filters.eq("year", year),
+                    Filters.eq("month", month),
+                    Filters.eq("day", day),
+                    Filters.eq("userId", ObjectId(userId))
+                )
+            )
+            .firstOrNull()
+    }
 }

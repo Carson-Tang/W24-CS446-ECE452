@@ -1,7 +1,7 @@
 plugins {
   id("com.android.application")
   id("org.jetbrains.kotlin.android")
-  id("org.jetbrains.kotlin.plugin.serialization") version "1.6.10"
+  id("org.jetbrains.kotlin.plugin.serialization") version "1.9.22"
   // The version before the - needs to match `id "org.jetbrains.kotlin.android" version`
   // in the other build.gradle, see https://github.com/google/ksp/releases
   id("com.google.devtools.ksp") version "1.9.22-1.0.16"
@@ -35,6 +35,8 @@ android {
 }
 
 dependencies {
+  implementation(project(":shared"))
+
   implementation("androidx.activity:activity-compose:1.8.2")
   implementation("androidx.compose.ui:ui:1.6.2")
   implementation("androidx.compose.ui:ui-tooling:1.6.2")
@@ -84,12 +86,16 @@ dependencies {
 
   implementation("io.ktor:ktor-client-core:$ktorVersion")
   implementation("io.ktor:ktor-client-json:$ktorVersion")
+  implementation("io.ktor:ktor-serialization-gson-jvm")
   implementation("io.ktor:ktor-client-serialization:$ktorVersion")
   implementation("io.ktor:ktor-client-logging:$ktorVersion")
   implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
   implementation("io.ktor:ktor-client-cio:$ktorVersion")
   implementation("io.ktor:ktor-client-android:$ktorVersion")
+  implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
 
+
+  implementation("com.google.code.gson:gson:2.10.1")
   // The view calendar library
   implementation ("com.kizitonwose.calendar:view:2.5.0")
 

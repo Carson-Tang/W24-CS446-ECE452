@@ -15,8 +15,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -96,7 +100,14 @@ fun PhotobookPage(context: Context, pageState: MutableState<PageStates>) {
         rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) {
             /* TODO: upload bitmap to server and update UI */
             if (it != null) {
-                photoState.add(0, PhotobookPhoto("22 Thu", it))
+                photoState.add(
+                    0,
+                    PhotobookPhoto(
+                        "${currentDate.dayOfMonth} ${
+                            capitalize(currentDate.dayOfWeek.toString().take(3))
+                        }", it
+                    )
+                )
             }
         }
 
@@ -108,12 +119,9 @@ fun PhotobookPage(context: Context, pageState: MutableState<PageStates>) {
         Modifier
             .background(color = MaterialTheme.colorScheme.background)
             .fillMaxSize()
-            .padding(top = 100.dp),
+            .padding(top = 50.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Button(onClick = { openCamera() }) {
-            Text("+")
-        }
         Column(
             modifier = Modifier
                 .padding(all = 20.dp)
@@ -134,6 +142,15 @@ fun PhotobookPage(context: Context, pageState: MutableState<PageStates>) {
                         .padding(top = 20.dp)
                 ) {
                     ScrollablePhotoList(photoState)
+                    FloatingActionButton(
+                        modifier = Modifier.align(Alignment.BottomEnd),
+                        shape = CircleShape,
+                        containerColor = Color.DarkGray,
+                        onClick = { openCamera() }) {
+                        Icon(
+                            Icons.Filled.Add, "Add photobook button"
+                        )
+                    }
                 }
             }
         }

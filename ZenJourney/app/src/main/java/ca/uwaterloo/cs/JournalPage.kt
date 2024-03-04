@@ -297,7 +297,7 @@ fun JournalPage3(pageState: MutableState<PageStates>,
                         .background(color = Color(0xFF7BB6A1), shape = RoundedCornerShape(16.dp))
                 ) {
                     Button(
-                        onClick = { pageState.value = PageStates.JOURNAL_STEP3 },
+                        onClick = { pageState.value = PageStates.JOURNAL_STEP2 },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
                         modifier = Modifier
                             .padding(start = 32.dp)
@@ -343,6 +343,9 @@ fun JournalPage3(pageState: MutableState<PageStates>,
                                         month = selectedDate.value.monthValue,
                                         day = selectedDate.value.dayOfMonth,
                                     )
+                                    journalEntry.value = ""
+                                    selectedMoods.value = listOf("")
+
                                     if (journalResponse != null) {
                                         pastJournalEntry.value = journalResponse.content
                                         pastSelectedMoods.value = journalResponse.moods

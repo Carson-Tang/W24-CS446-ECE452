@@ -33,15 +33,17 @@ fun formatTime(ms: Long): String {
 
 @Composable
 fun TimerScreen() {
-    var time by remember {
-        mutableStateOf(0L)
+    // default timer value
+    var defaultTimeMs by remember { // in ms
+        mutableStateOf(60000L)
+    }
+
+    // what the actual timer shows
+    var timeMs by remember {
+        mutableStateOf(defaultTimeMs)
     }
     var isRunning by remember {
         mutableStateOf(false)
-    }
-
-    var startTime by remember {
-        mutableStateOf(0L)
     }
 
     Column(
@@ -66,7 +68,7 @@ fun TimerScreen() {
             }
 
             Text(
-                text = formatTime(time),
+                text = formatTime(timeMs),
                 style = MaterialTheme.typography.headlineLarge,
                 color = Color(0xFF70A894),
                 modifier = Modifier
@@ -85,8 +87,7 @@ fun TimerScreen() {
                         .background(color = Color(0xFF7BB6A1), shape = RoundedCornerShape(6.dp))
                 ) {
                     IconButton(onClick = {
-                        startTime = 0
-                        time = 0
+                        timeMs = defaultTimeMs
                         isRunning = false
                     }) {
                         Icon(
@@ -102,7 +103,6 @@ fun TimerScreen() {
                         .background(color = Color(0xFF7BB6A1), shape = RoundedCornerShape(6.dp))
                 ) {
                     IconButton(onClick = {
-                        startTime = System.currentTimeMillis() - time
                         isRunning = true
                     }) {
                         Icon(
@@ -132,8 +132,11 @@ fun TimerScreen() {
     }
     LaunchedEffect(isRunning) {
         while (isRunning) {
+            if (timeMs == 0L) {
+                isRunning = false
+            }
             delay(1000)
-            time = System.currentTimeMillis() - startTime
+            timeMs -= 1000
         }
     }
 }

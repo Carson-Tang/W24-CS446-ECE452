@@ -29,7 +29,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainContent(context: Context) {
-    val pageState = remember { mutableStateOf(PageStates.HOME) }
+    val pageState = remember { mutableStateOf(PageStates.WELCOME) }
 
     val nameState = remember { mutableStateOf("") }
 

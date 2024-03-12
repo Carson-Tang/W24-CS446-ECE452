@@ -10,7 +10,7 @@ import io.ktor.http.*
 import com.google.gson.Gson
 import io.ktor.client.call.body
 
-object ApiService {
+object JournalApiService {
 
     val gson = Gson()
     private val baseUrl = "http://10.0.2.2:8080/journal"

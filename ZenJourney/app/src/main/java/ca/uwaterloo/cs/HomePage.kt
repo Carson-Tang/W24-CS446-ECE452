@@ -32,7 +32,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import ca.uwaterloo.cs.api.ApiService
+import ca.uwaterloo.cs.api.JournalApiService
 import io.ktor.client.statement.request
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.launch
@@ -129,7 +129,7 @@ fun HomePage(pageState: MutableState<PageStates>) {
         // This block will be executed when the composable is first displayed
         coroutineScope.launch {
             try {
-                val journalResponse: JournalResponse? = ApiService.getJournalByDate(today.year, today.monthValue, today.dayOfMonth)
+                val journalResponse: JournalResponse? = JournalApiService.getJournalByDate(today.year, today.monthValue, today.dayOfMonth)
                 if (journalResponse != null) {
                     todayJournalData = journalResponse
                 }

@@ -8,4 +8,6 @@ data class JournalResponse(
     val moods: List<String>,
     val content: String,
     val userId: String
-)
+) {
+
+}

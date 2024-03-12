@@ -39,7 +39,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.runtime.MutableState
 import kotlinx.coroutines.launch
-import ca.uwaterloo.cs.api.ApiService
+import ca.uwaterloo.cs.api.JournalApiService
 import java.time.LocalDate
 
 
@@ -130,7 +130,7 @@ fun Day(day: CalendarDay, pageState: MutableState<PageStates>,
                 selectedDate.value = day.date
                 coroutineScope.launch {
                     try {
-                        val journalResponse = ApiService.getJournalByDateAndUser(
+                        val journalResponse = JournalApiService.getJournalByDateAndUser(
                             userId = "65e5664b99258c800b3ab381", // Example user ID
                             year = day.date.year,
                             month = day.date.monthValue,

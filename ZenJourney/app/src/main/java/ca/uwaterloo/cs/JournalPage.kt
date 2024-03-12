@@ -36,7 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.launch
-import ca.uwaterloo.cs.api.ApiService
+import ca.uwaterloo.cs.api.JournalApiService
 import journal.JournalRequest
 import java.time.LocalDate
 
@@ -336,8 +336,8 @@ fun JournalPage3(pageState: MutableState<PageStates>,
                                 try {
                                     // we can change this flow in the future, but this current creation doesnt return
                                     // the actual journal response, so we just query it again
-                                    val response = ApiService.createJournal(journalRequest)
-                                    val journalResponse = ApiService.getJournalByDateAndUser(
+                                    val response = JournalApiService.createJournal(journalRequest)
+                                    val journalResponse = JournalApiService.getJournalByDateAndUser(
                                         userId = "65e5664b99258c800b3ab381", // Example user ID
                                         year = selectedDate.value.year,
                                         month = selectedDate.value.monthValue,

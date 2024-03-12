@@ -10,7 +10,7 @@ import io.ktor.http.*
 import com.google.gson.Gson
 import io.ktor.client.call.body
 
-object ApiService {
+object JournalApiService {
 
     val gson = Gson()
     private val baseUrl = "http://10.0.2.2:8080/journal"
@@ -46,12 +46,18 @@ object ApiService {
         }
     }
 
-    suspend fun getJournalByDate(year: Int, month: Int, day: Int): HttpResponse {
+    suspend fun getJournalByDate(year: Int, month: Int, day: Int): JournalResponse? {
         return withContext(Dispatchers.IO) {
-            HttpClientSetup.httpClient.get("$baseUrl") {
+            val response: HttpResponse = HttpClientSetup.httpClient.get("$baseUrl") {
                 parameter("year", year)
                 parameter("month", month)
                 parameter("day", day)
+            }
+
+            if (response.status == HttpStatusCode.OK) {
+                response.body()
+            } else {
+                null
             }
         }
     }

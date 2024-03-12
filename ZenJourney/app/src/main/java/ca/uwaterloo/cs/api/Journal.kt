@@ -46,12 +46,18 @@ object ApiService {
         }
     }
 
-    suspend fun getJournalByDate(year: Int, month: Int, day: Int): HttpResponse {
+    suspend fun getJournalByDate(year: Int, month: Int, day: Int): JournalResponse? {
         return withContext(Dispatchers.IO) {
-            HttpClientSetup.httpClient.get("$baseUrl") {
+            val response: HttpResponse = HttpClientSetup.httpClient.get("$baseUrl") {
                 parameter("year", year)
                 parameter("month", month)
                 parameter("day", day)
+            }
+
+            if (response.status == HttpStatusCode.OK) {
+                response.body()
+            } else {
+                null
             }
         }
     }

@@ -15,7 +15,11 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
@@ -24,9 +28,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import ca.uwaterloo.cs.api.ApiService
+import io.ktor.client.statement.request
+import io.ktor.http.HttpStatusCode
+import kotlinx.coroutines.launch
+import org.junit.Test.None
+import journal.JournalResponse
+
 
 @Composable
-fun WithInfo() {
+fun WithInfo(today: java.time.LocalDate, todayJournalData: JournalResponse) {
+    // TODO: actually use this todayJournalData
     Column(
         modifier = Modifier
             .fillMaxWidth(),
@@ -61,7 +77,7 @@ fun WithInfo() {
             Spacer(modifier = Modifier.padding(start = 10.dp))
             Column {
                 Text(
-                    text = "Today, Feb 21",
+                    text = "Today, ${today.format(DateTimeFormatter.ofPattern("MMMM d"))}",
                     style = TextStyle(
                         color = Color(0xFF8FCAB5),
                         fontWeight = FontWeight.Bold,
@@ -105,6 +121,25 @@ fun WithoutInfo() {
 
 @Composable
 fun HomePage(pageState: MutableState<PageStates>) {
+    val coroutineScope = rememberCoroutineScope()
+    val today = LocalDate.now()
+    var todayJournalData by remember { mutableStateOf(JournalResponse("", 0, 0, 0, listOf(), "", "")) }
+
+    LaunchedEffect(Unit) {
+        // This block will be executed when the composable is first displayed
+        coroutineScope.launch {
+            try {
+                val journalResponse: JournalResponse? = ApiService.getJournalByDate(today.year, today.monthValue, today.dayOfMonth)
+                if (journalResponse != null) {
+                    todayJournalData = journalResponse
+                }
+            } catch (e: Exception) {
+                // TODO: error, but tbh prob fine to just ignore
+            }
+        }
+    }
+
+
     Column(
         Modifier
             .background(color = Color(0xFFC7E6C9))
@@ -114,9 +149,11 @@ fun HomePage(pageState: MutableState<PageStates>) {
         Column(
             modifier = Modifier.padding(top = 128.dp)
         ) {
-            // TODO: only show one of these depending on state
-            WithInfo()
-//            WithoutInfo()
+            if (todayJournalData.id != "") {
+                WithInfo(today, todayJournalData)
+            } else {
+                WithoutInfo()
+            }
         }
 
         Column(

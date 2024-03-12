@@ -15,16 +15,49 @@ import org.koin.ktor.ext.inject
 import toStatusResponse
 import user.UserRequest
 import user.toDomain
+import org.mindrot.jbcrypt.BCrypt
 
 fun Route.userRoutes() {
     val userRepository by inject<UserRepository>()
     route("/user") {
+        post("/login") {
+            val user = call.receive<UserRequest>()
+            val existingUser = userRepository.findByEmail(user.email)
+            if (existingUser != null) {
+                if (BCrypt.checkpw(user.password, existingUser.password)) {
+                    // TODO: something with jwt
+                    return@post call.respond(
+                        HttpStatusCode.OK,
+                        toStatusResponse(true, "Successfully logged in")
+                    )
+                } else {
+                    return@post call.respond(
+                        HttpStatusCode.BadRequest,
+                        toStatusResponse(false, "Your email and password do not match. Please try again.")
+                    )
+                }
+            }
+            return@post call.respond(
+                HttpStatusCode.BadRequest,
+                toStatusResponse(false, "Your email and password do not match. Please try again.")
+            )
+        }
+
         post {
             val user = call.receive<UserRequest>()
+
+            val existingUser = userRepository.findByEmail(user.email)
+            if (existingUser != null) {
+                return@post call.respond(
+                    HttpStatusCode.BadRequest,
+                    toStatusResponse(false, "User with email ${user.email} already exists")
+                )
+            }
+
             val insertedId = userRepository.insertOne(user.toDomain())
 
             if (insertedId != null) {
-                call.respond(
+                return@post call.respond(
                     HttpStatusCode.Created,
                     toStatusResponse(true, "Created user with id: ${insertedId.asObjectId().value}")
                 )

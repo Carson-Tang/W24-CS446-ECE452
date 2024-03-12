@@ -104,4 +104,6 @@ dependencies {
 
   // Used for adding material 3 icons
   implementation("androidx.compose.material:material-icons-extended:1.6.2")
+
+  implementation("org.mindrot:jbcrypt:0.4")
 }

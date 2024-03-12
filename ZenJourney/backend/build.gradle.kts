@@ -36,4 +36,6 @@ dependencies {
     implementation(project(":shared"))
     testImplementation("io.ktor:ktor-server-tests-jvm")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
+
+    implementation("org.mindrot:jbcrypt:0.4")
 }

@@ -8,4 +8,6 @@ interface UserRepository {
     suspend fun insertOne(user: User): BsonValue?
     suspend fun deleteById(objectId: ObjectId): Long
     suspend fun findById(objectId: ObjectId): User?
+
+    suspend fun findByEmail(email: String): User?
 }

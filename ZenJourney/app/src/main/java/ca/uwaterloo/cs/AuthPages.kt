@@ -19,6 +19,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import android.util.Patterns.EMAIL_ADDRESS
+import ca.uwaterloo.cs.api.ApiService
+import ca.uwaterloo.cs.api.UserApiService
+import kotlinx.coroutines.launch
+import user.UserRequest
+import androidx.compose.runtime.rememberCoroutineScope
+import io.ktor.client.call.body
+import io.ktor.client.statement.bodyAsText
+import io.ktor.client.statement.readText
+import io.ktor.http.HttpStatusCode
+import io.ktor.util.InternalAPI
+import java.time.LocalDate
+import org.mindrot.jbcrypt.BCrypt
+import kotlinx.coroutines.launch
+
 
 @Composable
 fun SignUpPage1(pageState: MutableState<PageStates>, nameState: MutableState<String>) {
@@ -62,26 +76,32 @@ fun SignUpPage1(pageState: MutableState<PageStates>, nameState: MutableState<Str
 fun SignUpPage2(pageState: MutableState<PageStates>, nameState: MutableState<String>) {
     SignUpLoginPage(
         pageState = pageState,
+        nameState = nameState,
         headlineText = "\uD83D\uDC69\u200D\uD83D\uDCBB\n\nAwesome!\nLet's create an account for you, ${nameState.value}",
         buttonText = "Register"
     )
 }
 
 @Composable
-fun LoginPage(pageState: MutableState<PageStates>) {
+fun LoginPage(pageState: MutableState<PageStates>, nameState: MutableState<String>) {
     SignUpLoginPage(
         pageState = pageState,
+        nameState = nameState,
         headlineText = "\uD83D\uDC69\u200D\uD83D\uDCBB\n\nWelcome back\nPlease login",
         buttonText = "Login"
     )
 }
 
+@OptIn(InternalAPI::class)
 @Composable
 fun SignUpLoginPage(
     pageState: MutableState<PageStates>,
+    nameState: MutableState<String>,
     headlineText: String,
     buttonText: String
 ) {
+    val coroutineScope = rememberCoroutineScope()
+
     val emailState = remember { mutableStateOf("") }
     val passwordState = remember { mutableStateOf("") }
     val emailErrorState = remember { mutableStateOf(InputErrorStates.NONE) }
@@ -105,7 +125,6 @@ fun SignUpLoginPage(
             TextFieldComponent(passwordState, "Password", passwordErrorState, true)
         }
         ElevatedButton(
-            /* TODO: Still need to check with BE */
             onClick = {
                 if (emailState.value.isNotBlank() && passwordState.value.isNotBlank()) {
                     // check if email and password is valid (InputErrorStates.NONE)
@@ -118,9 +137,45 @@ fun SignUpLoginPage(
                         if (passwordState.value.length < 6) InputErrorStates.INVALID_PASSWORD
                         else InputErrorStates.NONE
 
-                    // if both valid, switch to home page
-                    if (emailErrorState.value == InputErrorStates.NONE && passwordErrorState.value == InputErrorStates.NONE) {
-                        pageState.value = PageStates.HOME
+                    coroutineScope.launch {
+                        // REGISTER USER
+                        if (buttonText == "Register") {
+                            val userRequest = UserRequest(
+                                name = nameState.value,
+                                email = emailState.value.trimEnd(),
+                                password = passwordState.value,
+                            )
+                            try {
+                                val response = UserApiService.createUser(userRequest)
+                                if (response.status == HttpStatusCode.BadRequest) {
+                                    // TODO: show error
+                                } else if (response.status == HttpStatusCode.Created) {
+                                    // TODO: something with jwt
+                                     pageState.value = PageStates.HOME
+                                }
+                            } catch (e: Exception) {
+                                // handle in future
+                            }
+                        }
+                        // LOGIN USER
+                        else {
+                            val userRequest = UserRequest(
+                                name = nameState.value,
+                                email = emailState.value,
+                                password = passwordState.value,
+                            )
+                            try {
+                                val response = UserApiService.loginUser(userRequest)
+                                if (response.status == HttpStatusCode.BadRequest) {
+                                    // TODO: show error
+                                } else if (response.status == HttpStatusCode.OK) {
+                                    // TODO: something with jwt
+                                     pageState.value = PageStates.HOME
+                                }
+                            } catch (e: Exception) {
+                                // handle in future
+                            }
+                        }
                     }
                 } else if (emailState.value.isBlank()) {
                     emailErrorState.value = InputErrorStates.EMPTY_INPUT

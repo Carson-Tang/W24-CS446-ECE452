@@ -85,7 +85,7 @@ fun PageContent(
 ) {
     when (pageState.value) {
         PageStates.WELCOME -> WelcomePage(pageState)
-        PageStates.LOGIN -> LoginPage(pageState)
+        PageStates.LOGIN -> LoginPage(pageState, nameState)
         PageStates.SIGNUP_STEP1 -> SignUpPage1(pageState, nameState)
         PageStates.SIGNUP_STEP2 -> SignUpPage2(pageState, nameState)
         PageStates.HOME -> HomePage(pageState)

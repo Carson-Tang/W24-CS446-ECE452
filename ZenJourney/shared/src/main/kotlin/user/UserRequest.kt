@@ -1,6 +1,7 @@
 package user
 
 import org.bson.types.ObjectId
+import org.mindrot.jbcrypt.BCrypt
 
 data class UserRequest(
     val name: String,
@@ -13,6 +14,6 @@ fun UserRequest.toDomain(): User {
         id = ObjectId(),
         name = name,
         email = email,
-        password = "password"
+        password = BCrypt.hashpw(password, BCrypt.gensalt()),
     )
 }

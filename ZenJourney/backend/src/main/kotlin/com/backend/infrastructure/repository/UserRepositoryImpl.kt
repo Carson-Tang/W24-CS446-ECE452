@@ -44,4 +44,9 @@ class UserRepositoryImpl(
         mongoDatabase.getCollection<User>(USER_COLLECTION).withDocumentClass<User>()
             .find(Filters.eq("_id", objectId))
             .firstOrNull()
+
+    override suspend fun findByEmail(email: String): User? =
+        mongoDatabase.getCollection<User>(USER_COLLECTION).withDocumentClass<User>()
+            .find(Filters.eq("email", email))
+            .firstOrNull()
 }

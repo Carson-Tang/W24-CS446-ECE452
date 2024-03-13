@@ -48,7 +48,12 @@ fun MainContent(context: Context) {
                     PageStates.WELCOME,
                     PageStates.LOGIN,
                     PageStates.SIGNUP_STEP1,
-                    PageStates.SIGNUP_STEP2
+                    PageStates.SIGNUP_STEP2,
+                    PageStates.SIGNUP_STEP3,
+                    PageStates.SIGNUP_CLOUD,
+                    PageStates.SIGNUP_CLOUD_MORE,
+                    PageStates.SIGNUP_AFFIRMATION,
+                    PageStates.SIGNUP_PIN,
                 )
             ) {
                 Footer(pageState)
@@ -88,6 +93,11 @@ fun PageContent(
         PageStates.LOGIN -> LoginPage(pageState, nameState)
         PageStates.SIGNUP_STEP1 -> SignUpPage1(pageState, nameState)
         PageStates.SIGNUP_STEP2 -> SignUpPage2(pageState, nameState)
+        PageStates.SIGNUP_STEP3 -> SignUpPage3(pageState, nameState)
+        PageStates.SIGNUP_CLOUD -> SignUpCloud(pageState)
+        PageStates.SIGNUP_CLOUD_MORE -> SignUpCloudLearnMore(pageState)
+        PageStates.SIGNUP_AFFIRMATION -> SignUpAffirmation(pageState)
+        PageStates.SIGNUP_PIN -> SignUpPIN(pageState)
         PageStates.HOME -> HomePage(pageState)
         PageStates.MEDITATE -> MeditatePage(pageState)
         PageStates.AFFIRMATION -> AffirmationPage(pageState)

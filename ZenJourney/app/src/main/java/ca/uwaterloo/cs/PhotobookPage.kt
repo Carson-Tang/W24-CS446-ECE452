@@ -163,7 +163,7 @@ fun PhotobookPage(context: Context, pageState: MutableState<PageStates>) {
             text = {
                 Text(
                     color = Color(0xFF4F4F4F),
-                    text = "Add today's photo by",
+                    text = "Add today's photo",
                     fontSize = 16.sp
                 )
             }

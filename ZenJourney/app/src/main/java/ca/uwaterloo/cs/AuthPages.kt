@@ -76,6 +76,41 @@ fun SignUpPage2(pageState: MutableState<PageStates>, nameState: MutableState<Str
 }
 
 @Composable
+fun SignUpPage3(pageState: MutableState<PageStates>, nameState: MutableState<String>) {
+    Column(
+        Modifier
+            .background(MaterialTheme.colorScheme.background)
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            "\uD83D\uDE0D\n\nHi ${nameState.value}!",
+            style = MaterialTheme.typography.headlineLarge,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(top = 64.dp, bottom = 40.dp),
+        )
+        Text(
+            "We are excited\nto begin this\njourney of\nself-care with you.",
+            style = MaterialTheme.typography.headlineLarge,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(bottom = 224.dp),
+        )
+        ElevatedButton(
+            onClick = { pageState.value = PageStates.SIGNUP_CLOUD },
+            modifier = Modifier.size(width = 184.dp, height = 56.dp),
+            colors = ButtonDefaults.elevatedButtonColors(MaterialTheme.colorScheme.primaryContainer),
+            elevation = ButtonDefaults.elevatedButtonElevation(defaultElevation = 4.dp)
+        ) {
+            Text(
+                "Continue",
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                style = MaterialTheme.typography.headlineSmall
+            )
+        }
+    }
+}
+
+@Composable
 fun LoginPage(pageState: MutableState<PageStates>, nameState: MutableState<String>) {
     SignUpLoginPage(
         pageState = pageState,
@@ -144,7 +179,7 @@ fun SignUpLoginPage(
                                     // TODO: show error
                                 } else if (response.status == HttpStatusCode.Created) {
                                     // TODO: something with jwt
-                                     pageState.value = PageStates.HOME
+                                    pageState.value = PageStates.SIGNUP_STEP3
                                 }
                             } catch (e: Exception) {
                                 // handle in future
@@ -163,7 +198,7 @@ fun SignUpLoginPage(
                                     // TODO: show error
                                 } else if (response.status == HttpStatusCode.OK) {
                                     // TODO: something with jwt
-                                     pageState.value = PageStates.HOME
+                                    pageState.value = PageStates.HOME
                                 }
                             } catch (e: Exception) {
                                 // handle in future

@@ -50,6 +50,11 @@ fun ZenJourneyTheme(content: @Composable () -> Unit) {
             fontSize = 25.sp,
             color = lightColors.onSecondaryContainer
         ),
+        labelSmall = androidx.compose.ui.text.TextStyle(
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 22.sp,
+            color = lightColors.tertiaryContainer
+        ),
     )
     MaterialTheme(
         colorScheme = if (isSystemInDarkTheme()) darkColors else lightColors,

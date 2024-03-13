@@ -114,6 +114,7 @@ fun SignUpPIN(pageState: MutableState<PageStates>) {
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 104.dp, bottom = 40.dp),
         )
+        /*TODO: add PIN input*/
         CustomizationActionButtons(pageState, PageStates.HOME)
     }
 }

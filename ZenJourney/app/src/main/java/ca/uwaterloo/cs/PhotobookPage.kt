@@ -3,6 +3,7 @@ package ca.uwaterloo.cs
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.ImageDecoder
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -19,6 +20,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -26,12 +30,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import java.time.LocalDate
 
 data class PhotobookPhoto(
@@ -96,23 +102,72 @@ fun PhotobookPage(context: Context, pageState: MutableState<PageStates>) {
             )
         )
     }
-    val getContent =
+
+    fun addImageToPhotoState(image: Bitmap) {
+        photoState.add(
+            0,
+            PhotobookPhoto(
+                "${currentDate.dayOfMonth} ${
+                    capitalize(currentDate.dayOfWeek.toString().take(3))
+                }", image
+            )
+        )
+    }
+
+
+    val getCameraContent =
         rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) {
             /* TODO: upload bitmap to server and update UI */
             if (it != null) {
-                photoState.add(
-                    0,
-                    PhotobookPhoto(
-                        "${currentDate.dayOfMonth} ${
-                            capitalize(currentDate.dayOfWeek.toString().take(3))
-                        }", it
-                    )
-                )
+                addImageToPhotoState(it)
             }
         }
+    val getAlbumContent = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
+        if (it != null) {
+            addImageToPhotoState(
+                ImageDecoder.decodeBitmap(
+                    ImageDecoder.createSource(
+                        context.contentResolver,
+                        it
+                    )
+                )
+            )
+        }
+    }
 
-    fun openCamera() {
-        getContent.launch(null)
+    val showDialog = remember { mutableStateOf(false) }
+
+    if (showDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showDialog.value = false },
+            confirmButton = {
+                Button(
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
+                    onClick = {
+                        showDialog.value = false
+                        getCameraContent.launch(null)
+                    }) {
+                    Text("Take picture")
+                }
+            },
+            dismissButton = {
+                Button(
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
+                    onClick = {
+                        showDialog.value = false
+                        getAlbumContent.launch("image/*")
+                    }) {
+                    Text("Select image")
+                }
+            },
+            text = {
+                Text(
+                    color = Color(0xFF4F4F4F),
+                    text = "Add today's photo by",
+                    fontSize = 16.sp
+                )
+            }
+        )
     }
 
     Column(
@@ -146,7 +201,9 @@ fun PhotobookPage(context: Context, pageState: MutableState<PageStates>) {
                         modifier = Modifier.align(Alignment.BottomEnd),
                         shape = CircleShape,
                         containerColor = Color.DarkGray,
-                        onClick = { openCamera() }) {
+                        onClick = {
+                            showDialog.value = true
+                        }) {
                         Icon(
                             Icons.Filled.Add, "Add photobook button"
                         )

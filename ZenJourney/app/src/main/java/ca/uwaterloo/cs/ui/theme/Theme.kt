@@ -25,6 +25,7 @@ fun ZenJourneyTheme(content: @Composable () -> Unit) {
         onPrimaryContainer = Color(0xFF99D5BF),
         secondaryContainer = Color(0xFF8FCAB5),
         onSecondaryContainer = Color(0xFFB3E2D0),
+        tertiaryContainer = Color(0xFF7BB6A1),
         onBackground = Color.White,
         onSurface = Color(0xFF99D5BF),
     )

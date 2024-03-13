@@ -19,19 +19,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import android.util.Patterns.EMAIL_ADDRESS
-import ca.uwaterloo.cs.api.ApiService
 import ca.uwaterloo.cs.api.UserApiService
 import kotlinx.coroutines.launch
 import user.UserRequest
 import androidx.compose.runtime.rememberCoroutineScope
-import io.ktor.client.call.body
-import io.ktor.client.statement.bodyAsText
-import io.ktor.client.statement.readText
 import io.ktor.http.HttpStatusCode
 import io.ktor.util.InternalAPI
-import java.time.LocalDate
-import org.mindrot.jbcrypt.BCrypt
-import kotlinx.coroutines.launch
 
 
 @Composable

@@ -22,7 +22,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 
-
 @Composable
 fun AffirmationPage(pageState: MutableState<PageStates>) {
     val affirmations = listOf(
@@ -124,11 +123,11 @@ fun AffirmationPage(pageState: MutableState<PageStates>) {
             Box(
                 modifier = Modifier
                     .size(400.dp, 80.dp)
-                    .background(color = Color(0xFF7BB6A1), shape = RoundedCornerShape(16.dp))
+                    .background(color = MaterialTheme.colorScheme.tertiaryContainer, shape = RoundedCornerShape(16.dp))
             ) {
                 Button(
                     onClick = { setCurrAffirmation(affirmations.random()) },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer),
                     modifier = Modifier.fillMaxSize()
                 ) {
                     Text(

@@ -25,7 +25,12 @@ import user.UserRequest
 import androidx.compose.runtime.rememberCoroutineScope
 import io.ktor.http.HttpStatusCode
 import io.ktor.util.InternalAPI
-
+import java.time.LocalDate
+import org.mindrot.jbcrypt.BCrypt
+import kotlinx.coroutines.launch
+import user.UserResponse
+import StatusResponse
+import io.ktor.client.call.body
 
 @Composable
 fun SignUpPage1(pageState: MutableState<PageStates>, nameState: MutableState<String>) {
@@ -176,10 +181,13 @@ fun SignUpLoginPage(
                             try {
                                 val response = UserApiService.createUser(userRequest)
                                 if (response.status == HttpStatusCode.BadRequest) {
-                                    // TODO: show error
+                                    val statusResponse: StatusResponse = response.body()
+                                    // TODO: assign statusResponse.body to something
                                 } else if (response.status == HttpStatusCode.Created) {
                                     // TODO: something with jwt
                                     pageState.value = PageStates.SIGNUP_STEP3
+                                    val userResponse: UserResponse = response.body()
+                                    pageState.value = PageStates.HOME
                                 }
                             } catch (e: Exception) {
                                 // handle in future

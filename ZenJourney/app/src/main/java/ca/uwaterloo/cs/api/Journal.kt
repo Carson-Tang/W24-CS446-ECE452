@@ -46,23 +46,18 @@ object JournalApiService {
         }
     }
 
-    suspend fun getJournalByDate(year: Int, month: Int, day: Int): JournalResponse? {
+    suspend fun getJournalByDate(year: Int, month: Int, day: Int): HttpResponse {
         return withContext(Dispatchers.IO) {
             val response: HttpResponse = HttpClientSetup.httpClient.get("$baseUrl") {
                 parameter("year", year)
                 parameter("month", month)
                 parameter("day", day)
             }
-
-            if (response.status == HttpStatusCode.OK) {
-                response.body()
-            } else {
-                null
-            }
+            response
         }
     }
 
-    suspend fun getJournalByDateAndUser(userId: String, year: Int, month: Int, day: Int): JournalResponse? {
+    suspend fun getJournalByDateAndUser(userId: String, year: Int, month: Int, day: Int): HttpResponse {
         return withContext(Dispatchers.IO) {
             val response: HttpResponse = HttpClientSetup.httpClient.get("$baseUrl/user") {
                 parameter("user", userId)
@@ -70,12 +65,7 @@ object JournalApiService {
                 parameter("month", month)
                 parameter("day", day)
             }
-
-            if (response.status == HttpStatusCode.OK) {
-                response.body()
-            } else {
-                null
-            }
+            response
         }
     }
 }

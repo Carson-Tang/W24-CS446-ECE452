@@ -25,7 +25,12 @@ import java.util.concurrent.TimeUnit
 import android.media.RingtoneManager
 import android.media.MediaPlayer
 import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.outlined.Timer
+import androidx.compose.material3.Button
+import androidx.compose.material3.Surface
+import androidx.compose.ui.window.Dialog
 
 @Composable
 fun formatTime(ms: Long): String {
@@ -51,8 +56,20 @@ fun TimerScreen(context: Context, pageState: MutableState<PageStates>, selectedT
         mutableStateOf(false)
     }
 
+    var isTimePickerVisible by remember { mutableStateOf(false) }
+    var selectedTime by remember { mutableStateOf(Triple(0, 0, 0)) }
+
     // TODO: I don't think the stop actually works
     var mediaPlayer: MediaPlayer? = null;
+
+    Column() {
+        if (isTimePickerVisible) {
+            TimePickerPopup { hour, minute, second ->
+                selectedTime = Triple(hour, minute, second)
+                isTimePickerVisible = false
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -109,7 +126,7 @@ fun TimerScreen(context: Context, pageState: MutableState<PageStates>, selectedT
                         .background(color = Color(0xFF7BB6A1), shape = RoundedCornerShape(6.dp))
                 ) {
                     IconButton(onClick = {
-                        // TODO: popup to pick time
+                        isTimePickerVisible = true
                     }) {
                         Icon(
                             imageVector = Icons.Outlined.Timer,
@@ -187,6 +204,66 @@ fun TimerScreen(context: Context, pageState: MutableState<PageStates>, selectedT
             }
             delay(1000)
             timeMs -= 1000
+        }
+    }
+}
+
+
+@Composable
+fun TimePickerPopup(onTimeSelected: (hour: Int, minute: Int, second: Int) -> Unit) {
+    var hour by remember { mutableStateOf(0) }
+    var minute by remember { mutableStateOf(0) }
+    var second by remember { mutableStateOf(0) }
+
+    Dialog(onDismissRequest = { /* Dismiss the dialog */ }) {
+        Surface(
+            modifier = Modifier.width(280.dp),
+            shape = MaterialTheme.shapes.medium,
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = "Pick a time", style = MaterialTheme.typography.headlineMedium)
+                Spacer(modifier = Modifier.height(16.dp))
+                NumberPicker(value = hour, onValueChange = { hour = it }, label = "Hour")
+                NumberPicker(value = minute, onValueChange = { minute = it }, label = "Minute")
+                NumberPicker(value = second, onValueChange = { second = it }, label = "Second")
+
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = {
+                        onTimeSelected(hour, minute, second)
+                    }
+                ) {
+                    Text("Confirm")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun NumberPicker(value: Int, onValueChange: (Int) -> Unit, label: String) {
+    Column(
+        modifier = Modifier.padding(vertical = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = label,
+            color = Color.Black,
+            )
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            IconButton(onClick = { onValueChange(value - 1) }) {
+                Icon(Icons.Default.Remove, contentDescription = "Decrease")
+            }
+            Text(text = value.toString())
+            IconButton(onClick = { onValueChange(value + 1) }) {
+                Icon(Icons.Default.Add, contentDescription = "Increase")
+            }
         }
     }
 }

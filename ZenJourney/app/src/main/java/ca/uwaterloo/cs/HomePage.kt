@@ -40,9 +40,22 @@ import org.junit.Test.None
 import journal.JournalResponse
 
 
+fun generateFeelingStatement(moods: List<String>): String {
+    val moodMap = moodEmojisWithLabels.map { it.first to it.second.lowercase() }.toMap()
+    val feelings = moods.mapNotNull { moodMap[it] }
+
+    // TODO: maybe make sentence ending ! if happy feeling and . if sad feeling
+
+    val feelingString = when {
+        feelings.isEmpty() -> "No specific feelings"
+        feelings.size == 1 -> "I'm feeling ${feelings.first()}."
+        else -> "I'm feeling ${feelings.joinToString(" and ")}."
+    }
+    return feelingString
+}
+
 @Composable
 fun WithInfo(today: java.time.LocalDate, todayJournalData: JournalResponse) {
-    // TODO: actually use this todayJournalData
     Column(
         modifier = Modifier
             .fillMaxWidth(),
@@ -56,6 +69,7 @@ fun WithInfo(today: java.time.LocalDate, todayJournalData: JournalResponse) {
         )
     }
 
+    // TODO: make this expand with the text
     Column(
         modifier = Modifier
             .padding(top = 50.dp, start = 30.dp, end = 30.dp)
@@ -69,7 +83,9 @@ fun WithInfo(today: java.time.LocalDate, todayJournalData: JournalResponse) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "\uD83D\uDE04",
+                // assumes len(todayJournalData.moods) >= 1, we only show
+                // WithInfo if moods is not empty
+                text = todayJournalData.moods[0],
                 style = TextStyle(
                     fontSize = 40.sp
                 )
@@ -85,7 +101,7 @@ fun WithInfo(today: java.time.LocalDate, todayJournalData: JournalResponse) {
                     )
                 )
                 Text(
-                    text = "I'm feeling happy!",
+                    text = generateFeelingStatement(todayJournalData.moods),
                     style = TextStyle(
                         color = Color.Black,
                         fontWeight = FontWeight.Bold,
@@ -149,7 +165,7 @@ fun HomePage(pageState: MutableState<PageStates>) {
         Column(
             modifier = Modifier.padding(top = 128.dp)
         ) {
-            if (todayJournalData.id != "") {
+            if (todayJournalData.moods.isNotEmpty()) {
                 WithInfo(today, todayJournalData)
             } else {
                 WithoutInfo()

@@ -83,19 +83,6 @@ fun JournalPage1(pageState: MutableState<PageStates>, selectedDate: MutableState
 
 @Composable
 fun JournalPage2(pageState: MutableState<PageStates>, selectedDate: MutableState<LocalDate>, selectedMoods: MutableState<List<String>>) {
-    val moodEmojisWithLabels = listOf(
-        "\uD83D\uDE0A" to "Happy",
-        "\uD83D\uDE22" to "Sad",
-        "\uD83D\uDE20" to "Angry",
-        "\uD83D\uDE31" to "Shocked",
-        "\uD83D\uDE1E" to "Disappointed",
-        "\uD83D\uDE0D" to "Loved",
-        "\uD83E\uDD2F" to "Mind Blown",
-        "\uD83D\uDE0E" to "Cool",
-        "\uD83E\uDD73" to "Party"
-    )
-
-
     Column(
         Modifier
             .background(color = MaterialTheme.colorScheme.background)
@@ -199,18 +186,6 @@ fun JournalPage3(pageState: MutableState<PageStates>,
 ) {
     val charLimit = 2000
     val coroutineScope = rememberCoroutineScope()
-
-    val emojiToWordMap = mapOf(
-        "\uD83D\uDE0A" to "Happy",
-        "\uD83D\uDE22" to "Sad",
-        "\uD83D\uDE20" to "Angry",
-        "\uD83D\uDE31" to "Shocked",
-        "\uD83D\uDE1E" to "Disappointed",
-        "\uD83D\uDE0D" to "Loved",
-        "\uD83E\uDD2F" to "Mind Blown",
-        "\uD83D\uDE0E" to "Cool",
-        "\uD83E\uDD73" to "Party"
-    )
 
     Column(
         Modifier
@@ -394,18 +369,6 @@ fun PastJournalPage(pageState: MutableState<PageStates>,
             pastJournalEntry.value = ""
         }
     }
-
-    val wordToEmojiMap = mapOf(
-        "Happy" to "\uD83D\uDE0A",
-        "Sad" to "\uD83D\uDE22",
-        "Angry" to "\uD83D\uDE20",
-        "Shocked" to "\uD83D\uDE31",
-        "Disappointed" to "\uD83D\uDE1E",
-        "Loved" to "\uD83D\uDE0D",
-        "Mind Blown" to "\uD83E\uDD2F",
-        "Cool" to "\uD83D\uDE0E",
-        "Party" to "\uD83E\uDD73"
-    )
 
     Column(
         Modifier

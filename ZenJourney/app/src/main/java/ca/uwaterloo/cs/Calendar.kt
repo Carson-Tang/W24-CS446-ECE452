@@ -1,5 +1,6 @@
 package ca.uwaterloo.cs
 
+import StatusResponse
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -40,6 +41,9 @@ import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.runtime.MutableState
 import kotlinx.coroutines.launch
 import ca.uwaterloo.cs.api.JournalApiService
+import io.ktor.client.call.body
+import io.ktor.http.HttpStatusCode
+import journal.JournalResponse
 import java.time.LocalDate
 
 
@@ -130,18 +134,22 @@ fun Day(day: CalendarDay, pageState: MutableState<PageStates>,
                 selectedDate.value = day.date
                 coroutineScope.launch {
                     try {
-                        val journalResponse = JournalApiService.getJournalByDateAndUser(
+                        val response = JournalApiService.getJournalByDateAndUser(
                             userId = "65e5664b99258c800b3ab381", // Example user ID
                             year = day.date.year,
                             month = day.date.monthValue,
                             day = day.date.dayOfMonth
                         )
-                        if (journalResponse != null) {
+                        if (response.status == HttpStatusCode.OK) {
+                            val journalResponse: JournalResponse = response.body()
                             pastJournalEntry.value = journalResponse.content
                             pastSelectedMoods.value = journalResponse.moods
                             pastDate.value = LocalDate.of(journalResponse.year, journalResponse.month, journalResponse.day)
                             pageState.value = PageStates.PAST_JOURNAL
-                        } else {
+                        } else if (response.status == HttpStatusCode.BadRequest || response.status == HttpStatusCode.NotFound) {
+                            val statusResponse: StatusResponse = response.body()
+                            // TODO something with response.body()
+
                             pageState.value = PageStates.JOURNAL_STEP2
                         }
                     } catch (e: Exception) {

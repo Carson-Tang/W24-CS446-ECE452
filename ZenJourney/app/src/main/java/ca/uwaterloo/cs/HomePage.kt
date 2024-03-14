@@ -1,5 +1,6 @@
 package ca.uwaterloo.cs
 
+import StatusResponse
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,6 +34,7 @@ import java.time.format.DateTimeFormatter
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import ca.uwaterloo.cs.api.JournalApiService
+import io.ktor.client.call.body
 import io.ktor.client.statement.request
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.launch
@@ -145,9 +147,13 @@ fun HomePage(pageState: MutableState<PageStates>) {
         // This block will be executed when the composable is first displayed
         coroutineScope.launch {
             try {
-                val journalResponse: JournalResponse? = JournalApiService.getJournalByDate(today.year, today.monthValue, today.dayOfMonth)
-                if (journalResponse != null) {
-                    todayJournalData = journalResponse
+                val response = JournalApiService.getJournalByDate(today.year, today.monthValue, today.dayOfMonth)
+                if (response.status == HttpStatusCode.OK) {
+                    todayJournalData = response.body()
+                } else {
+                    // TODO: error, but tbh prob fine to just ignore
+                    val statusResponse: StatusResponse = response.body()
+                    // statusResponse.body
                 }
             } catch (e: Exception) {
                 // TODO: error, but tbh prob fine to just ignore

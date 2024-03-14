@@ -1,5 +1,6 @@
 package ca.uwaterloo.cs
 
+import StatusResponse
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -37,7 +38,10 @@ import androidx.compose.ui.unit.sp
 import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.launch
 import ca.uwaterloo.cs.api.JournalApiService
+import io.ktor.client.call.body
+import io.ktor.http.HttpStatusCode
 import journal.JournalRequest
+import journal.JournalResponse
 import java.time.LocalDate
 
 @Composable
@@ -311,8 +315,8 @@ fun JournalPage3(pageState: MutableState<PageStates>,
                                 try {
                                     // we can change this flow in the future, but this current creation doesnt return
                                     // the actual journal response, so we just query it again
-                                    val response = JournalApiService.createJournal(journalRequest)
-                                    val journalResponse = JournalApiService.getJournalByDateAndUser(
+                                    val response2 = JournalApiService.createJournal(journalRequest)
+                                    val response = JournalApiService.getJournalByDateAndUser(
                                         userId = "65e5664b99258c800b3ab381", // Example user ID
                                         year = selectedDate.value.year,
                                         month = selectedDate.value.monthValue,
@@ -321,13 +325,16 @@ fun JournalPage3(pageState: MutableState<PageStates>,
                                     journalEntry.value = ""
                                     selectedMoods.value = listOf("")
 
-                                    if (journalResponse != null) {
+                                    if (response.status == HttpStatusCode.OK) {
+                                        val journalResponse: JournalResponse = response.body()
                                         pastJournalEntry.value = journalResponse.content
                                         pastSelectedMoods.value = journalResponse.moods
                                         pastDate.value = LocalDate.of(journalResponse.year, journalResponse.month, journalResponse.day)
                                         pageState.value = PageStates.PAST_JOURNAL
-                                    } else {
-                                        // failure case, not handled for now
+                                    } else if (response.status == HttpStatusCode.BadRequest || response.status == HttpStatusCode.NotFound) {
+                                        val statusResponse: StatusResponse = response.body()
+                                        // TODO something with response.body()
+
                                         pageState.value = PageStates.HOME
                                     }
                                 } catch (e: Exception) {

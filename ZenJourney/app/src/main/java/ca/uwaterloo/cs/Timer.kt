@@ -1,5 +1,6 @@
 package ca.uwaterloo.cs
 
+import android.content.Context
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -21,6 +22,10 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.*
 import java.util.concurrent.TimeUnit
+import android.media.RingtoneManager
+import android.media.MediaPlayer
+import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.outlined.Timer
 
 @Composable
 fun formatTime(ms: Long): String {
@@ -32,7 +37,7 @@ fun formatTime(ms: Long): String {
 }
 
 @Composable
-fun TimerScreen() {
+fun TimerScreen(context: Context, pageState: MutableState<PageStates>, selectedTune: MutableState<Int>) {
     // default timer value
     var defaultTimeMs by remember { // in ms
         mutableStateOf(60000L)
@@ -44,6 +49,24 @@ fun TimerScreen() {
     }
     var isRunning by remember {
         mutableStateOf(false)
+    }
+
+    // TODO: I don't think the stop actually works
+    var mediaPlayer: MediaPlayer? = null;
+
+    Column(
+        modifier = Modifier
+            .padding(bottom = 20.dp)
+    ) {
+        Row() {
+            Text(
+                text = "Add some tunes",
+                color = Color(0xFF649E8A),
+                style = MaterialTheme.typography.headlineSmall,
+                modifier = Modifier
+                    .clickable(onClick = {pageState.value = PageStates.MEDITATE_PICK_TUNE})
+            )
+        }
     }
 
     Column(
@@ -81,7 +104,21 @@ fun TimerScreen() {
                 verticalAlignment = Alignment.Bottom,
                 horizontalArrangement = Arrangement.Center,
             ) {
-
+                Box(
+                    modifier = Modifier
+                        .background(color = Color(0xFF7BB6A1), shape = RoundedCornerShape(6.dp))
+                ) {
+                    IconButton(onClick = {
+                        // TODO: popup to pick time
+                    }) {
+                        Icon(
+                            imageVector = Icons.Outlined.Timer,
+                            contentDescription = null,
+                            tint = Color(0xFF8FCAB5)
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.width(24.dp))
                 Box(
                     modifier = Modifier
                         .background(color = Color(0xFF7BB6A1), shape = RoundedCornerShape(6.dp))
@@ -89,6 +126,10 @@ fun TimerScreen() {
                     IconButton(onClick = {
                         timeMs = defaultTimeMs
                         isRunning = false
+
+                        mediaPlayer?.stop()
+                        mediaPlayer?.release()
+                        mediaPlayer = null
                     }) {
                         Icon(
                             imageVector = Icons.Outlined.Refresh,
@@ -104,6 +145,8 @@ fun TimerScreen() {
                 ) {
                     IconButton(onClick = {
                         isRunning = true
+                        mediaPlayer = MediaPlayer.create(context, selectedTune.value)
+                        mediaPlayer?.start()
                     }) {
                         Icon(
                             imageVector = Icons.Outlined.PlayArrow,
@@ -119,6 +162,9 @@ fun TimerScreen() {
                 ) {
                     IconButton(onClick = {
                         isRunning = false
+                        mediaPlayer?.stop()
+                        mediaPlayer?.release()
+                        mediaPlayer = null
                     }) {
                         Icon(
                             imageVector = Icons.Outlined.Pause,
@@ -130,10 +176,14 @@ fun TimerScreen() {
             }
         }
     }
+
     LaunchedEffect(isRunning) {
         while (isRunning) {
             if (timeMs == 0L) {
                 isRunning = false
+                mediaPlayer?.stop()
+                mediaPlayer?.release()
+                mediaPlayer = null
             }
             delay(1000)
             timeMs -= 1000

@@ -8,9 +8,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import ca.uwaterloo.cs.ui.theme.ZenJourneyTheme
 
@@ -42,6 +46,10 @@ fun MainContent(context: Context) {
     val pastSelectedMoods = remember { mutableStateOf(listOf<String>()) }
     val pastDate = remember { mutableStateOf(LocalDate.now()) }
 
+    val selectedTune = remember {
+        mutableStateOf(R.raw.once_in_paris)
+    }
+
     Scaffold(
         bottomBar = {
             if (pageState.value !in arrayOf(
@@ -70,7 +78,8 @@ fun MainContent(context: Context) {
                 journalEntry,
                 pastSelectedMoods,
                 pastJournalEntry,
-                pastDate
+                pastDate,
+                selectedTune,
             )
         }
     }
@@ -86,7 +95,8 @@ fun PageContent(
     journalEntry: MutableState<String>,
     pastSelectedMoods: MutableState<List<String>>,
     pastJournalEntry: MutableState<String>,
-    pastDate: MutableState<LocalDate>
+    pastDate: MutableState<LocalDate>,
+    selectedTune: MutableState<Int>
 ) {
     when (pageState.value) {
         PageStates.WELCOME -> WelcomePage(pageState)
@@ -99,7 +109,8 @@ fun PageContent(
         PageStates.SIGNUP_AFFIRMATION -> SignUpAffirmation(pageState)
         PageStates.SIGNUP_PIN -> SignUpPIN(pageState)
         PageStates.HOME -> HomePage(pageState)
-        PageStates.MEDITATE -> MeditatePage(pageState)
+        PageStates.MEDITATE -> MeditatePage(context, pageState, selectedTune)
+        PageStates.MEDITATE_PICK_TUNE -> MeditatePickTune(pageState, selectedTune)
         PageStates.AFFIRMATION -> AffirmationPage(pageState)
         PageStates.PHOTOBOOK -> PhotobookPage(context, pageState)
         PageStates.JOURNAL_STEP1 -> JournalPage1(pageState, selectedDate, pastSelectedMoods, pastJournalEntry, pastDate)

@@ -156,13 +156,13 @@ fun CustomizationActionButtons(
     }
     if (pageState.value != PageStates.SIGNUP_CLOUD_MORE) {
         TextButton(onClick = {
-            pageState.value = nextPageState
             if (pageState.value == PageStates.SIGNUP_CLOUD) {
                 useCloud.value = false
             }
             else if (pageState.value == PageStates.SIGNUP_AFFIRMATION) {
                 useJournalForAffirmations.value = false
             }
+            pageState.value = nextPageState
         }) {
             Text(
                 text = if (pageState.value == PageStates.SIGNUP_CLOUD) "No, continue without"

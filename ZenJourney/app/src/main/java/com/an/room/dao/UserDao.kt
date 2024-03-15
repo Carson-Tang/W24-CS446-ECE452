@@ -14,9 +14,11 @@ interface UserDao {
     @Query("SELECT * FROM users WHERE id IN (:userIds)")
     fun loadAllByIds(userIds: IntArray): List<User>
 
-    @Query("SELECT * FROM users WHERE firstName LIKE :first AND " +
-            "lastName LIKE :last LIMIT 1")
-    fun findByName(first: String, last: String): User
+    @Query("SELECT * FROM users WHERE firstName LIKE :first LIMIT 1")
+    fun findByName(first: String): User
+
+    @Query("SELECT * FROM users WHERE email = :email LIMIT 1")
+    fun findByEmail(email: String): User
 
     @Insert
     fun insertAll(vararg users: User)

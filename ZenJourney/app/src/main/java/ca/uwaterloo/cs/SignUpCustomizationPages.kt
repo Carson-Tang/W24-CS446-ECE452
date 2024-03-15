@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.material3.TextButton
 
 @Composable
-fun SignUpCloud(pageState: MutableState<PageStates>) {
+fun SignUpCloud(pageState: MutableState<PageStates>, useCloud: MutableState<Boolean>, useJournalForAffirmations: MutableState<Boolean>) {
     Column(
         Modifier
             .background(MaterialTheme.colorScheme.background)
@@ -48,12 +48,12 @@ fun SignUpCloud(pageState: MutableState<PageStates>) {
             onClick = { pageState.value = PageStates.SIGNUP_CLOUD_MORE }) {
             Text("Learn more", style = MaterialTheme.typography.labelSmall)
         }
-        CustomizationActionButtons(pageState, PageStates.SIGNUP_AFFIRMATION)
+        CustomizationActionButtons(pageState, PageStates.SIGNUP_AFFIRMATION, useCloud, useJournalForAffirmations)
     }
 }
 
 @Composable
-fun SignUpCloudLearnMore(pageState: MutableState<PageStates>) {
+fun SignUpCloudLearnMore(pageState: MutableState<PageStates>, useCloud: MutableState<Boolean>, useJournalForAffirmations: MutableState<Boolean>) {
     Column(
         Modifier
             .background(MaterialTheme.colorScheme.background)
@@ -72,12 +72,12 @@ fun SignUpCloudLearnMore(pageState: MutableState<PageStates>) {
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(bottom = 144.dp),
         )
-        CustomizationActionButtons(pageState, PageStates.SIGNUP_CLOUD)
+        CustomizationActionButtons(pageState, PageStates.SIGNUP_CLOUD, useCloud, useJournalForAffirmations)
     }
 }
 
 @Composable
-fun SignUpAffirmation(pageState: MutableState<PageStates>) {
+fun SignUpAffirmation(pageState: MutableState<PageStates>, useCloud: MutableState<Boolean>, useJournalForAffirmations: MutableState<Boolean>) {
     Column(
         Modifier
             .background(MaterialTheme.colorScheme.background)
@@ -96,12 +96,12 @@ fun SignUpAffirmation(pageState: MutableState<PageStates>) {
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(bottom = 160.dp),
         )
-        CustomizationActionButtons(pageState, PageStates.SIGNUP_PIN)
+        CustomizationActionButtons(pageState, PageStates.SIGNUP_PIN, useCloud, useJournalForAffirmations)
     }
 }
 
 @Composable
-fun SignUpPIN(pageState: MutableState<PageStates>) {
+fun SignUpPIN(pageState: MutableState<PageStates>, useCloud: MutableState<Boolean>, useJournalForAffirmations: MutableState<Boolean>) {
     Column(
         Modifier
             .background(MaterialTheme.colorScheme.background)
@@ -115,19 +115,33 @@ fun SignUpPIN(pageState: MutableState<PageStates>) {
             modifier = Modifier.padding(top = 104.dp, bottom = 40.dp),
         )
         /*TODO: add PIN input*/
-        CustomizationActionButtons(pageState, PageStates.HOME)
+        CustomizationActionButtons(pageState, PageStates.HOME, useCloud, useJournalForAffirmations)
     }
 }
 
 @Composable
 fun CustomizationActionButtons(
     pageState: MutableState<PageStates>,
-    nextPageState: PageStates
+    nextPageState: PageStates,
+    useCloud: MutableState<Boolean>,
+    useJournalForAffirmations: MutableState<Boolean>
 ) {
     val mainActionText =
-        if (pageState.value == PageStates.SIGNUP_PIN) "Continue" else if (pageState.value == PageStates.SIGNUP_CLOUD_MORE) "Go back" else "Yes"
+        if (pageState.value == PageStates.SIGNUP_PIN) "Continue"
+        else if (pageState.value == PageStates.SIGNUP_CLOUD_MORE) "Go back"
+        else if (pageState.value == PageStates.SIGNUP_AFFIRMATION ||
+                 pageState.value == PageStates.SIGNUP_CLOUD) "Yes"
+        else ""
     ElevatedButton(
-        onClick = { pageState.value = nextPageState },
+        onClick = {
+            if (pageState.value == PageStates.SIGNUP_CLOUD) {
+                useCloud.value = true
+            }
+            else if (pageState.value == PageStates.SIGNUP_AFFIRMATION) {
+                useJournalForAffirmations.value = true
+            }
+            pageState.value = nextPageState
+        },
         modifier = Modifier
             .padding(bottom = 16.dp)
             .size(width = 184.dp, height = 56.dp),
@@ -141,9 +155,19 @@ fun CustomizationActionButtons(
         )
     }
     if (pageState.value != PageStates.SIGNUP_CLOUD_MORE) {
-        TextButton(onClick = { pageState.value = nextPageState }) {
+        TextButton(onClick = {
+            if (pageState.value == PageStates.SIGNUP_CLOUD) {
+                useCloud.value = false
+            }
+            else if (pageState.value == PageStates.SIGNUP_AFFIRMATION) {
+                useJournalForAffirmations.value = false
+            }
+            pageState.value = nextPageState
+        }) {
             Text(
-                text = if (pageState.value == PageStates.SIGNUP_CLOUD) "No, continue without" else "Not now, continue without",
+                text = if (pageState.value == PageStates.SIGNUP_CLOUD) "No, continue without"
+                        else if (pageState.value == PageStates.SIGNUP_AFFIRMATION) "Not now, continue without"
+                        else "",
                 style = MaterialTheme.typography.headlineSmall
             )
         }

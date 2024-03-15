@@ -250,7 +250,6 @@ fun SignUpLoginPage(
                                 userRes = userDao.findByEmail(emailState.value.trimEnd())
                             }
                             job.join()
-                            println("userRes" + (userRes?.password))
                             if (userRes != null && BCrypt.checkpw(passwordState.value, userRes!!.password)) {
                                 // OK
                                 pageState.value = PageStates.HOME

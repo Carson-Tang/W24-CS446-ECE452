@@ -50,6 +50,9 @@ fun MainContent(context: Context) {
         mutableStateOf(R.raw.once_in_paris)
     }
 
+    val useCloud = remember { mutableStateOf(false) }
+    val useJournalForAffirmations = remember { mutableStateOf(false) }
+
     Scaffold(
         bottomBar = {
             if (pageState.value !in arrayOf(
@@ -80,6 +83,8 @@ fun MainContent(context: Context) {
                 pastJournalEntry,
                 pastDate,
                 selectedTune,
+                useCloud,
+                useJournalForAffirmations
             )
         }
     }
@@ -96,18 +101,20 @@ fun PageContent(
     pastSelectedMoods: MutableState<List<String>>,
     pastJournalEntry: MutableState<String>,
     pastDate: MutableState<LocalDate>,
-    selectedTune: MutableState<Int>
+    selectedTune: MutableState<Int>,
+    useCloud: MutableState<Boolean>,
+    useJournalForAffirmations: MutableState<Boolean>,
 ) {
     when (pageState.value) {
         PageStates.WELCOME -> WelcomePage(pageState)
-        PageStates.LOGIN -> LoginPage(pageState, nameState)
+        PageStates.LOGIN -> LoginPage(context, pageState, nameState, useCloud, useJournalForAffirmations)
         PageStates.SIGNUP_STEP1 -> SignUpPage1(pageState, nameState)
-        PageStates.SIGNUP_STEP2 -> SignUpPage2(pageState, nameState)
+        PageStates.SIGNUP_STEP2 -> SignUpPage2(context, pageState, nameState, useCloud, useJournalForAffirmations)
         PageStates.SIGNUP_STEP3 -> SignUpPage3(pageState, nameState)
-        PageStates.SIGNUP_CLOUD -> SignUpCloud(pageState)
-        PageStates.SIGNUP_CLOUD_MORE -> SignUpCloudLearnMore(pageState)
-        PageStates.SIGNUP_AFFIRMATION -> SignUpAffirmation(pageState)
-        PageStates.SIGNUP_PIN -> SignUpPIN(pageState)
+        PageStates.SIGNUP_CLOUD -> SignUpCloud(pageState, useCloud, useJournalForAffirmations)
+        PageStates.SIGNUP_CLOUD_MORE -> SignUpCloudLearnMore(pageState, useCloud, useJournalForAffirmations)
+        PageStates.SIGNUP_AFFIRMATION -> SignUpAffirmation(pageState, useCloud, useJournalForAffirmations)
+        PageStates.SIGNUP_PIN -> SignUpPIN(pageState, useCloud, useJournalForAffirmations)
         PageStates.HOME -> HomePage(pageState)
         PageStates.MEDITATE -> MeditatePage(context, pageState, selectedTune)
         PageStates.MEDITATE_PICK_TUNE -> MeditatePickTune(pageState, selectedTune)

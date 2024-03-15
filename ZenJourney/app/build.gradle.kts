@@ -38,8 +38,8 @@ dependencies {
   implementation(project(":shared"))
 
   implementation("androidx.activity:activity-compose:1.8.2")
-  implementation("androidx.compose.ui:ui:1.6.2")
-  implementation("androidx.compose.ui:ui-tooling:1.6.2")
+  implementation("androidx.compose.ui:ui:1.6.3")
+  implementation("androidx.compose.ui:ui-tooling:1.6.3")
   implementation("io.coil-kt:coil-compose:2.1.0")                            // For loading images.
   implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.7")                // For making HTTP calls.
   implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")   // For serializing/deserializing JSON.
@@ -47,8 +47,8 @@ dependencies {
   implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
   implementation("androidx.test.ext:junit-ktx:1.1.5")
 
-  implementation("androidx.compose.material3:material3:1.2.0")
-  implementation("androidx.compose.material3:material3-android:1.2.0")
+  implementation("androidx.compose.material3:material3:1.2.1")
+  implementation("androidx.compose.material3:material3-android:1.2.1")
 
   testImplementation("junit:junit:4.13.2")
   testImplementation("androidx.test.ext:junit:1.1.5")
@@ -103,7 +103,7 @@ dependencies {
   implementation ("com.kizitonwose.calendar:compose:2.5.0")
 
   // Used for adding material 3 icons
-  implementation("androidx.compose.material:material-icons-extended:1.6.2")
+  implementation("androidx.compose.material:material-icons-extended:1.6.3")
 
   implementation("org.mindrot:jbcrypt:0.4")
 }

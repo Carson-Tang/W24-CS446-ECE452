@@ -139,7 +139,7 @@ fun CustomizationActionButtons(
                 useCloud.value = true
             }
             else if (pageState.value == PageStates.SIGNUP_AFFIRMATION) {
-                useJournalForAffirmations.value = false
+                useJournalForAffirmations.value = true
             }
         },
         modifier = Modifier

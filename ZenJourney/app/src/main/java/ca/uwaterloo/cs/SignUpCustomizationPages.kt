@@ -134,13 +134,13 @@ fun CustomizationActionButtons(
         else ""
     ElevatedButton(
         onClick = {
-            pageState.value = nextPageState
             if (pageState.value == PageStates.SIGNUP_CLOUD) {
                 useCloud.value = true
             }
             else if (pageState.value == PageStates.SIGNUP_AFFIRMATION) {
                 useJournalForAffirmations.value = true
             }
+            pageState.value = nextPageState
         },
         modifier = Modifier
             .padding(bottom = 16.dp)

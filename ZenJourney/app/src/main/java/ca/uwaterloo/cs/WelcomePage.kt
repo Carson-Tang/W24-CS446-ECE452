@@ -48,7 +48,7 @@ fun WelcomePage(pageState: MutableState<PageStates>) {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             ElevatedButton(
-                onClick = { pageState.value = PageStates.SIGNUP_STEP1 },
+                onClick = { pageState.value = PageStates.SIGNUP_CLOUD },
                 modifier = Modifier.size(width = 184.dp, height = 56.dp),
                 colors = ButtonDefaults.elevatedButtonColors(MaterialTheme.colorScheme.primaryContainer),
                 elevation = ButtonDefaults.elevatedButtonElevation(defaultElevation = 4.dp)

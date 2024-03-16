@@ -110,7 +110,7 @@ fun SignUpPage3(pageState: MutableState<PageStates>, nameState: MutableState<Str
             modifier = Modifier.padding(bottom = 224.dp),
         )
         ElevatedButton(
-            onClick = { pageState.value = PageStates.SIGNUP_CLOUD },
+            onClick = { pageState.value = PageStates.SIGNUP_AFFIRMATION },
             modifier = Modifier.size(width = 184.dp, height = 56.dp),
             colors = ButtonDefaults.elevatedButtonColors(MaterialTheme.colorScheme.primaryContainer),
             elevation = ButtonDefaults.elevatedButtonElevation(defaultElevation = 4.dp)

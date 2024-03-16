@@ -15,7 +15,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun TextFieldComponent(valueState: MutableState<String>, placeholderText: String, errorState: MutableState<InputErrorStates>, isPassword: Boolean = false) {
+fun TextFieldComponent(
+    valueState: MutableState<String>,
+    placeholderText: String,
+    errorState: MutableState<InputErrorStates>,
+    isPassword: Boolean = false,
+) {
     TextField(
         value = valueState.value,
         onValueChange = { valueState.value = it },

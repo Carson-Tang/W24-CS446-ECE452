@@ -52,7 +52,7 @@ fun MainContent(context: Context) {
 
     val useCloud = remember { mutableStateOf(false) }
     val useJournalForAffirmations = remember { mutableStateOf(false) }
-
+    val usePIN = remember { mutableStateOf(false) }
     Scaffold(
         bottomBar = {
             if (pageState.value !in arrayOf(
@@ -84,7 +84,8 @@ fun MainContent(context: Context) {
                 pastDate,
                 selectedTune,
                 useCloud,
-                useJournalForAffirmations
+                useJournalForAffirmations,
+                usePIN
             )
         }
     }
@@ -104,6 +105,7 @@ fun PageContent(
     selectedTune: MutableState<Int>,
     useCloud: MutableState<Boolean>,
     useJournalForAffirmations: MutableState<Boolean>,
+    usePIN: MutableState<Boolean>,
 ) {
     when (pageState.value) {
         PageStates.WELCOME -> WelcomePage(pageState)
@@ -111,10 +113,10 @@ fun PageContent(
         PageStates.SIGNUP_STEP1 -> SignUpPage1(pageState, nameState)
         PageStates.SIGNUP_STEP2 -> SignUpPage2(context, pageState, nameState, useCloud, useJournalForAffirmations)
         PageStates.SIGNUP_STEP3 -> SignUpPage3(pageState, nameState)
-        PageStates.SIGNUP_CLOUD -> SignUpCloud(pageState, useCloud, useJournalForAffirmations)
-        PageStates.SIGNUP_CLOUD_MORE -> SignUpCloudLearnMore(pageState, useCloud, useJournalForAffirmations)
-        PageStates.SIGNUP_AFFIRMATION -> SignUpAffirmation(pageState, useCloud, useJournalForAffirmations)
-        PageStates.SIGNUP_PIN -> SignUpPIN(pageState, useCloud, useJournalForAffirmations)
+        PageStates.SIGNUP_CLOUD -> SignUpCloud(pageState, useCloud)
+        PageStates.SIGNUP_CLOUD_MORE -> SignUpCloudLearnMore(pageState, useCloud)
+        PageStates.SIGNUP_AFFIRMATION -> SignUpAffirmation(pageState, useJournalForAffirmations)
+        PageStates.SIGNUP_PIN -> SignUpPIN(pageState, usePIN)
         PageStates.HOME -> HomePage(pageState)
         PageStates.MEDITATE -> MeditatePage(context, pageState, selectedTune)
         PageStates.MEDITATE_PICK_TUNE -> MeditatePickTune(pageState, selectedTune)

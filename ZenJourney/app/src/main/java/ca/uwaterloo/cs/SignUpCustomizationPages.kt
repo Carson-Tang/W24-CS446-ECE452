@@ -3,8 +3,10 @@ package ca.uwaterloo.cs
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.MaterialTheme
@@ -16,9 +18,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 
 @Composable
-fun SignUpCloud(pageState: MutableState<PageStates>, useCloud: MutableState<Boolean>, useJournalForAffirmations: MutableState<Boolean>) {
+fun SignUpCloud(
+    pageState: MutableState<PageStates>,
+    useCloud: MutableState<Boolean>,
+) {
     Column(
         Modifier
             .background(MaterialTheme.colorScheme.background)
@@ -48,12 +59,19 @@ fun SignUpCloud(pageState: MutableState<PageStates>, useCloud: MutableState<Bool
             onClick = { pageState.value = PageStates.SIGNUP_CLOUD_MORE }) {
             Text("Learn more", style = MaterialTheme.typography.labelSmall)
         }
-        CustomizationActionButtons(pageState, PageStates.SIGNUP_AFFIRMATION, useCloud, useJournalForAffirmations)
+        CustomizationActionButtons(
+            pageState,
+            PageStates.SIGNUP_STEP1,
+            useCloud
+        )
     }
 }
 
 @Composable
-fun SignUpCloudLearnMore(pageState: MutableState<PageStates>, useCloud: MutableState<Boolean>, useJournalForAffirmations: MutableState<Boolean>) {
+fun SignUpCloudLearnMore(
+    pageState: MutableState<PageStates>,
+    useCloud: MutableState<Boolean>,
+) {
     Column(
         Modifier
             .background(MaterialTheme.colorScheme.background)
@@ -72,12 +90,19 @@ fun SignUpCloudLearnMore(pageState: MutableState<PageStates>, useCloud: MutableS
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(bottom = 144.dp),
         )
-        CustomizationActionButtons(pageState, PageStates.SIGNUP_CLOUD, useCloud, useJournalForAffirmations)
+        CustomizationActionButtons(
+            pageState,
+            PageStates.SIGNUP_CLOUD,
+            useCloud
+        )
     }
 }
 
 @Composable
-fun SignUpAffirmation(pageState: MutableState<PageStates>, useCloud: MutableState<Boolean>, useJournalForAffirmations: MutableState<Boolean>) {
+fun SignUpAffirmation(
+    pageState: MutableState<PageStates>,
+    useJournalForAffirmations: MutableState<Boolean>,
+) {
     Column(
         Modifier
             .background(MaterialTheme.colorScheme.background)
@@ -96,12 +121,21 @@ fun SignUpAffirmation(pageState: MutableState<PageStates>, useCloud: MutableStat
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(bottom = 160.dp),
         )
-        CustomizationActionButtons(pageState, PageStates.SIGNUP_PIN, useCloud, useJournalForAffirmations)
+        CustomizationActionButtons(
+            pageState,
+            PageStates.SIGNUP_PIN,
+            useJournalForAffirmations
+        )
     }
 }
 
 @Composable
-fun SignUpPIN(pageState: MutableState<PageStates>, useCloud: MutableState<Boolean>, useJournalForAffirmations: MutableState<Boolean>) {
+fun SignUpPIN(
+    pageState: MutableState<PageStates>,
+    usePIN: MutableState<Boolean>
+) {
+    val pinState = remember { mutableStateOf("") }
+    val pinErrorState = remember { mutableStateOf(false) }
     Column(
         Modifier
             .background(MaterialTheme.colorScheme.background)
@@ -114,8 +148,39 @@ fun SignUpPIN(pageState: MutableState<PageStates>, useCloud: MutableState<Boolea
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 104.dp, bottom = 40.dp),
         )
-        /*TODO: add PIN input*/
-        CustomizationActionButtons(pageState, PageStates.HOME, useCloud, useJournalForAffirmations)
+        TextField(
+            pinState.value,
+            onValueChange = {
+                if (it.all { c -> c.isDigit() }) {
+                    pinState.value = it
+                }
+                pinErrorState.value = pinState.value.length != 4
+            },
+            isError = pinErrorState.value,
+            supportingText = {
+                if (pinErrorState.value) {
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = "The PIN must be exactly 4 digits",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                errorContainerColor = MaterialTheme.colorScheme.secondaryContainer
+            ),
+            visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+            modifier = Modifier.padding(bottom = 160.dp),
+        )
+        CustomizationActionButtons(
+            pageState,
+            PageStates.HOME,
+            usePIN,
+            pinErrorState
+        )
     }
 }
 
@@ -123,22 +188,28 @@ fun SignUpPIN(pageState: MutableState<PageStates>, useCloud: MutableState<Boolea
 fun CustomizationActionButtons(
     pageState: MutableState<PageStates>,
     nextPageState: PageStates,
-    useCloud: MutableState<Boolean>,
-    useJournalForAffirmations: MutableState<Boolean>
+    useCustomization: MutableState<Boolean>,
+    pinErrorState: MutableState<Boolean> = remember { mutableStateOf(false) }
 ) {
     val mainActionText =
         if (pageState.value == PageStates.SIGNUP_PIN) "Continue"
         else if (pageState.value == PageStates.SIGNUP_CLOUD_MORE) "Go back"
-        else if (pageState.value == PageStates.SIGNUP_AFFIRMATION ||
-                 pageState.value == PageStates.SIGNUP_CLOUD) "Yes"
+        else if (arrayOf(
+                PageStates.SIGNUP_AFFIRMATION,
+                PageStates.SIGNUP_CLOUD
+            ).contains(pageState.value)
+        ) "Yes"
         else ""
     ElevatedButton(
         onClick = {
-            if (pageState.value == PageStates.SIGNUP_CLOUD) {
-                useCloud.value = true
-            }
-            else if (pageState.value == PageStates.SIGNUP_AFFIRMATION) {
-                useJournalForAffirmations.value = true
+            if (arrayOf(
+                    PageStates.SIGNUP_CLOUD,
+                    PageStates.SIGNUP_AFFIRMATION
+                ).contains(pageState.value)
+            ) {
+                useCustomization.value = true
+            } else if (pageState.value == PageStates.SIGNUP_PIN && !pinErrorState.value) {
+                useCustomization.value = true
             }
             pageState.value = nextPageState
         },
@@ -156,18 +227,16 @@ fun CustomizationActionButtons(
     }
     if (pageState.value != PageStates.SIGNUP_CLOUD_MORE) {
         TextButton(onClick = {
-            if (pageState.value == PageStates.SIGNUP_CLOUD) {
-                useCloud.value = false
-            }
-            else if (pageState.value == PageStates.SIGNUP_AFFIRMATION) {
-                useJournalForAffirmations.value = false
-            }
+            useCustomization.value = false
             pageState.value = nextPageState
         }) {
             Text(
                 text = if (pageState.value == PageStates.SIGNUP_CLOUD) "No, continue without"
-                        else if (pageState.value == PageStates.SIGNUP_AFFIRMATION) "Not now, continue without"
-                        else "",
+                else if (arrayOf(PageStates.SIGNUP_AFFIRMATION, PageStates.SIGNUP_PIN).contains(
+                        pageState.value
+                    )
+                ) "Not now, continue without"
+                else "",
                 style = MaterialTheme.typography.headlineSmall
             )
         }

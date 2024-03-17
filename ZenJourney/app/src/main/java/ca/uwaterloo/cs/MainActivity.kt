@@ -8,13 +8,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import ca.uwaterloo.cs.ui.theme.ZenJourneyTheme
 
@@ -109,9 +105,9 @@ fun PageContent(
 ) {
     when (pageState.value) {
         PageStates.WELCOME -> WelcomePage(pageState)
-        PageStates.LOGIN -> LoginPage(context, pageState, nameState, useCloud, useJournalForAffirmations)
+        PageStates.LOGIN -> LoginPage(pageState, nameState)
         PageStates.SIGNUP_STEP1 -> SignUpPage1(pageState, nameState)
-        PageStates.SIGNUP_STEP2 -> SignUpPage2(context, pageState, nameState, useCloud, useJournalForAffirmations)
+        PageStates.SIGNUP_STEP2 -> SignUpPage2(context, pageState, nameState)
         PageStates.SIGNUP_STEP3 -> SignUpPage3(pageState, nameState)
         PageStates.SIGNUP_CLOUD -> SignUpCloud(pageState, useCloud)
         PageStates.SIGNUP_CLOUD_MORE -> SignUpCloudLearnMore(pageState, useCloud)

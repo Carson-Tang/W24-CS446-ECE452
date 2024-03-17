@@ -36,7 +36,8 @@ fun TextFieldComponent(
         modifier = Modifier.size(width = 304.dp, height = 80.dp),
         colors = TextFieldDefaults.colors(
             focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-            unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer
+            unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+            errorContainerColor = MaterialTheme.colorScheme.secondaryContainer
         ),
         isError = errorState.value != InputErrorStates.NONE,
         supportingText = {

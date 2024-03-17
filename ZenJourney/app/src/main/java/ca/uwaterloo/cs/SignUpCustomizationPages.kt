@@ -30,6 +30,15 @@ fun SignUpCloud(
     pageState: MutableState<PageStates>,
     useCloud: MutableState<Boolean>,
 ) {
+    fun primaryAction() {
+        useCloud.value = true
+        pageState.value = PageStates.SIGNUP_STEP2
+    }
+
+    fun secondaryAction() {
+        useCloud.value = false
+        pageState.value = PageStates.SIGNUP_STEP3
+    }
     Column(
         Modifier
             .background(MaterialTheme.colorScheme.background)
@@ -61,8 +70,8 @@ fun SignUpCloud(
         }
         CustomizationActionButtons(
             pageState,
-            PageStates.SIGNUP_STEP1,
-            useCloud
+            ::primaryAction,
+            ::secondaryAction
         )
     }
 }
@@ -72,6 +81,14 @@ fun SignUpCloudLearnMore(
     pageState: MutableState<PageStates>,
     useCloud: MutableState<Boolean>,
 ) {
+    fun primaryAction() {
+        useCloud.value = true
+        pageState.value = PageStates.SIGNUP_CLOUD
+    }
+
+    fun secondaryAction() {
+        pageState.value = PageStates.SIGNUP_CLOUD
+    }
     Column(
         Modifier
             .background(MaterialTheme.colorScheme.background)
@@ -92,8 +109,8 @@ fun SignUpCloudLearnMore(
         )
         CustomizationActionButtons(
             pageState,
-            PageStates.SIGNUP_CLOUD,
-            useCloud
+            ::primaryAction,
+            ::secondaryAction
         )
     }
 }
@@ -103,6 +120,15 @@ fun SignUpAffirmation(
     pageState: MutableState<PageStates>,
     useJournalForAffirmations: MutableState<Boolean>,
 ) {
+    fun primaryAction() {
+        useJournalForAffirmations.value = true
+        pageState.value = PageStates.SIGNUP_PIN
+    }
+
+    fun secondaryAction() {
+        useJournalForAffirmations.value = false
+        pageState.value = PageStates.SIGNUP_PIN
+    }
     Column(
         Modifier
             .background(MaterialTheme.colorScheme.background)
@@ -123,8 +149,8 @@ fun SignUpAffirmation(
         )
         CustomizationActionButtons(
             pageState,
-            PageStates.SIGNUP_PIN,
-            useJournalForAffirmations
+            ::primaryAction,
+            ::secondaryAction
         )
     }
 }
@@ -136,6 +162,20 @@ fun SignUpPIN(
 ) {
     val pinState = remember { mutableStateOf("") }
     val pinErrorState = remember { mutableStateOf(false) }
+
+    fun primaryAction() {
+        if (!pinErrorState.value && pinState.value.length == 4) {
+            usePIN.value = true
+            pageState.value = PageStates.HOME
+        } else {
+            pinErrorState.value = true
+        }
+    }
+
+    fun secondaryAction() {
+        usePIN.value = false
+        pageState.value = PageStates.HOME
+    }
     Column(
         Modifier
             .background(MaterialTheme.colorScheme.background)
@@ -177,9 +217,8 @@ fun SignUpPIN(
         )
         CustomizationActionButtons(
             pageState,
-            PageStates.HOME,
-            usePIN,
-            pinErrorState
+            ::primaryAction,
+            ::secondaryAction
         )
     }
 }
@@ -187,9 +226,8 @@ fun SignUpPIN(
 @Composable
 fun CustomizationActionButtons(
     pageState: MutableState<PageStates>,
-    nextPageState: PageStates,
-    useCustomization: MutableState<Boolean>,
-    pinErrorState: MutableState<Boolean> = remember { mutableStateOf(false) }
+    primaryAction: () -> Unit,
+    secondaryAction: () -> Unit,
 ) {
     val mainActionText =
         if (pageState.value == PageStates.SIGNUP_PIN) "Continue"
@@ -201,18 +239,7 @@ fun CustomizationActionButtons(
         ) "Yes"
         else ""
     ElevatedButton(
-        onClick = {
-            if (arrayOf(
-                    PageStates.SIGNUP_CLOUD,
-                    PageStates.SIGNUP_AFFIRMATION
-                ).contains(pageState.value)
-            ) {
-                useCustomization.value = true
-            } else if (pageState.value == PageStates.SIGNUP_PIN && !pinErrorState.value) {
-                useCustomization.value = true
-            }
-            pageState.value = nextPageState
-        },
+        onClick = primaryAction,
         modifier = Modifier
             .padding(bottom = 16.dp)
             .size(width = 184.dp, height = 56.dp),
@@ -226,10 +253,7 @@ fun CustomizationActionButtons(
         )
     }
     if (pageState.value != PageStates.SIGNUP_CLOUD_MORE) {
-        TextButton(onClick = {
-            useCustomization.value = false
-            pageState.value = nextPageState
-        }) {
+        TextButton(onClick = secondaryAction) {
             Text(
                 text = if (pageState.value == PageStates.SIGNUP_CLOUD) "No, continue without"
                 else if (arrayOf(PageStates.SIGNUP_AFFIRMATION, PageStates.SIGNUP_PIN).contains(

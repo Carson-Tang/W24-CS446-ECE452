@@ -20,12 +20,15 @@ object JournalApiService {
             HttpClientSetup.httpClient.get("http://10.0.2.2:8080/") {}
         }
     }
-    suspend fun createJournal(journalRequest: JournalRequest): HttpResponse {
+    suspend fun createJournal(journalRequest: JournalRequest, jwt: String): HttpResponse {
         val journalJson = gson.toJson(journalRequest)
         return withContext(Dispatchers.IO) {
             HttpClientSetup.httpClient.post("$baseUrl") {
                 contentType(ContentType.Application.Json)
                 setBody(journalJson)
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer $jwt")
+                }
             }
         }
     }
@@ -46,24 +49,30 @@ object JournalApiService {
         }
     }
 
-    suspend fun getJournalByDate(year: Int, month: Int, day: Int): HttpResponse {
+    suspend fun getJournalByDate(year: Int, month: Int, day: Int, jwt: String): HttpResponse {
         return withContext(Dispatchers.IO) {
             val response: HttpResponse = HttpClientSetup.httpClient.get("$baseUrl") {
                 parameter("year", year)
                 parameter("month", month)
                 parameter("day", day)
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer $jwt")
+                }
             }
             response
         }
     }
 
-    suspend fun getJournalByDateAndUser(userId: String, year: Int, month: Int, day: Int): HttpResponse {
+    suspend fun getJournalByDateAndUser(userId: String, year: Int, month: Int, day: Int, jwt: String): HttpResponse {
         return withContext(Dispatchers.IO) {
             val response: HttpResponse = HttpClientSetup.httpClient.get("$baseUrl/user") {
                 parameter("user", userId)
                 parameter("year", year)
                 parameter("month", month)
                 parameter("day", day)
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer $jwt")
+                }
             }
             response
         }

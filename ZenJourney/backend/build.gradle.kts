@@ -27,6 +27,8 @@ dependencies {
     implementation("io.ktor:ktor-server-host-common-jvm")
     implementation("io.ktor:ktor-server-jetty-jvm")
     implementation("io.ktor:ktor-server-tomcat-jvm")
+    implementation("io.ktor:ktor-server-auth:$ktor_version")
+    implementation("io.ktor:ktor-server-auth-jwt:$ktor_version")
     implementation("org.mongodb:mongodb-driver-kotlin-coroutine:4.11.0")
     implementation("org.mongodb:bson-kotlinx:4.11.0")
     //Koin Dependency Injection

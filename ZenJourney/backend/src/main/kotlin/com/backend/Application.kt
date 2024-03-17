@@ -13,13 +13,35 @@ import com.backend.domain.ports.UserRepository
 import com.backend.infrastructure.repository.PhotoRepositoryImpl
 import com.backend.infrastructure.repository.JournalRepositoryImpl
 import com.backend.infrastructure.repository.UserRepositoryImpl
+import com.backend.jwtConfig.JwtConfig
+import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.gson.gson
 import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
+import io.ktor.server.response.respond
 
 fun main(args: Array<String>): Unit = EngineMain.main(args)
 
 fun Application.module() {
 //    configureSerialization()
+    install(Authentication) {
+        jwt("auth-jwt") {
+            verifier(JwtConfig.verifier)
+            validate {
+                val name = it.payload.getClaim("name").asString()
+                val password = it.payload.getClaim("password").asString()
+                if (name != null && password != null) {
+                    JWTPrincipal(it.payload)
+                } else {
+                    null
+                }
+            }
+            challenge { _, _ ->
+                call.respond(HttpStatusCode.Unauthorized, "Token is not valid or has expired")
+            }
+        }
+    }
     install(ContentNegotiation) {
         gson {
         }

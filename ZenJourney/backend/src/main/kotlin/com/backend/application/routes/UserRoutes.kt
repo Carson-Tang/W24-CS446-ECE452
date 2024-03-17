@@ -16,6 +16,7 @@ import toStatusResponse
 import user.UserRequest
 import user.toDomain
 import org.mindrot.jbcrypt.BCrypt
+import com.backend.jwtConfig.JwtConfig
 
 fun Route.userRoutes() {
     val userRepository by inject<UserRepository>()
@@ -23,12 +24,12 @@ fun Route.userRoutes() {
         post("/login") {
             val user = call.receive<UserRequest>()
             val existingUser = userRepository.findByEmail(user.email)
+            val token = JwtConfig.generateToken(user)
             if (existingUser != null) {
                 if (BCrypt.checkpw(user.password, existingUser.password)) {
-                    // TODO: something with jwt
                     return@post call.respond(
                         HttpStatusCode.OK,
-                        toStatusResponse(true, "Successfully logged in")
+                        hashMapOf("token" to token),
                     )
                 } else {
                     return@post call.respond(
@@ -45,7 +46,7 @@ fun Route.userRoutes() {
 
         post {
             val user = call.receive<UserRequest>()
-
+            val token = JwtConfig.generateToken(user)
             val existingUser = userRepository.findByEmail(user.email)
             if (existingUser != null) {
                 return@post call.respond(
@@ -59,7 +60,7 @@ fun Route.userRoutes() {
             if (insertedId != null) {
                 return@post call.respond(
                     HttpStatusCode.Created,
-                    toStatusResponse(true, "Created user with id: ${insertedId.asObjectId().value}")
+                    hashMapOf("token" to token),
                 )
             }
         }

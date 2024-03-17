@@ -81,7 +81,7 @@ fun capitalize(s: String): String {
 }
 
 @Composable
-fun PhotobookPage(context: Context, pageState: MutableState<PageStates>) {
+fun PhotobookPage(context: Context, appState: AppState) {
     val currentDate = LocalDate.now()
     val currentMonth = currentDate.month.toString()
     val currentYear = currentDate.year.toString()

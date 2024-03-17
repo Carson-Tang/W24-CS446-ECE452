@@ -48,12 +48,7 @@ import java.time.LocalDate
 
 
 @Composable
-fun CalendarWithHeader(pageState: MutableState<PageStates>, selectedDate: MutableState<LocalDate>,
-                       pastSelectedMoods: MutableState<List<String>>,
-                       pastJournalEntry: MutableState<String>,
-                       pastDate: MutableState<LocalDate>,
-                       jwt: MutableState<String>,
-) {
+fun CalendarWithHeader(appState: AppState) {
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
     val coroutineScope = rememberCoroutineScope()
 
@@ -80,24 +75,20 @@ fun CalendarWithHeader(pageState: MutableState<PageStates>, selectedDate: Mutabl
         )
         HorizontalDivider()
 
-        Calendar(currentMonth, pageState, selectedDate, pastSelectedMoods, pastJournalEntry, pastDate, state, jwt)
+        Calendar(currentMonth, state, appState)
     }
 }
 
 @Composable
-fun Calendar(currentMonth: YearMonth = remember { YearMonth.now() },
-             pageState: MutableState<PageStates>,
-             selectedDate: MutableState<LocalDate>,
-             pastSelectedMoods: MutableState<List<String>>,
-             pastJournalEntry: MutableState<String>,
-             pastDate: MutableState<LocalDate>,
-             state: CalendarState,
-             jwt: MutableState<String>
+fun Calendar(
+    currentMonth: YearMonth = remember { YearMonth.now() },
+    calendarState: CalendarState,
+    appState: AppState
 ) {
 
 
     HorizontalCalendar(
-        state = state,
+        state = calendarState,
         monthHeader = { month ->
             val daysOfWeek = month.weekDays.first().map { it.date.dayOfWeek }
             MonthHeader(daysOfWeek = daysOfWeek)
@@ -111,20 +102,17 @@ fun Calendar(currentMonth: YearMonth = remember { YearMonth.now() },
             }
         },
         dayContent = { day ->
-            Day(day, pageState, selectedDate, pastSelectedMoods, pastJournalEntry, pastDate, currentMonth, jwt)
+            Day(day, currentMonth, appState)
         }
     )
 }
 
 
 @Composable
-fun Day(day: CalendarDay, pageState: MutableState<PageStates>,
-        selectedDate: MutableState<LocalDate>,
-        pastSelectedMoods: MutableState<List<String>>,
-        pastJournalEntry: MutableState<String>,
-        pastDate: MutableState<LocalDate>,
-        currentMonth: YearMonth,
-        jwt: MutableState<String>,
+fun Day(
+    day: CalendarDay,
+    currentMonth: YearMonth,
+    appState: AppState,
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -133,7 +121,7 @@ fun Day(day: CalendarDay, pageState: MutableState<PageStates>,
         modifier = Modifier
             .aspectRatio(1f)
             .clickable {
-                selectedDate.value = day.date
+                appState.selectedDate.value = day.date
                 coroutineScope.launch {
                     try {
                         val response = JournalApiService.getJournalByDateAndUser(
@@ -141,20 +129,20 @@ fun Day(day: CalendarDay, pageState: MutableState<PageStates>,
                             year = day.date.year,
                             month = day.date.monthValue,
                             day = day.date.dayOfMonth,
-                            jwt = jwt.value
+                            jwt = appState.jwt.value
                         )
-                        println(response)
+
                         if (response.status == HttpStatusCode.OK) {
                             val journalResponse: JournalResponse = response.body()
-                            pastJournalEntry.value = journalResponse.content
-                            pastSelectedMoods.value = journalResponse.moods
-                            pastDate.value = LocalDate.of(journalResponse.year, journalResponse.month, journalResponse.day)
-                            pageState.value = PageStates.PAST_JOURNAL
+                            appState.pastJournalEntry.value = journalResponse.content
+                            appState.pastSelectedMoods.value = journalResponse.moods
+                            appState.pastDate.value = LocalDate.of(journalResponse.year, journalResponse.month, journalResponse.day)
+                            appState.pageState.value = PageStates.PAST_JOURNAL
                         } else if (response.status == HttpStatusCode.BadRequest || response.status == HttpStatusCode.NotFound) {
                             val statusResponse: StatusResponse = response.body()
                             // TODO something with response.body()
 
-                            pageState.value = PageStates.JOURNAL_STEP2
+                            appState.pageState.value = PageStates.JOURNAL_STEP2
                         }
                     } catch (e: Exception) {
                         println(e.message)

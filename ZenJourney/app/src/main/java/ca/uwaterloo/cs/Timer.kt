@@ -42,7 +42,7 @@ fun formatTime(ms: Long): String {
 }
 
 @Composable
-fun TimerScreen(context: Context, pageState: MutableState<PageStates>, selectedTune: MutableState<Int>) {
+fun TimerScreen(context: Context, appState: AppState) {
     // default timer value
     var defaultTimeMs by remember { // in ms
         mutableStateOf(60000L)
@@ -81,7 +81,7 @@ fun TimerScreen(context: Context, pageState: MutableState<PageStates>, selectedT
                 color = Color(0xFF649E8A),
                 style = MaterialTheme.typography.headlineSmall,
                 modifier = Modifier
-                    .clickable(onClick = {pageState.value = PageStates.MEDITATE_PICK_TUNE})
+                    .clickable(onClick = {appState.pageState.value = PageStates.MEDITATE_PICK_TUNE})
             )
         }
     }
@@ -162,7 +162,7 @@ fun TimerScreen(context: Context, pageState: MutableState<PageStates>, selectedT
                 ) {
                     IconButton(onClick = {
                         isRunning = true
-                        mediaPlayer = MediaPlayer.create(context, selectedTune.value)
+                        mediaPlayer = MediaPlayer.create(context, appState.selectedTune.value)
                         mediaPlayer?.start()
                     }) {
                         Icon(

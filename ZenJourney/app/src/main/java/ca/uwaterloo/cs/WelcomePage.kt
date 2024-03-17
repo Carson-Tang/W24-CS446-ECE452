@@ -19,7 +19,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun WelcomePage(pageState: MutableState<PageStates>) {
+fun WelcomePage(appState: AppState) {
     Column(
         Modifier
             .background(MaterialTheme.colorScheme.background)
@@ -48,7 +48,7 @@ fun WelcomePage(pageState: MutableState<PageStates>) {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             ElevatedButton(
-                onClick = { pageState.value = PageStates.SIGNUP_STEP1 },
+                onClick = { appState.pageState.value = PageStates.SIGNUP_STEP1 },
                 modifier = Modifier.size(width = 184.dp, height = 56.dp),
                 colors = ButtonDefaults.elevatedButtonColors(MaterialTheme.colorScheme.primaryContainer),
                 elevation = ButtonDefaults.elevatedButtonElevation(defaultElevation = 4.dp)
@@ -59,7 +59,7 @@ fun WelcomePage(pageState: MutableState<PageStates>) {
                     style = MaterialTheme.typography.headlineSmall
                 )
             }
-            TextButton(onClick = { pageState.value = PageStates.LOGIN }) {
+            TextButton(onClick = { appState.pageState.value = PageStates.LOGIN }) {
                 Text("I have an account", style = MaterialTheme.typography.headlineSmall)
             }
         }

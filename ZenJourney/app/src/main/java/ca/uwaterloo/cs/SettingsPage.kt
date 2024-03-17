@@ -21,7 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun SettingsPage(pageState: MutableState<PageStates>) {
+fun SettingsPage(appState: AppState) {
     Column(
         Modifier
             .background(color = Color(0xFFC7E6C9))
@@ -122,7 +122,7 @@ fun SettingsPage(pageState: MutableState<PageStates>) {
                     .background(color = Color(0xFF7BB6A1), shape = RoundedCornerShape(16.dp))
             ) {
                 Button(
-                    onClick = { pageState.value = PageStates.WELCOME },
+                    onClick = { appState.pageState.value = PageStates.WELCOME },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
                     modifier = Modifier
                         .fillMaxSize()

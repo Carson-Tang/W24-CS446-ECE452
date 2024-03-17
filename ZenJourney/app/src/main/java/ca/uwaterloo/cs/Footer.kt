@@ -17,11 +17,11 @@ import androidx.compose.ui.unit.dp
 
 
 @Composable
-fun Footer(pageState: MutableState<PageStates>) {
+fun Footer(appState: AppState) {
     NavigationBar(Modifier.fillMaxWidth()) {
         NavigationBarItem(
-            selected = pageState.value == PageStates.PHOTOBOOK,
-            onClick = { pageState.value = PageStates.PHOTOBOOK },
+            selected = appState.pageState.value == PageStates.PHOTOBOOK,
+            onClick = { appState.pageState.value = PageStates.PHOTOBOOK },
             icon = {
                 Icon(
                     Icons.Outlined.Image,
@@ -30,8 +30,8 @@ fun Footer(pageState: MutableState<PageStates>) {
                 )
             })
         NavigationBarItem(
-            selected = pageState.value == PageStates.AFFIRMATION,
-            onClick = { pageState.value = PageStates.AFFIRMATION },
+            selected = appState.pageState.value == PageStates.AFFIRMATION,
+            onClick = { appState.pageState.value = PageStates.AFFIRMATION },
             icon = {
                 Icon(
                     Icons.Outlined.VolunteerActivism,
@@ -40,8 +40,8 @@ fun Footer(pageState: MutableState<PageStates>) {
                 )
             })
         NavigationBarItem(
-            selected = pageState.value == PageStates.HOME,
-            onClick = { pageState.value = PageStates.HOME },
+            selected = appState.pageState.value == PageStates.HOME,
+            onClick = { appState.pageState.value = PageStates.HOME },
             icon = {
                 Icon(
                     Icons.Outlined.Home,
@@ -50,13 +50,13 @@ fun Footer(pageState: MutableState<PageStates>) {
                 )
             })
         NavigationBarItem(
-            selected = pageState.value in arrayOf(
+            selected = appState.pageState.value in arrayOf(
                 PageStates.JOURNAL_STEP1,
                 PageStates.JOURNAL_STEP2,
                 PageStates.JOURNAL_STEP3,
                 PageStates.PAST_JOURNAL
             ),
-            onClick = { pageState.value = PageStates.JOURNAL_STEP1 },
+            onClick = { appState.pageState.value = PageStates.JOURNAL_STEP1 },
             icon = {
                 Icon(
                     Icons.Outlined.EditNote,
@@ -65,8 +65,8 @@ fun Footer(pageState: MutableState<PageStates>) {
                 )
             })
         NavigationBarItem(
-            selected = pageState.value == PageStates.MEDITATE,
-            onClick = { pageState.value = PageStates.MEDITATE },
+            selected = appState.pageState.value == PageStates.MEDITATE,
+            onClick = { appState.pageState.value = PageStates.MEDITATE },
             icon = {
                 Icon(
                     Icons.Outlined.SelfImprovement,

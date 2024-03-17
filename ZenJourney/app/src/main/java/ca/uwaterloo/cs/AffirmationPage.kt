@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 
 
 @Composable
-fun AffirmationPage(pageState: MutableState<PageStates>) {
+fun AffirmationPage(appState: AppState) {
     val affirmations = listOf(
         "You got this",
         "You'll figure it out",

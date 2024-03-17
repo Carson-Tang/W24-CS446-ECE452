@@ -1,5 +1,6 @@
 package ca.uwaterloo.cs
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,19 +12,23 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import com.an.room.db.UserDB
+import com.an.room.model.User
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 @Composable
 fun SignUpCloud(
@@ -152,8 +157,32 @@ fun SignUpAffirmation(
     }
 }
 
+@OptIn(DelicateCoroutinesApi::class)
+fun storeLocalUserSettings(context: Context, appState: AppState, pinState: String) {
+    val user = User(
+        firstName = appState.nameState.value,
+        useCloud = appState.useCloud.value,
+        useJournalForAffirmations = appState.useJournalForAffirmations.value,
+        // TODO: encrypt?
+        pin = pinState
+    )
+
+    val database = UserDB.getDB(context)
+    val userDao = database.userDao()
+
+    GlobalScope.launch {
+        val userRes = userDao.getOne().getOrNull(0)
+        if (userRes == null) {
+            userDao.insert(user)
+        } else {
+            // THIS SHOULDN'T HAPPEN
+        }
+    }
+}
+
 @Composable
 fun SignUpPIN(
+    context: Context,
     appState: AppState
 ) {
     val pinState = remember { mutableStateOf("") }
@@ -162,6 +191,7 @@ fun SignUpPIN(
     fun primaryAction() {
         if (!pinErrorState.value && pinState.value.length == 4) {
             appState.usePIN.value = true
+            storeLocalUserSettings(context, appState, pinState.value)
             appState.pageState.value = PageStates.HOME
         } else {
             pinErrorState.value = true
@@ -170,6 +200,7 @@ fun SignUpPIN(
 
     fun secondaryAction() {
         appState.usePIN.value = false
+        storeLocalUserSettings(context, appState, pinState.value)
         appState.pageState.value = PageStates.HOME
     }
     Column(

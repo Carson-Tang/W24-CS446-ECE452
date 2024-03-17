@@ -24,18 +24,10 @@ import kotlinx.coroutines.launch
 import user.UserRequest
 import androidx.compose.runtime.rememberCoroutineScope
 import io.ktor.http.HttpStatusCode
-import io.ktor.util.InternalAPI
-import java.time.LocalDate
-import org.mindrot.jbcrypt.BCrypt
-import kotlinx.coroutines.launch
 import user.UserResponse
 import StatusResponse
 import android.content.Context
-import com.an.room.db.UserDB
-import com.an.room.model.User
 import io.ktor.client.call.body
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
 
 @Composable
 fun SignUpPage1(pageState: MutableState<PageStates>, nameState: MutableState<String>) {
@@ -55,7 +47,7 @@ fun SignUpPage1(pageState: MutableState<PageStates>, nameState: MutableState<Str
         TextFieldComponent(nameState, "My name is...", errorState)
         ElevatedButton(
             onClick = {
-                if (nameState.value.isNotBlank()) pageState.value = PageStates.SIGNUP_STEP2
+                if (nameState.value.isNotBlank()) pageState.value = PageStates.SIGNUP_CLOUD
                 else {
                     errorState.value = InputErrorStates.EMPTY_INPUT
                 }
@@ -76,16 +68,14 @@ fun SignUpPage1(pageState: MutableState<PageStates>, nameState: MutableState<Str
 }
 
 @Composable
-fun SignUpPage2(context: Context, pageState: MutableState<PageStates>, nameState: MutableState<String>,
-                useCloud: MutableState<Boolean>, useJournalForAffirmations: MutableState<Boolean>) {
+fun SignUpPage2(
+    context: Context, pageState: MutableState<PageStates>, nameState: MutableState<String>,
+) {
     SignUpLoginPage(
-        context = context,
         pageState = pageState,
         nameState = nameState,
         headlineText = "\uD83D\uDC69\u200D\uD83D\uDCBB\n\nAwesome!\nLet's create an account for you, ${nameState.value}",
         buttonText = "Register",
-        useCloud = useCloud,
-        useJournalForAffirmations = useJournalForAffirmations
     )
 }
 
@@ -110,7 +100,7 @@ fun SignUpPage3(pageState: MutableState<PageStates>, nameState: MutableState<Str
             modifier = Modifier.padding(bottom = 224.dp),
         )
         ElevatedButton(
-            onClick = { pageState.value = PageStates.SIGNUP_CLOUD },
+            onClick = { pageState.value = PageStates.SIGNUP_AFFIRMATION },
             modifier = Modifier.size(width = 184.dp, height = 56.dp),
             colors = ButtonDefaults.elevatedButtonColors(MaterialTheme.colorScheme.primaryContainer),
             elevation = ButtonDefaults.elevatedButtonElevation(defaultElevation = 4.dp)
@@ -125,29 +115,23 @@ fun SignUpPage3(pageState: MutableState<PageStates>, nameState: MutableState<Str
 }
 
 @Composable
-fun LoginPage(context: Context, pageState: MutableState<PageStates>, nameState: MutableState<String>,
-              useCloud: MutableState<Boolean>, useJournalForAffirmations: MutableState<Boolean>) {
+fun LoginPage(
+    pageState: MutableState<PageStates>, nameState: MutableState<String>,
+) {
     SignUpLoginPage(
-        context = context,
         pageState = pageState,
         nameState = nameState,
-        headlineText = "\uD83D\uDC69\u200D\uD83D\uDCBB\n\nWelcome back\nPlease login",
+        headlineText = "\uD83D\uDC69\u200D\uD83D\uDCBB\n\nWelcome back!\nPlease login",
         buttonText = "Login",
-        useCloud = useCloud,
-        useJournalForAffirmations = useJournalForAffirmations,
     )
 }
 
-@OptIn(InternalAPI::class, DelicateCoroutinesApi::class)
 @Composable
 fun SignUpLoginPage(
-    context: Context,
     pageState: MutableState<PageStates>,
     nameState: MutableState<String>,
     headlineText: String,
     buttonText: String,
-    useCloud: MutableState<Boolean>,
-    useJournalForAffirmations: MutableState<Boolean>,
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -187,92 +171,45 @@ fun SignUpLoginPage(
                         else InputErrorStates.NONE
 
                     coroutineScope.launch {
-                        val database = UserDB.getDB(context)
-                        val userDao = database.userDao()
-
                         // REGISTER USER
                         if (buttonText == "Register") {
-                            // LOCAL
-                            var userExists = false
-                            val job = GlobalScope.launch {
-                                val userRes = userDao.findByEmail(emailState.value.trimEnd())
-                                if (userRes != null) {
-                                    userExists = true
+                            val userRequest = UserRequest(
+                                name = nameState.value,
+                                email = emailState.value.trimEnd(),
+                                password = passwordState.value,
+                            )
+                            try {
+                                val response = UserApiService.createUser(userRequest)
+                                if (response.status == HttpStatusCode.BadRequest) {
+                                    val statusResponse: StatusResponse = response.body()
+                                    // TODO: assign statusResponse.body to something
+                                } else if (response.status == HttpStatusCode.Created) {
+                                    // TODO: something with jwt
+                                    pageState.value = PageStates.SIGNUP_STEP3
+                                    val userResponse: UserResponse = response.body()
+                                    pageState.value = PageStates.HOME
                                 }
-                            }
-                            job.join()
-                            // TODO: err message
-                            if (userExists) {
-
-                            } else {
-                                val job = GlobalScope.launch {
-                                    val newUser = User(
-                                        email = emailState.value.trimEnd(),
-                                        firstName = nameState.value,
-                                        password = BCrypt.hashpw(passwordState.value, BCrypt.gensalt()),
-                                        useCloud = useCloud.value,
-                                        useJournalForAffirmations = useJournalForAffirmations.value,
-                                        pin = "1234" // TODO: fix
-                                    )
-                                    userDao.insert(newUser)
-                                }
-                                job.join()
-                            }
-
-                            // CLOUD
-                            if (useCloud.value) {
-                                val userRequest = UserRequest(
-                                    name = nameState.value,
-                                    email = emailState.value.trimEnd(),
-                                    password = passwordState.value,
-                                )
-                                try {
-                                    val response = UserApiService.createUser(userRequest)
-                                    if (response.status == HttpStatusCode.BadRequest) {
-                                        val statusResponse: StatusResponse = response.body()
-                                        // TODO: assign statusResponse.body to something
-                                    } else if (response.status == HttpStatusCode.Created) {
-                                        // TODO: something with jwt
-                                        pageState.value = PageStates.SIGNUP_STEP3
-                                        val userResponse: UserResponse = response.body()
-                                        pageState.value = PageStates.HOME
-                                    }
-                                } catch (e: Exception) {
-                                    // handle in future
-                                }
+                            } catch (e: Exception) {
+                                // handle in future
                             }
                         }
                         // LOGIN USER
                         else {
-                            // LOCAL
-                            var userRes: User? = null
-                            val job = GlobalScope.launch {
-                                userRes = userDao.findByEmail(emailState.value.trimEnd())
-                            }
-                            job.join()
-                            if (userRes != null && BCrypt.checkpw(passwordState.value, userRes!!.password)) {
-                                // OK
-                                pageState.value = PageStates.HOME
-                            }
-
-                            // CLOUD
-                            if (useCloud.value) {
-                                val userRequest = UserRequest(
-                                    name = nameState.value,
-                                    email = emailState.value,
-                                    password = passwordState.value,
-                                )
-                                try {
-                                    val response = UserApiService.loginUser(userRequest)
-                                    if (response.status == HttpStatusCode.BadRequest) {
-                                        // TODO: show error
-                                    } else if (response.status == HttpStatusCode.OK) {
-                                        // TODO: something with jwt
-                                        pageState.value = PageStates.HOME
-                                    }
-                                } catch (e: Exception) {
-                                    // handle in future
+                            val userRequest = UserRequest(
+                                name = nameState.value,
+                                email = emailState.value,
+                                password = passwordState.value,
+                            )
+                            try {
+                                val response = UserApiService.loginUser(userRequest)
+                                if (response.status == HttpStatusCode.BadRequest) {
+                                    // TODO: show error
+                                } else if (response.status == HttpStatusCode.OK) {
+                                    // TODO: something with jwt
+                                    pageState.value = PageStates.HOME
                                 }
+                            } catch (e: Exception) {
+                                // handle in future
                             }
                         }
                     }

@@ -15,7 +15,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun TextFieldComponent(valueState: MutableState<String>, placeholderText: String, errorState: MutableState<InputErrorStates>, isPassword: Boolean = false) {
+fun TextFieldComponent(
+    valueState: MutableState<String>,
+    placeholderText: String,
+    errorState: MutableState<InputErrorStates>,
+    isPassword: Boolean = false,
+) {
     TextField(
         value = valueState.value,
         onValueChange = { valueState.value = it },
@@ -31,7 +36,8 @@ fun TextFieldComponent(valueState: MutableState<String>, placeholderText: String
         modifier = Modifier.size(width = 304.dp, height = 80.dp),
         colors = TextFieldDefaults.colors(
             focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-            unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer
+            unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+            errorContainerColor = MaterialTheme.colorScheme.secondaryContainer
         ),
         isError = errorState.value != InputErrorStates.NONE,
         supportingText = {

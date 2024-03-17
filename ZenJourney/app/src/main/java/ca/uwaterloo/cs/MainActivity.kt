@@ -49,6 +49,9 @@ fun MainContent(context: Context) {
     val useCloud = remember { mutableStateOf(false) }
     val useJournalForAffirmations = remember { mutableStateOf(false) }
     val usePIN = remember { mutableStateOf(false) }
+
+    val jwt = remember { mutableStateOf("") }
+
     Scaffold(
         bottomBar = {
             if (pageState.value !in arrayOf(
@@ -81,7 +84,8 @@ fun MainContent(context: Context) {
                 selectedTune,
                 useCloud,
                 useJournalForAffirmations,
-                usePIN
+                usePIN,
+                jwt,
             )
         }
     }
@@ -102,25 +106,26 @@ fun PageContent(
     useCloud: MutableState<Boolean>,
     useJournalForAffirmations: MutableState<Boolean>,
     usePIN: MutableState<Boolean>,
+    jwt: MutableState<String>,
 ) {
     when (pageState.value) {
         PageStates.WELCOME -> WelcomePage(pageState)
-        PageStates.LOGIN -> LoginPage(pageState, nameState)
+        PageStates.LOGIN -> LoginPage(pageState, nameState, jwt)
         PageStates.SIGNUP_STEP1 -> SignUpPage1(pageState, nameState)
-        PageStates.SIGNUP_STEP2 -> SignUpPage2(context, pageState, nameState)
+        PageStates.SIGNUP_STEP2 -> SignUpPage2(context, pageState, nameState, jwt)
         PageStates.SIGNUP_STEP3 -> SignUpPage3(pageState, nameState)
         PageStates.SIGNUP_CLOUD -> SignUpCloud(pageState, useCloud)
         PageStates.SIGNUP_CLOUD_MORE -> SignUpCloudLearnMore(pageState, useCloud)
         PageStates.SIGNUP_AFFIRMATION -> SignUpAffirmation(pageState, useJournalForAffirmations)
         PageStates.SIGNUP_PIN -> SignUpPIN(pageState, usePIN)
-        PageStates.HOME -> HomePage(pageState)
+        PageStates.HOME -> HomePage(pageState, jwt)
         PageStates.MEDITATE -> MeditatePage(context, pageState, selectedTune)
         PageStates.MEDITATE_PICK_TUNE -> MeditatePickTune(pageState, selectedTune)
         PageStates.AFFIRMATION -> AffirmationPage(pageState)
         PageStates.PHOTOBOOK -> PhotobookPage(context, pageState)
-        PageStates.JOURNAL_STEP1 -> JournalPage1(pageState, selectedDate, pastSelectedMoods, pastJournalEntry, pastDate)
+        PageStates.JOURNAL_STEP1 -> JournalPage1(pageState, selectedDate, pastSelectedMoods, pastJournalEntry, pastDate, jwt)
         PageStates.JOURNAL_STEP2 -> JournalPage2(pageState, selectedDate, selectedMoods)
-        PageStates.JOURNAL_STEP3 -> JournalPage3(pageState, selectedDate, journalEntry, selectedMoods, pastSelectedMoods, pastJournalEntry, pastDate)
+        PageStates.JOURNAL_STEP3 -> JournalPage3(pageState, selectedDate, journalEntry, selectedMoods, pastSelectedMoods, pastJournalEntry, pastDate, jwt)
         PageStates.PAST_JOURNAL -> PastJournalPage(pageState, pastSelectedMoods, pastJournalEntry, pastDate)
         PageStates.SETTINGS -> SettingsPage(pageState)
     }

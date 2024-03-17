@@ -132,4 +132,9 @@ fun Route.journalRoutes() {
             call.respond(HttpStatusCode.OK, journal.toResponse())
         }
     }
+    route("/journal/test") {
+        get {
+            call.respond(HttpStatusCode.OK)
+        }
+    }
 }

@@ -138,7 +138,7 @@ fun WithoutInfo() {
 }
 
 @Composable
-fun HomePage(pageState: MutableState<PageStates>) {
+fun HomePage(pageState: MutableState<PageStates>, jwt: MutableState<String>) {
     val coroutineScope = rememberCoroutineScope()
     val today = LocalDate.now()
     var todayJournalData by remember { mutableStateOf(JournalResponse("", 0, 0, 0, listOf(), "", "")) }
@@ -147,7 +147,7 @@ fun HomePage(pageState: MutableState<PageStates>) {
         // This block will be executed when the composable is first displayed
         coroutineScope.launch {
             try {
-                val response = JournalApiService.getJournalByDate(today.year, today.monthValue, today.dayOfMonth)
+                val response = JournalApiService.getJournalByDate(today.year, today.monthValue, today.dayOfMonth, jwt.value)
                 if (response.status == HttpStatusCode.OK) {
                     todayJournalData = response.body()
                 } else {

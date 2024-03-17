@@ -51,7 +51,8 @@ import java.time.LocalDate
 fun CalendarWithHeader(pageState: MutableState<PageStates>, selectedDate: MutableState<LocalDate>,
                        pastSelectedMoods: MutableState<List<String>>,
                        pastJournalEntry: MutableState<String>,
-                       pastDate: MutableState<LocalDate>
+                       pastDate: MutableState<LocalDate>,
+                       jwt: MutableState<String>,
 ) {
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
     val coroutineScope = rememberCoroutineScope()
@@ -79,7 +80,7 @@ fun CalendarWithHeader(pageState: MutableState<PageStates>, selectedDate: Mutabl
         )
         HorizontalDivider()
 
-        Calendar(currentMonth, pageState, selectedDate, pastSelectedMoods, pastJournalEntry, pastDate, state)
+        Calendar(currentMonth, pageState, selectedDate, pastSelectedMoods, pastJournalEntry, pastDate, state, jwt)
     }
 }
 
@@ -90,7 +91,8 @@ fun Calendar(currentMonth: YearMonth = remember { YearMonth.now() },
              pastSelectedMoods: MutableState<List<String>>,
              pastJournalEntry: MutableState<String>,
              pastDate: MutableState<LocalDate>,
-             state: CalendarState
+             state: CalendarState,
+             jwt: MutableState<String>
 ) {
 
 
@@ -109,7 +111,7 @@ fun Calendar(currentMonth: YearMonth = remember { YearMonth.now() },
             }
         },
         dayContent = { day ->
-            Day(day, pageState, selectedDate, pastSelectedMoods, pastJournalEntry, pastDate, currentMonth)
+            Day(day, pageState, selectedDate, pastSelectedMoods, pastJournalEntry, pastDate, currentMonth, jwt)
         }
     )
 }
@@ -121,12 +123,12 @@ fun Day(day: CalendarDay, pageState: MutableState<PageStates>,
         pastSelectedMoods: MutableState<List<String>>,
         pastJournalEntry: MutableState<String>,
         pastDate: MutableState<LocalDate>,
-        currentMonth: YearMonth
+        currentMonth: YearMonth,
+        jwt: MutableState<String>,
 ) {
     val coroutineScope = rememberCoroutineScope()
 
     val isInCurrentMonth = day.date.month == currentMonth.month && day.date.year == currentMonth.year
-
     Box(
         modifier = Modifier
             .aspectRatio(1f)
@@ -138,8 +140,10 @@ fun Day(day: CalendarDay, pageState: MutableState<PageStates>,
                             userId = "65e5664b99258c800b3ab381", // Example user ID
                             year = day.date.year,
                             month = day.date.monthValue,
-                            day = day.date.dayOfMonth
+                            day = day.date.dayOfMonth,
+                            jwt = jwt.value
                         )
+                        println(response)
                         if (response.status == HttpStatusCode.OK) {
                             val journalResponse: JournalResponse = response.body()
                             pastJournalEntry.value = journalResponse.content

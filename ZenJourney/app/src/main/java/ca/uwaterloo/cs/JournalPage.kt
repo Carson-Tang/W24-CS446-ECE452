@@ -47,7 +47,7 @@ import java.time.LocalDate
 @Composable
 fun JournalPage1(pageState: MutableState<PageStates>, selectedDate: MutableState<LocalDate>,
                  pastSelectedMoods: MutableState<List<String>>, pastJournalEntry: MutableState<String>,
-                 pastDate: MutableState<LocalDate>
+                 pastDate: MutableState<LocalDate>, jwt: MutableState<String>,
 ) {
     Column(
         Modifier
@@ -80,7 +80,7 @@ fun JournalPage1(pageState: MutableState<PageStates>, selectedDate: MutableState
                 .padding(top = 20.dp)
         )
         {
-            CalendarWithHeader(pageState, selectedDate, pastSelectedMoods, pastJournalEntry, pastDate)
+            CalendarWithHeader(pageState, selectedDate, pastSelectedMoods, pastJournalEntry, pastDate, jwt)
         }
     }
 }
@@ -186,7 +186,8 @@ fun JournalPage3(pageState: MutableState<PageStates>,
                  selectedMoods: MutableState<List<String>>,
                  pastSelectedMoods: MutableState<List<String>>,
                  pastJournalEntry: MutableState<String>,
-                 pastDate: MutableState<LocalDate>
+                 pastDate: MutableState<LocalDate>,
+                 jwt: MutableState<String>,
 ) {
     val charLimit = 2000
     val coroutineScope = rememberCoroutineScope()
@@ -310,17 +311,19 @@ fun JournalPage3(pageState: MutableState<PageStates>,
                                     day = selectedDate.value.dayOfMonth,
                                     moods = selectedMoodsInWords,
                                     content = journalEntry.value,
-                                    userId = "65e5664b99258c800b3ab381" // Hardcoded test user for now
+                                    userId = "65f6591ebe57c2026bcb2300" // Hardcoded test user for now
                                 )
                                 try {
                                     // we can change this flow in the future, but this current creation doesnt return
                                     // the actual journal response, so we just query it again
-                                    val response2 = JournalApiService.createJournal(journalRequest)
+                                    val response2 = JournalApiService.createJournal(journalRequest, jwt.value)
+                                    println(response2)
                                     val response = JournalApiService.getJournalByDateAndUser(
-                                        userId = "65e5664b99258c800b3ab381", // Example user ID
+                                        userId = "65f6591ebe57c2026bcb2300", // Example user ID
                                         year = selectedDate.value.year,
                                         month = selectedDate.value.monthValue,
                                         day = selectedDate.value.dayOfMonth,
+                                        jwt = jwt.value
                                     )
                                     journalEntry.value = ""
                                     selectedMoods.value = listOf("")

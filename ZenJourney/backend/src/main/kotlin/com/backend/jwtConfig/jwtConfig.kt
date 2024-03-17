@@ -8,7 +8,7 @@ import java.util.Date
 
 object JwtConfig{
     private val secret = System.getenv("JWT_SECRET")
-    private val issuer = System.getenv("JWT_ISSUER")
+    private val issuer = "http://0.0.0.0:8080/"
     private const val validityInMs = 36_000_00 * 24 // 1 day
     private val algorithm = Algorithm.HMAC512(secret)
 

@@ -28,6 +28,7 @@ import user.UserResponse
 import StatusResponse
 import android.content.Context
 import io.ktor.client.call.body
+import token.TokenResponse
 
 @Composable
 fun SignUpPage1(pageState: MutableState<PageStates>, nameState: MutableState<String>) {
@@ -69,13 +70,14 @@ fun SignUpPage1(pageState: MutableState<PageStates>, nameState: MutableState<Str
 
 @Composable
 fun SignUpPage2(
-    context: Context, pageState: MutableState<PageStates>, nameState: MutableState<String>,
+    context: Context, pageState: MutableState<PageStates>, nameState: MutableState<String>, jwt: MutableState<String>
 ) {
     SignUpLoginPage(
         pageState = pageState,
         nameState = nameState,
         headlineText = "\uD83D\uDC69\u200D\uD83D\uDCBB\n\nAwesome!\nLet's create an account for you, ${nameState.value}",
         buttonText = "Register",
+        jwt = jwt,
     )
 }
 
@@ -116,13 +118,14 @@ fun SignUpPage3(pageState: MutableState<PageStates>, nameState: MutableState<Str
 
 @Composable
 fun LoginPage(
-    pageState: MutableState<PageStates>, nameState: MutableState<String>,
+    pageState: MutableState<PageStates>, nameState: MutableState<String>, jwt: MutableState<String>
 ) {
     SignUpLoginPage(
         pageState = pageState,
         nameState = nameState,
         headlineText = "\uD83D\uDC69\u200D\uD83D\uDCBB\n\nWelcome back!\nPlease login",
         buttonText = "Login",
+        jwt = jwt,
     )
 }
 
@@ -132,6 +135,7 @@ fun SignUpLoginPage(
     nameState: MutableState<String>,
     headlineText: String,
     buttonText: String,
+    jwt: MutableState<String>,
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -184,10 +188,10 @@ fun SignUpLoginPage(
                                     val statusResponse: StatusResponse = response.body()
                                     // TODO: assign statusResponse.body to something
                                 } else if (response.status == HttpStatusCode.Created) {
-                                    // TODO: something with jwt
+                                    val tokenResponse: TokenResponse = response.body()
+                                    println("TOKEN: "+tokenResponse.token)
+                                    jwt.value = tokenResponse.token
                                     pageState.value = PageStates.SIGNUP_STEP3
-                                    val userResponse: UserResponse = response.body()
-                                    pageState.value = PageStates.HOME
                                 }
                             } catch (e: Exception) {
                                 // handle in future
@@ -205,7 +209,9 @@ fun SignUpLoginPage(
                                 if (response.status == HttpStatusCode.BadRequest) {
                                     // TODO: show error
                                 } else if (response.status == HttpStatusCode.OK) {
-                                    // TODO: something with jwt
+                                    val tokenResponse: TokenResponse = response.body()
+                                    println("TOKEN: "+tokenResponse.token)
+                                    jwt.value = tokenResponse.token
                                     pageState.value = PageStates.HOME
                                 }
                             } catch (e: Exception) {

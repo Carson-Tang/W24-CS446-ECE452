@@ -7,6 +7,7 @@ import io.ktor.server.http.content.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import com.backend.application.routes.userRoutes
+import io.ktor.server.auth.authenticate
 
 fun Application.configureRouting() {
     routing {
@@ -14,8 +15,10 @@ fun Application.configureRouting() {
             call.respondText("Hello World!")
         }
         userRoutes()
-        photoRoutes()
-        journalRoutes()
+        authenticate("auth-jwt") {
+            photoRoutes()
+            journalRoutes()
+        }
         // Static plugin. Try to access `/static/index.html`
         static("/static") {
             resources("static")

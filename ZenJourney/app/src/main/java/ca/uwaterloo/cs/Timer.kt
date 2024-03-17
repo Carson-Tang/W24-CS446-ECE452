@@ -4,7 +4,6 @@ import android.content.Context
 import android.media.MediaPlayer
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -86,22 +86,8 @@ fun TimerScreen(context: Context, appState: AppState) {
 
     Column(
         modifier = Modifier
-            .padding(bottom = 20.dp)
-    ) {
-        Row() {
-            Text(
-                text = "Add some tunes",
-                color = Color(0xFF649E8A),
-                style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier
-                    .clickable(onClick = {appState.pageState.value = PageStates.MEDITATE_PICK_TUNE})
-            )
-        }
-    }
-
-    Column(
-        modifier = Modifier
-            .padding(bottom = 120.dp),
+            .height(375.dp)
+            .padding(bottom = 25.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -157,9 +143,6 @@ fun TimerScreen(context: Context, appState: AppState) {
                         timeMs = defaultTimeMs
                         isRunning = false
 
-                        mediaPlayer?.stop()
-                        mediaPlayer?.release()
-                        mediaPlayer = null
                     }) {
                         Icon(
                             imageVector = Icons.Outlined.Refresh,
@@ -192,9 +175,7 @@ fun TimerScreen(context: Context, appState: AppState) {
                 ) {
                     IconButton(onClick = {
                         isRunning = false
-                        mediaPlayer?.stop()
-                        mediaPlayer?.release()
-                        mediaPlayer = null
+                        mediaPlayer?.pause()
                     }) {
                         Icon(
                             imageVector = Icons.Outlined.Pause,
@@ -202,6 +183,11 @@ fun TimerScreen(context: Context, appState: AppState) {
                             tint = Color(0xFF8FCAB5)
                         )
                     }
+                }
+            }
+            DisposableEffect(key1 = mediaPlayer) {
+                onDispose {
+                    mediaPlayer?.release()
                 }
             }
         }

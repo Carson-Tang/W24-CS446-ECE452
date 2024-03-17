@@ -34,7 +34,7 @@ class MainActivity : ComponentActivity() {
 
 class AppState {
     // what page user sees
-    val pageState = mutableStateOf(PageStates.WELCOME)
+    val pageState = mutableStateOf(PageStates.MEDITATE)
 
     // users name
     val nameState = mutableStateOf("")
@@ -49,6 +49,7 @@ class AppState {
 
     // meditation
     val selectedTune = mutableStateOf(R.raw.once_in_paris)
+    val isPickMusicPlaying = mutableStateOf(false)
 
     // user settings
     val useCloud = mutableStateOf(false)
@@ -133,7 +134,7 @@ fun PageContent(
         PageStates.SIGNUP_PIN -> SignUpPIN(context, appState)
         PageStates.HOME -> HomePage(appState)
         PageStates.MEDITATE -> MeditatePage(context, appState)
-        PageStates.MEDITATE_PICK_TUNE -> MeditatePickTune(appState)
+        PageStates.MEDITATE_PICK_TUNE -> MeditatePickTune(context, appState)
         PageStates.AFFIRMATION -> AffirmationPage(appState)
         PageStates.PHOTOBOOK -> PhotobookPage(context, appState)
         PageStates.JOURNAL_STEP1 -> JournalPage1(appState)

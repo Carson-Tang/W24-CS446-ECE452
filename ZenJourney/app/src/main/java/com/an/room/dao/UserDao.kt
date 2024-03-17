@@ -8,17 +8,21 @@ import com.an.room.model.User
 
 @Dao
 interface UserDao {
+    // assume if user is using local DB then it is just for persistent storage
+    // otherwise they would be using the cloud
+    // this means if user chooses to not use the cloud, they cannot pick a new name
+    // unless they delete the app and redownload
     @Query("SELECT * FROM users")
     fun getAll(): List<User>
+
+    @Query("SELECT * FROM users LIMIT 1")
+    fun getOne(): List<User>
 
     @Query("SELECT * FROM users WHERE id IN (:userIds)")
     fun loadAllByIds(userIds: IntArray): List<User>
 
     @Query("SELECT * FROM users WHERE firstName LIKE :first LIMIT 1")
     fun findByName(first: String): User
-
-    @Query("SELECT * FROM users WHERE email = :email LIMIT 1")
-    fun findByEmail(email: String): User
 
     @Insert
     fun insertAll(vararg users: User)

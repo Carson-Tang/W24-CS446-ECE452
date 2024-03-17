@@ -1,14 +1,20 @@
 package ca.uwaterloo.cs.api
 
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
+import com.google.gson.Gson
+import io.ktor.client.request.delete
+import io.ktor.client.request.get
+import io.ktor.client.request.headers
+import io.ktor.client.request.parameter
+import io.ktor.client.request.post
+import io.ktor.client.request.put
+import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.contentType
+import journal.JournalRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import journal.JournalRequest
-import journal.JournalResponse
-import io.ktor.http.*
-import com.google.gson.Gson
-import io.ktor.client.call.body
 
 object JournalApiService {
 

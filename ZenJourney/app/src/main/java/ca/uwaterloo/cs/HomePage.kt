@@ -2,6 +2,7 @@ package ca.uwaterloo.cs
 
 import StatusResponse
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,47 +18,42 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import ca.uwaterloo.cs.api.JournalApiService
 import io.ktor.client.call.body
-import io.ktor.client.statement.request
 import io.ktor.http.HttpStatusCode
-import kotlinx.coroutines.launch
-import org.junit.Test.None
 import journal.JournalResponse
+import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 
 fun generateFeelingStatement(moods: List<String>): String {
     val moodMap = moodEmojisWithLabels.map { it.first to it.second.lowercase() }.toMap()
     val feelings = moods.mapNotNull { moodMap[it] }
 
-    // TODO: maybe make sentence ending ! if happy feeling and . if sad feeling
-
     val feelingString = when {
         feelings.isEmpty() -> "No specific feelings"
-        feelings.size == 1 -> "I'm feeling ${feelings.first()}."
-        else -> "I'm feeling ${feelings.joinToString(" and ")}."
+        feelings.size == 1 -> "I'm feeling ${feelings.first()}"
+        else -> "I'm feeling ${feelings.first()} and ..."
     }
     return feelingString
 }
 
 @Composable
-fun WithInfo(today: java.time.LocalDate, todayJournalData: JournalResponse) {
+fun WithInfo(today: java.time.LocalDate, todayJournalData: JournalResponse, appState: AppState) {
     Column(
         modifier = Modifier
             .fillMaxWidth(),
@@ -71,10 +67,14 @@ fun WithInfo(today: java.time.LocalDate, todayJournalData: JournalResponse) {
         )
     }
 
-    // TODO: make this expand with the text
     Column(
         modifier = Modifier
             .padding(top = 50.dp, start = 30.dp, end = 30.dp)
+            .clickable(onClick = {
+                // TODO: make sure this clickable actually shows today in past journal
+                // might have to update appState
+                appState.pageState.value = PageStates.PAST_JOURNAL
+            })
     ) {
         Row(
             modifier = Modifier
@@ -151,12 +151,13 @@ fun HomePage(appState: AppState) {
                 if (response.status == HttpStatusCode.OK) {
                     todayJournalData = response.body()
                 } else {
-                    // TODO: error, but tbh prob fine to just ignore
+                    // TODO: handle error
                     val statusResponse: StatusResponse = response.body()
-                    // statusResponse.body
+                    println(statusResponse.body)
                 }
             } catch (e: Exception) {
-                // TODO: error, but tbh prob fine to just ignore
+                // TODO: handle error
+                println(e.message)
             }
         }
     }
@@ -172,7 +173,7 @@ fun HomePage(appState: AppState) {
             modifier = Modifier.padding(top = 128.dp)
         ) {
             if (todayJournalData.moods.isNotEmpty()) {
-                WithInfo(today, todayJournalData)
+                WithInfo(today, todayJournalData, appState)
             } else {
                 WithoutInfo()
             }

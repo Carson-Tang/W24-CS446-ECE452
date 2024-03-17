@@ -1,14 +1,15 @@
 package ca.uwaterloo.cs.api
 
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
+import com.google.gson.Gson
+import io.ktor.client.request.get
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import user.UserRequest
-import user.UserResponse
-import io.ktor.http.*
-import com.google.gson.Gson
-import io.ktor.client.call.body
 
 object UserApiService {
 

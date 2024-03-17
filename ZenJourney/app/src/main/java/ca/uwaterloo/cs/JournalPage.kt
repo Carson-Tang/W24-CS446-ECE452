@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,7 +15,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -22,12 +22,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,14 +34,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.time.format.DateTimeFormatter
-import kotlinx.coroutines.launch
 import ca.uwaterloo.cs.api.JournalApiService
 import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode
 import journal.JournalRequest
 import journal.JournalResponse
+import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun JournalPage1(appState: AppState) {
@@ -306,7 +305,6 @@ fun JournalPage3(appState: AppState) {
                                     // we can change this flow in the future, but this current creation doesnt return
                                     // the actual journal response, so we just query it again
                                     val response2 = JournalApiService.createJournal(journalRequest, appState.jwt.value)
-                                    println(response2)
                                     val response = JournalApiService.getJournalByDateAndUser(
                                         userId = "65f6591ebe57c2026bcb2300", // Example user ID
                                         year = appState.selectedDate.value.year,
@@ -325,12 +323,13 @@ fun JournalPage3(appState: AppState) {
                                         appState.pageState.value = PageStates.PAST_JOURNAL
                                     } else if (response.status == HttpStatusCode.BadRequest || response.status == HttpStatusCode.NotFound) {
                                         val statusResponse: StatusResponse = response.body()
-                                        // TODO something with response.body()
-
+                                        // TODO: handle invalid query params or no data for date
+                                        println(statusResponse.body)
                                         appState.pageState.value = PageStates.HOME
                                     }
                                 } catch (e: Exception) {
-                                    // handle in future
+                                    // TODO: handle error
+                                    println(e.message)
                                 }
                             }
 
@@ -357,7 +356,6 @@ fun JournalPage3(appState: AppState) {
 @Composable
 fun PastJournalPage(appState: AppState)
 {
-
     DisposableEffect(Unit) {
         onDispose {
             appState.pastDate.value = LocalDate.now()

@@ -1,5 +1,7 @@
 package ca.uwaterloo.cs
 
+import StatusResponse
+import android.util.Patterns.EMAIL_ADDRESS
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,24 +13,19 @@ import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import android.util.Patterns.EMAIL_ADDRESS
 import ca.uwaterloo.cs.api.UserApiService
-import kotlinx.coroutines.launch
-import user.UserRequest
-import androidx.compose.runtime.rememberCoroutineScope
-import io.ktor.http.HttpStatusCode
-import user.UserResponse
-import StatusResponse
-import android.content.Context
 import io.ktor.client.call.body
+import io.ktor.http.HttpStatusCode
+import kotlinx.coroutines.launch
 import token.TokenResponse
+import user.UserRequest
 
 @Composable
 fun SignUpPage1(appState: AppState) {
@@ -137,6 +134,7 @@ fun SignUpLoginPage(
     val passwordState = remember { mutableStateOf("") }
     val emailErrorState = remember { mutableStateOf(InputErrorStates.NONE) }
     val passwordErrorState = remember { mutableStateOf(InputErrorStates.NONE) }
+
     Column(
         Modifier
             .background(MaterialTheme.colorScheme.background)
@@ -180,14 +178,16 @@ fun SignUpLoginPage(
                                 val response = UserApiService.createUser(userRequest)
                                 if (response.status == HttpStatusCode.BadRequest) {
                                     val statusResponse: StatusResponse = response.body()
-                                    // TODO: assign statusResponse.body to something
+                                    // TODO: handle with email already exists
+                                    println(statusResponse.body)
                                 } else if (response.status == HttpStatusCode.Created) {
                                     val tokenResponse: TokenResponse = response.body()
                                     appState.jwt.value = tokenResponse.token
                                     appState.pageState.value = PageStates.SIGNUP_STEP3
                                 }
                             } catch (e: Exception) {
-                                // handle in future
+                                // TODO: handle error
+                                println(e.message)
                             }
                         }
                         // LOGIN USER
@@ -200,14 +200,18 @@ fun SignUpLoginPage(
                             try {
                                 val response = UserApiService.loginUser(userRequest)
                                 if (response.status == HttpStatusCode.BadRequest) {
-                                    // TODO: show error
+                                    val statusResponse: StatusResponse = response.body()
+                                    // TODO: handle email doesn't exist or invalid password
+                                    // probably don't differentiate to keep security
+                                    println(statusResponse.body)
                                 } else if (response.status == HttpStatusCode.OK) {
                                     val tokenResponse: TokenResponse = response.body()
                                     appState.jwt.value = tokenResponse.token
                                     appState.pageState.value = PageStates.HOME
                                 }
                             } catch (e: Exception) {
-                                // handle in future
+                                // TODO: handle error
+                                println(e.message)
                             }
                         }
                     }

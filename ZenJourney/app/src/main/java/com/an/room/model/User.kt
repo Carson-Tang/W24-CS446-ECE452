@@ -8,10 +8,8 @@ data class User(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id") val id: Int = 0,
 
-    @ColumnInfo(name = "email") val email: String,
     @ColumnInfo(name = "firstName") val firstName: String,
-    @ColumnInfo(name = "password") val password: String,
     @ColumnInfo(name = "useCloud") val useCloud: Boolean,
     @ColumnInfo(name = "useJournalForAffirmations") val useJournalForAffirmations: Boolean,
-    @ColumnInfo(name = "pin") val pin: String,
+    @ColumnInfo(name = "pin") val pin: String = "",
 ): java.io.Serializable;

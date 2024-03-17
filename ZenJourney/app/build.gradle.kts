@@ -86,7 +86,7 @@ dependencies {
 
   implementation("io.ktor:ktor-client-core:$ktorVersion")
   implementation("io.ktor:ktor-client-json:$ktorVersion")
-  implementation("io.ktor:ktor-serialization-gson-jvm")
+  implementation("io.ktor:ktor-serialization-gson-jvm:2.3.9")
   implementation("io.ktor:ktor-client-serialization:$ktorVersion")
   implementation("io.ktor:ktor-client-logging:$ktorVersion")
   implementation("io.ktor:ktor-client-okhttp:$ktorVersion")

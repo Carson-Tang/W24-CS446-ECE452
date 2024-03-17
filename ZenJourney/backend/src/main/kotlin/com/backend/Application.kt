@@ -13,13 +13,21 @@ import com.backend.domain.ports.UserRepository
 import com.backend.infrastructure.repository.PhotoRepositoryImpl
 import com.backend.infrastructure.repository.JournalRepositoryImpl
 import com.backend.infrastructure.repository.UserRepositoryImpl
+import com.backend.jwtConfig.JwtConfig
 import io.ktor.serialization.gson.gson
 import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
 
 fun main(args: Array<String>): Unit = EngineMain.main(args)
 
 fun Application.module() {
 //    configureSerialization()
+    install(Authentication) {
+        jwt {
+            verifier(JwtConfig.verifier)
+        }
+    }
     install(ContentNegotiation) {
         gson {
         }

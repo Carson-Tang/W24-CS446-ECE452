@@ -34,7 +34,7 @@ class MainActivity : ComponentActivity() {
 
 class AppState {
     // what page user sees
-    val pageState = mutableStateOf(PageStates.MEDITATE)
+    val pageState = mutableStateOf(PageStates.WELCOME)
 
     // users name
     val nameState = mutableStateOf("")

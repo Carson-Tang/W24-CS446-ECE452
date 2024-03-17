@@ -13,7 +13,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import ca.uwaterloo.cs.ui.theme.ZenJourneyTheme
 import com.an.room.db.UserDB
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -76,6 +75,7 @@ fun loadLocalUserSettings(context: Context, appState: AppState) {
 @Composable
 fun MainContent(context: Context) {
     val appState = remember { AppState() }
+
     loadLocalUserSettings(context, appState)
 
     Scaffold(

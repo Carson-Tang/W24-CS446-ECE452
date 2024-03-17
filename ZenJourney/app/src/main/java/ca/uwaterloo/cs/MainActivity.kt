@@ -49,7 +49,10 @@ class AppState {
 
     // meditation
     val selectedTune = mutableStateOf(R.raw.once_in_paris)
-    val isPickMusicPlaying = mutableStateOf(false)
+    val playingTuneId = mutableStateOf(selectedTune.value)
+    // timer time in meditation
+    val defaultTimeMs = mutableStateOf(60000L)
+    val timeMs = mutableStateOf(defaultTimeMs.value)
 
     // user settings
     val useCloud = mutableStateOf(false)

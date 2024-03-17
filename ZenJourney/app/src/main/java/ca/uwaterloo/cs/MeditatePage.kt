@@ -1,6 +1,7 @@
 package ca.uwaterloo.cs
 
 import android.content.Context
+import android.content.res.AssetFileDescriptor
 import android.media.MediaPlayer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,13 +21,14 @@ import androidx.compose.material.icons.outlined.PauseCircle
 import androidx.compose.material.icons.outlined.PlayCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,7 +39,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.ktor.utils.io.errors.IOException
 
 @Composable
 fun MeditatePage(context: Context, appState: AppState) {
@@ -60,15 +61,22 @@ fun MeditatePage(context: Context, appState: AppState) {
                 textAlign = TextAlign.Center,
             )
             TimerScreen(context, appState)
-            Text(
-                text = "Add some tunes",
-                color = Color(0xFF649E8A),
-                style = MaterialTheme.typography.headlineSmall,
+            ElevatedButton(
+                onClick = {
+                    appState.pageState.value = PageStates.MEDITATE_PICK_TUNE
+                },
                 modifier = Modifier
-                    .clickable(onClick = {
-                        appState.pageState.value = PageStates.MEDITATE_PICK_TUNE
-                    })
-            )
+                    .padding(bottom = 20.dp)
+                    .size(width = 250.dp, height = 56.dp),
+                colors = ButtonDefaults.elevatedButtonColors(MaterialTheme.colorScheme.primaryContainer),
+                elevation = ButtonDefaults.elevatedButtonElevation(defaultElevation = 4.dp)
+            ) {
+                Text(
+                    "Add some tunes",
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    style = MaterialTheme.typography.headlineSmall
+                )
+            }
         }
     }
 }
@@ -101,10 +109,7 @@ fun MeditatePickTune(context: Context, appState: AppState) {
                     .background(color = Color.White, shape = RoundedCornerShape(16.dp))
                     .padding(top = 30.dp)
             ) {
-                ScrollableTunesList(listOf(
-                    Tune("Once in Paris", R.raw.once_in_paris),
-                    Tune("Good Night", R.raw.good_night)
-                ), appState.selectedTune, appState.isPickMusicPlaying, context, appState)
+                ScrollableTunesList(meditationMusic, appState.selectedTune, appState.playingTuneId, context, appState)
             }
         }
 
@@ -143,32 +148,10 @@ data class Tune(
     val tuneId: Int // e.g. R.raw.once_in_paris
 )
 @Composable
-fun TuneListItem(tune: Tune, selectedTune: MutableState<Int>, isPickMusicPlaying: MutableState<Boolean>, context: Context, appState: AppState) {
-    val mediaPlayer = remember {
-        MediaPlayer.create(context, appState.selectedTune.value)
-        MediaPlayer().apply {
-            setOnCompletionListener {
-                // Handle completion if needed
-            }
-        }
-    }
-    DisposableEffect(key1 = mediaPlayer) {
-        onDispose {
-            mediaPlayer.release()
-        }
-    }
-
-    LaunchedEffect(isPickMusicPlaying.value) {
-        if (isPickMusicPlaying.value) {
-            try {
-                mediaPlayer.start()
-            } catch (e: IOException) {
-                // Handle exception
-            }
-        } else {
-            mediaPlayer.pause()
-        }
-    }
+fun TuneListItem(tune: Tune, selectedTune: MutableState<Int>, playingTuneId: MutableState<Int>, context: Context, appState: AppState) {
+    val mediaPlayer = remember { MediaPlayer() }
+    val tunePlaybackState = remember { mutableStateMapOf<Int, Boolean>() }
+    val isCurrPlaying = tunePlaybackState[tune.tuneId] ?: false
 
     val tint = if (tune.tuneId == selectedTune.value) {
         Color.White
@@ -211,26 +194,39 @@ fun TuneListItem(tune: Tune, selectedTune: MutableState<Int>, isPickMusicPlaying
                 .clickable(onClick = {selectedTune.value = tune.tuneId})
         )
         Icon(
-            imageVector = if (isPickMusicPlaying.value) Icons.Outlined.PauseCircle else Icons.Outlined.PlayCircle,
+            imageVector = if (isCurrPlaying) Icons.Outlined.PauseCircle else Icons.Outlined.PlayCircle,
             contentDescription = null,
             tint = tint,
             modifier = Modifier
                 .clickable {
-                    isPickMusicPlaying.value = !isPickMusicPlaying.value
+                    tunePlaybackState[tune.tuneId] = !isCurrPlaying
+                    if (playingTuneId.value != tune.tuneId) {
+                        playingTuneId.value = tune.tuneId
+                    }
+                    if (!isCurrPlaying) {
+                        mediaPlayer.reset()
+                        val assetDescriptor: AssetFileDescriptor = context.resources.openRawResourceFd(tune.tuneId)
+                        mediaPlayer.setDataSource(assetDescriptor.fileDescriptor, assetDescriptor.startOffset, assetDescriptor.length)
+                        mediaPlayer.prepare()
+                        mediaPlayer.start()
+                    } else {
+                        mediaPlayer.pause()
+                    }
+
                 }
                 .padding(end = 30.dp),
         )
     }
-
-    DisposableEffect(key1 = mediaPlayer) {
+    DisposableEffect(Unit) {
         onDispose {
+            // Release the MediaPlayer when the composable is disposed
             mediaPlayer.release()
         }
     }
 }
 
 @Composable
-fun ScrollableTunesList(tuneList: List<Tune>, selectedTune: MutableState<Int>, isPickMusicPlaying: MutableState<Boolean>, context: Context, appState: AppState) {
+fun ScrollableTunesList(tuneList: List<Tune>, selectedTune: MutableState<Int>, isPickMusicPlaying: MutableState<Int>, context: Context, appState: AppState) {
     LazyColumn {
         items(tuneList) { tune ->
             TuneListItem(tune, selectedTune, isPickMusicPlaying, context, appState)

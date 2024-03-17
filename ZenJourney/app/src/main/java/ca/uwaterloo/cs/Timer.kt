@@ -4,7 +4,6 @@ import android.content.Context
 import android.media.MediaPlayer
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +23,7 @@ import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -55,53 +55,38 @@ fun formatTime(ms: Long): String {
 }
 
 @Composable
-fun TimerScreen(context: Context, appState: AppState) {
-    // default timer value
-    var defaultTimeMs by remember { // in ms
-        mutableStateOf(60000L)
-    }
+fun formatTimeTriple(ms: Long): Triple<Int, Int, Int> {
+    val hours = TimeUnit.MILLISECONDS.toHours(ms).toInt()
+    val min = (TimeUnit.MILLISECONDS.toMinutes(ms) % 60).toInt()
+    val sec = (TimeUnit.MILLISECONDS.toSeconds(ms) % 60).toInt()
 
-    // what the actual timer shows
-    var timeMs by remember {
-        mutableStateOf(defaultTimeMs)
-    }
+    return Triple(hours, min, sec)
+}
+
+@Composable
+fun TimerScreen(context: Context, appState: AppState) {
     var isRunning by remember {
         mutableStateOf(false)
     }
 
     var isTimePickerVisible by remember { mutableStateOf(false) }
-    var selectedTime by remember { mutableStateOf(Triple(0, 0, 0)) }
 
-    // TODO: I don't think the stop actually works
-    var mediaPlayer: MediaPlayer? = null;
+    var mediaPlayer: MediaPlayer? by remember { mutableStateOf(null) }
 
     Column() {
         if (isTimePickerVisible) {
-            TimePickerPopup { hour, minute, second ->
-                selectedTime = Triple(hour, minute, second)
+            TimePickerPopup(appState.defaultTimeMs.value) { hour, minute, second ->
                 isTimePickerVisible = false
+                appState.defaultTimeMs.value = hour * 3600000L + minute * 60000L + second * 1000L
+                appState.timeMs.value = appState.defaultTimeMs.value
             }
         }
     }
 
     Column(
         modifier = Modifier
-            .padding(bottom = 20.dp)
-    ) {
-        Row() {
-            Text(
-                text = "Add some tunes",
-                color = Color(0xFF649E8A),
-                style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier
-                    .clickable(onClick = {appState.pageState.value = PageStates.MEDITATE_PICK_TUNE})
-            )
-        }
-    }
-
-    Column(
-        modifier = Modifier
-            .padding(bottom = 120.dp),
+            .height(350.dp)
+            .padding(bottom = 25.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -121,7 +106,7 @@ fun TimerScreen(context: Context, appState: AppState) {
             }
 
             Text(
-                text = formatTime(timeMs),
+                text = formatTime(appState.timeMs.value),
                 style = MaterialTheme.typography.headlineLarge,
                 color = Color(0xFF70A894),
                 modifier = Modifier
@@ -154,12 +139,9 @@ fun TimerScreen(context: Context, appState: AppState) {
                         .background(color = Color(0xFF7BB6A1), shape = RoundedCornerShape(6.dp))
                 ) {
                     IconButton(onClick = {
-                        timeMs = defaultTimeMs
+                        appState.timeMs.value = appState.defaultTimeMs.value
                         isRunning = false
 
-                        mediaPlayer?.stop()
-                        mediaPlayer?.release()
-                        mediaPlayer = null
                     }) {
                         Icon(
                             imageVector = Icons.Outlined.Refresh,
@@ -174,9 +156,12 @@ fun TimerScreen(context: Context, appState: AppState) {
                         .background(color = Color(0xFF7BB6A1), shape = RoundedCornerShape(6.dp))
                 ) {
                     IconButton(onClick = {
-                        isRunning = true
-                        mediaPlayer = MediaPlayer.create(context, appState.selectedTune.value)
-                        mediaPlayer?.start()
+                        if (!isRunning) {
+                            isRunning = true
+                            mediaPlayer = MediaPlayer.create(context, appState.selectedTune.value)
+                            mediaPlayer?.isLooping = true
+                            mediaPlayer?.start()
+                        }
                     }) {
                         Icon(
                             imageVector = Icons.Outlined.PlayArrow,
@@ -192,9 +177,7 @@ fun TimerScreen(context: Context, appState: AppState) {
                 ) {
                     IconButton(onClick = {
                         isRunning = false
-                        mediaPlayer?.stop()
-                        mediaPlayer?.release()
-                        mediaPlayer = null
+                        mediaPlayer?.pause()
                     }) {
                         Icon(
                             imageVector = Icons.Outlined.Pause,
@@ -209,24 +192,25 @@ fun TimerScreen(context: Context, appState: AppState) {
 
     LaunchedEffect(isRunning) {
         while (isRunning) {
-            if (timeMs == 0L) {
+            if (appState.timeMs.value == 0L) {
                 isRunning = false
                 mediaPlayer?.stop()
                 mediaPlayer?.release()
                 mediaPlayer = null
             }
             delay(1000)
-            timeMs -= 1000
+            appState.timeMs.value -= 1000
         }
     }
 }
 
 
 @Composable
-fun TimePickerPopup(onTimeSelected: (hour: Int, minute: Int, second: Int) -> Unit) {
-    var hour by remember { mutableStateOf(0) }
-    var minute by remember { mutableStateOf(0) }
-    var second by remember { mutableStateOf(0) }
+fun TimePickerPopup(defaultTimeMs: Long, onTimeSelected: (hour: Int, minute: Int, second: Int) -> Unit) {
+    var time = formatTimeTriple(defaultTimeMs)
+    var hour by remember { mutableStateOf(time.first) }
+    var minute by remember { mutableStateOf(time.second) }
+    var second by remember { mutableStateOf(time.third) }
 
     Dialog(onDismissRequest = { /* Dismiss the dialog */ }) {
         Surface(
@@ -237,14 +221,14 @@ fun TimePickerPopup(onTimeSelected: (hour: Int, minute: Int, second: Int) -> Uni
                 modifier = Modifier.padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(text = "Pick a time", style = MaterialTheme.typography.headlineMedium)
-                Spacer(modifier = Modifier.height(16.dp))
+                Text(text = "Meditation Time", style = MaterialTheme.typography.headlineSmall, color = Color.Black)
+                Spacer(modifier = Modifier.height(8.dp))
                 NumberPicker(value = hour, onValueChange = { hour = it }, label = "Hour")
                 NumberPicker(value = minute, onValueChange = { minute = it }, label = "Minute")
                 NumberPicker(value = second, onValueChange = { second = it }, label = "Second")
 
-                Spacer(modifier = Modifier.height(16.dp))
                 Button(
+                    colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondaryContainer),
                     onClick = {
                         onTimeSelected(hour, minute, second)
                     }
@@ -273,7 +257,11 @@ fun NumberPicker(value: Int, onValueChange: (Int) -> Unit, label: String) {
             IconButton(onClick = { onValueChange(value - 1) }) {
                 Icon(Icons.Default.Remove, contentDescription = "Decrease")
             }
-            Text(text = value.toString())
+            Text(
+                text = value.toString(),
+                color = Color.Black,
+                modifier = Modifier.padding(top = 10.dp)
+            )
             IconButton(onClick = { onValueChange(value + 1) }) {
                 Icon(Icons.Default.Add, contentDescription = "Increase")
             }

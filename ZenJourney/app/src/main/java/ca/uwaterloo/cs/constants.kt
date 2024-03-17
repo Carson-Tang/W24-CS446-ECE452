@@ -35,3 +35,14 @@ val emojiToWordMap = moodEmojisWithLabels.toMap()
 
 // map of ("Happy" to "\uD83D\uDE0A")
 val wordToEmojiMap = moodEmojisWithLabels.map { (emoji, word) -> word to emoji }.toMap()
+
+// songs
+val meditationMusic = listOf(
+    Tune("Once in Paris", R.raw.once_in_paris),
+    Tune("Good Night", R.raw.good_night),
+    Tune("Forest Lullaby", R.raw.forest_lullaby),
+    Tune("Lofi Study", R.raw.lofi_study),
+    Tune("Melody of Nature", R.raw.melody_of_nature),
+    Tune("Scott Buckley Moonlight", R.raw.scott_buckley_moonlight),
+    Tune("Test Song", R.raw.test_song)
+    )

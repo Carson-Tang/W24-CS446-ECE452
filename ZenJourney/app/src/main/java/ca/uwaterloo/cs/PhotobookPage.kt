@@ -1,5 +1,6 @@
 package ca.uwaterloo.cs
 
+import android.Manifest
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -37,6 +38,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import java.time.LocalDate
 
 data class PhotobookPhoto(
@@ -79,6 +83,7 @@ fun capitalize(s: String): String {
     return s.substring(0, 1).uppercase() + s.substring(1).lowercase();
 }
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun PhotobookPage(context: Context, appState: AppState) {
     val currentDate = LocalDate.now()
@@ -113,7 +118,12 @@ fun PhotobookPage(context: Context, appState: AppState) {
         )
     }
 
-
+    /*
+        referenced from:
+        https://developer.android.com/jetpack/compose/libraries
+        https://developer.android.com/reference/androidx/activity/result/contract/ActivityResultContracts.TakePicturePreview
+        https://developer.android.com/reference/androidx/activity/result/contract/ActivityResultContracts.GetContent
+    */
     val getCameraContent =
         rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) {
             /* TODO: upload bitmap to server and update UI */
@@ -134,17 +144,25 @@ fun PhotobookPage(context: Context, appState: AppState) {
         }
     }
 
-    val showDialog = remember { mutableStateOf(false) }
+    val showChoiceDialog = remember { mutableStateOf(false) }
+    val showPermissionDeniedDialog = remember { mutableStateOf(false) }
+    // referenced from: https://google.github.io/accompanist/permissions/
+    val cameraPermissions =
+        rememberPermissionState(Manifest.permission.CAMERA)
 
-    if (showDialog.value) {
+    if (showChoiceDialog.value) {
         AlertDialog(
-            onDismissRequest = { showDialog.value = false },
+            onDismissRequest = { showChoiceDialog.value = false },
             confirmButton = {
                 Button(
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
                     onClick = {
-                        showDialog.value = false
-                        getCameraContent.launch(null)
+                        if (cameraPermissions.status.isGranted) {
+                            getCameraContent.launch(null)
+                        } else {
+                            showPermissionDeniedDialog.value = true
+                        }
+                        showChoiceDialog.value = false
                     }) {
                     Text("Take picture")
                 }
@@ -153,7 +171,7 @@ fun PhotobookPage(context: Context, appState: AppState) {
                 Button(
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
                     onClick = {
-                        showDialog.value = false
+                        showChoiceDialog.value = false
                         getAlbumContent.launch("image/*")
                     }) {
                     Text("Select image")
@@ -167,6 +185,31 @@ fun PhotobookPage(context: Context, appState: AppState) {
                 )
             }
         )
+    }
+    if (showPermissionDeniedDialog.value) {
+        AlertDialog(
+            onDismissRequest = {
+                cameraPermissions.launchPermissionRequest()
+                showPermissionDeniedDialog.value = false
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        cameraPermissions.launchPermissionRequest()
+                        showPermissionDeniedDialog.value = false
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
+                ) {
+                    Text("OK")
+                }
+            },
+            text = {
+                Text(
+                    color = Color(0xFF4F4F4F),
+                    text = "Camera permission is required for this feature.",
+                    fontSize = 16.sp
+                )
+            })
     }
 
     Column(
@@ -200,9 +243,7 @@ fun PhotobookPage(context: Context, appState: AppState) {
                         modifier = Modifier.align(Alignment.BottomEnd),
                         shape = CircleShape,
                         containerColor = Color.DarkGray,
-                        onClick = {
-                            showDialog.value = true
-                        }) {
+                        onClick = { showChoiceDialog.value = true }) {
                         Icon(
                             Icons.Filled.Add, "Add photobook button"
                         )

@@ -61,7 +61,6 @@ fun Route.userRoutes() {
                 return@post call.respond(
                     HttpStatusCode.Created,
                     hashMapOf("token" to token),
-//                    toStatusResponse(true, "Created user with id: ${insertedId.asObjectId().value}")
                 )
             }
         }

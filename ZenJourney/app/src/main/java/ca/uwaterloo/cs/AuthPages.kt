@@ -189,7 +189,6 @@ fun SignUpLoginPage(
                                     // TODO: assign statusResponse.body to something
                                 } else if (response.status == HttpStatusCode.Created) {
                                     val tokenResponse: TokenResponse = response.body()
-                                    println("TOKEN: "+tokenResponse.token)
                                     jwt.value = tokenResponse.token
                                     pageState.value = PageStates.SIGNUP_STEP3
                                 }
@@ -210,7 +209,6 @@ fun SignUpLoginPage(
                                     // TODO: show error
                                 } else if (response.status == HttpStatusCode.OK) {
                                     val tokenResponse: TokenResponse = response.body()
-                                    println("TOKEN: "+tokenResponse.token)
                                     jwt.value = tokenResponse.token
                                     pageState.value = PageStates.HOME
                                 }

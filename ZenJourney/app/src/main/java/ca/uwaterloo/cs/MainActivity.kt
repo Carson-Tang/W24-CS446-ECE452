@@ -1,5 +1,6 @@
 package ca.uwaterloo.cs
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -8,14 +9,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.MutableLiveData
 import ca.uwaterloo.cs.ui.theme.ZenJourneyTheme
 import com.an.room.db.UserDB
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import com.an.room.model.User
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
 class MainActivity : ComponentActivity() {
@@ -56,18 +59,27 @@ class AppState {
     val jwt = mutableStateOf("")
 }
 
-@OptIn(DelicateCoroutinesApi::class)
+@SuppressLint("CoroutineCreationDuringComposition")
+@Composable
 fun loadLocalUserSettings(context: Context, appState: AppState) {
     val database = UserDB.getDB(context)
     val userDao = database.userDao()
 
-    GlobalScope.launch {
-        val userRes = userDao.getOne().getOrNull(0)
-        if (userRes != null) {
-            appState.nameState.value = userRes.firstName
-            appState.useCloud.value = userRes.useCloud
-            appState.useJournalForAffirmations.value = userRes.useJournalForAffirmations
-            appState.usePIN.value = userRes.pin != ""
+    val userRes = remember { MutableLiveData<User>() }
+
+    LaunchedEffect(true) {
+        val user = withContext(Dispatchers.IO) {
+            userDao.getOne().getOrNull(0)
+        }
+        user?.let {
+            userRes.value = it
+            withContext(Dispatchers.Main) {
+                println(user)
+                appState.nameState.value = user.firstName
+                appState.useCloud.value = user.useCloud
+                appState.useJournalForAffirmations.value = user.useJournalForAffirmations
+                appState.usePIN.value = user.pin != ""
+            }
         }
     }
 }

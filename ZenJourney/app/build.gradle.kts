@@ -44,6 +44,8 @@ dependencies {
   implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.7")                // For making HTTP calls.
   implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")   // For serializing/deserializing JSON.
 
+  implementation("com.google.accompanist:accompanist-permissions:0.34.0")
+
   implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
   implementation("androidx.test.ext:junit-ktx:1.1.5")
 

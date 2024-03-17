@@ -11,6 +11,5 @@ data class Journal(
     @ColumnInfo(name = "year") val year: Int,
     @ColumnInfo(name = "month") val month: Int,
     @ColumnInfo(name = "day") val day: Int,
-    @ColumnInfo(name = "moods") val moods: List<String>,
     @ColumnInfo(name = "content") val content: String,
 ): java.io.Serializable;

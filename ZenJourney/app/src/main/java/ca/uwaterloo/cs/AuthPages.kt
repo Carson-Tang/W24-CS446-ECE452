@@ -1,6 +1,7 @@
 package ca.uwaterloo.cs
 
 import StatusResponse
+import android.Manifest
 import android.util.Patterns.EMAIL_ADDRESS
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -21,6 +22,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ca.uwaterloo.cs.api.UserApiService
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberPermissionState
 import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.launch
@@ -45,7 +48,8 @@ fun SignUpPage1(appState: AppState) {
         TextFieldComponent(appState.nameState, "My name is...", errorState)
         ElevatedButton(
             onClick = {
-                if (appState.nameState.value.isNotBlank()) appState.pageState.value = PageStates.SIGNUP_CLOUD
+                if (appState.nameState.value.isNotBlank()) appState.pageState.value =
+                    PageStates.SIGNUP_CLOUD
                 else {
                     errorState.value = InputErrorStates.EMPTY_INPUT
                 }
@@ -76,8 +80,12 @@ fun SignUpPage2(
     )
 }
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun SignUpPage3(appState: AppState) {
+    // referenced from: https://google.github.io/accompanist/permissions/
+    val notificationPermissions =
+        rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
     Column(
         Modifier
             .background(MaterialTheme.colorScheme.background)
@@ -97,7 +105,10 @@ fun SignUpPage3(appState: AppState) {
             modifier = Modifier.padding(bottom = 224.dp),
         )
         ElevatedButton(
-            onClick = { appState.pageState.value = PageStates.SIGNUP_AFFIRMATION },
+            onClick = {
+                appState.pageState.value = PageStates.SIGNUP_AFFIRMATION
+                notificationPermissions.launchPermissionRequest()
+            },
             modifier = Modifier.size(width = 184.dp, height = 56.dp),
             colors = ButtonDefaults.elevatedButtonColors(MaterialTheme.colorScheme.primaryContainer),
             elevation = ButtonDefaults.elevatedButtonElevation(defaultElevation = 4.dp)

@@ -74,7 +74,6 @@ fun loadLocalUserSettings(context: Context, appState: AppState) {
         user?.let {
             userRes.value = it
             withContext(Dispatchers.Main) {
-                println(user)
                 appState.nameState.value = user.firstName
                 appState.useCloud.value = user.useCloud
                 appState.useJournalForAffirmations.value = user.useJournalForAffirmations

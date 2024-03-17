@@ -138,7 +138,7 @@ fun WithoutInfo() {
 }
 
 @Composable
-fun HomePage(pageState: MutableState<PageStates>, jwt: MutableState<String>) {
+fun HomePage(appState: AppState) {
     val coroutineScope = rememberCoroutineScope()
     val today = LocalDate.now()
     var todayJournalData by remember { mutableStateOf(JournalResponse("", 0, 0, 0, listOf(), "", "")) }
@@ -147,7 +147,7 @@ fun HomePage(pageState: MutableState<PageStates>, jwt: MutableState<String>) {
         // This block will be executed when the composable is first displayed
         coroutineScope.launch {
             try {
-                val response = JournalApiService.getJournalByDate(today.year, today.monthValue, today.dayOfMonth, jwt.value)
+                val response = JournalApiService.getJournalByDate(today.year, today.monthValue, today.dayOfMonth, appState.jwt.value)
                 if (response.status == HttpStatusCode.OK) {
                     todayJournalData = response.body()
                 } else {
@@ -192,7 +192,7 @@ fun HomePage(pageState: MutableState<PageStates>, jwt: MutableState<String>) {
                         .size(height = 86.dp, width = 120.dp)
                 ) {
                     Button(
-                        onClick = { pageState.value = PageStates.AFFIRMATION },
+                        onClick = { appState.pageState.value = PageStates.AFFIRMATION },
                         colors = ButtonDefaults.buttonColors(containerColor = Color.White),
                         modifier = Modifier
                             .align(Alignment.Center)
@@ -224,7 +224,7 @@ fun HomePage(pageState: MutableState<PageStates>, jwt: MutableState<String>) {
                         .size(height = 86.dp, width = 120.dp)
                 ) {
                     Button(
-                        onClick = { pageState.value = PageStates.JOURNAL_STEP1 },
+                        onClick = { appState.pageState.value = PageStates.JOURNAL_STEP1 },
                         colors = ButtonDefaults.buttonColors(containerColor = Color.White),
                         modifier = Modifier
                             .align(Alignment.Center)
@@ -264,7 +264,7 @@ fun HomePage(pageState: MutableState<PageStates>, jwt: MutableState<String>) {
                             .size(height = 86.dp, width = 120.dp)
                     ) {
                         Button(
-                            onClick = { pageState.value = PageStates.MEDITATE },
+                            onClick = { appState.pageState.value = PageStates.MEDITATE },
                             colors = ButtonDefaults.buttonColors(containerColor = Color.White),
                             modifier = Modifier
                                 .align(Alignment.Center)
@@ -296,7 +296,7 @@ fun HomePage(pageState: MutableState<PageStates>, jwt: MutableState<String>) {
                             .size(height = 86.dp, width = 120.dp)
                     ) {
                         Button(
-                            onClick = { pageState.value = PageStates.PHOTOBOOK },
+                            onClick = { appState.pageState.value = PageStates.PHOTOBOOK },
                             colors = ButtonDefaults.buttonColors(containerColor = Color.White),
                             modifier = Modifier
                                 .align(Alignment.Center)

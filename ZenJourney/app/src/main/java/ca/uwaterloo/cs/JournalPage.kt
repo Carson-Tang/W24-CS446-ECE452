@@ -45,10 +45,7 @@ import journal.JournalResponse
 import java.time.LocalDate
 
 @Composable
-fun JournalPage1(pageState: MutableState<PageStates>, selectedDate: MutableState<LocalDate>,
-                 pastSelectedMoods: MutableState<List<String>>, pastJournalEntry: MutableState<String>,
-                 pastDate: MutableState<LocalDate>, jwt: MutableState<String>,
-) {
+fun JournalPage1(appState: AppState) {
     Column(
         Modifier
             .background(color = MaterialTheme.colorScheme.background)
@@ -80,13 +77,13 @@ fun JournalPage1(pageState: MutableState<PageStates>, selectedDate: MutableState
                 .padding(top = 20.dp)
         )
         {
-            CalendarWithHeader(pageState, selectedDate, pastSelectedMoods, pastJournalEntry, pastDate, jwt)
+            CalendarWithHeader(appState)
         }
     }
 }
 
 @Composable
-fun JournalPage2(pageState: MutableState<PageStates>, selectedDate: MutableState<LocalDate>, selectedMoods: MutableState<List<String>>) {
+fun JournalPage2(appState: AppState) {
     Column(
         Modifier
             .background(color = MaterialTheme.colorScheme.background)
@@ -98,7 +95,7 @@ fun JournalPage2(pageState: MutableState<PageStates>, selectedDate: MutableState
                 .padding(top = 24.dp)
         ) {
             Text(
-                text = selectedDate.value.format(DateTimeFormatter.ofPattern("MMMM d, yyyy")),
+                text = appState.selectedDate.value.format(DateTimeFormatter.ofPattern("MMMM d, yyyy")),
                 style = MaterialTheme.typography.headlineMedium,
                 textAlign = TextAlign.Center,
                 color = Color(0xFF649E8A)
@@ -123,7 +120,7 @@ fun JournalPage2(pageState: MutableState<PageStates>, selectedDate: MutableState
                 modifier = Modifier.padding(16.dp)
             ) {
                 items(moodEmojisWithLabels) { (emoji, label) ->
-                    val isSelected = emoji in selectedMoods.value
+                    val isSelected = emoji in appState.selectedMoods.value
                     Box(
                         modifier = Modifier
                             .padding(8.dp)
@@ -131,9 +128,9 @@ fun JournalPage2(pageState: MutableState<PageStates>, selectedDate: MutableState
                             .clickable {
                                 // Toggle selection
                                 if (isSelected) {
-                                    selectedMoods.value = selectedMoods.value - emoji
+                                    appState.selectedMoods.value = appState.selectedMoods.value - emoji
                                 } else {
-                                    selectedMoods.value = selectedMoods.value + emoji
+                                    appState.selectedMoods.value = appState.selectedMoods.value + emoji
                                 }
                             },
                         contentAlignment = Alignment.Center
@@ -161,7 +158,7 @@ fun JournalPage2(pageState: MutableState<PageStates>, selectedDate: MutableState
                         .background(color = Color(0xFF7BB6A1), shape = RoundedCornerShape(16.dp))
                 ) {
                     Button(
-                        onClick = { pageState.value = PageStates.JOURNAL_STEP3 },
+                        onClick = { appState.pageState.value = PageStates.JOURNAL_STEP3 },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
                         modifier = Modifier
                             .fillMaxSize()
@@ -180,15 +177,7 @@ fun JournalPage2(pageState: MutableState<PageStates>, selectedDate: MutableState
 }
 
 @Composable
-fun JournalPage3(pageState: MutableState<PageStates>,
-                 selectedDate: MutableState<LocalDate>,
-                 journalEntry: MutableState<String>,
-                 selectedMoods: MutableState<List<String>>,
-                 pastSelectedMoods: MutableState<List<String>>,
-                 pastJournalEntry: MutableState<String>,
-                 pastDate: MutableState<LocalDate>,
-                 jwt: MutableState<String>,
-) {
+fun JournalPage3(appState: AppState) {
     val charLimit = 2000
     val coroutineScope = rememberCoroutineScope()
 
@@ -203,7 +192,7 @@ fun JournalPage3(pageState: MutableState<PageStates>,
                 .padding(top = 24.dp)
         ) {
             Text(
-                text = selectedDate.value.format(DateTimeFormatter.ofPattern("MMMM d, yyyy")),
+                text = appState.selectedDate.value.format(DateTimeFormatter.ofPattern("MMMM d, yyyy")),
                 style = MaterialTheme.typography.headlineMedium,
                 textAlign = TextAlign.Center,
                 color = Color(0xFF649E8A)
@@ -233,10 +222,10 @@ fun JournalPage3(pageState: MutableState<PageStates>,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 OutlinedTextField(
-                    value = journalEntry.value,
+                    value = appState.journalEntry.value,
                     onValueChange = { newValue ->
                         if (newValue.length <= charLimit) {
-                            journalEntry.value = newValue
+                            appState.journalEntry.value = newValue
                         }
                     },
                     modifier = Modifier
@@ -257,7 +246,7 @@ fun JournalPage3(pageState: MutableState<PageStates>,
                 .padding(end = 8.dp),
             horizontalArrangement = Arrangement.End
         ) {
-            Text("${journalEntry.value.length} / $charLimit", style = MaterialTheme.typography.bodySmall)
+            Text("${appState.journalEntry.value.length} / $charLimit", style = MaterialTheme.typography.bodySmall)
         }
 
         Column(
@@ -277,7 +266,7 @@ fun JournalPage3(pageState: MutableState<PageStates>,
                         .background(color = Color(0xFF7BB6A1), shape = RoundedCornerShape(16.dp))
                 ) {
                     Button(
-                        onClick = { pageState.value = PageStates.JOURNAL_STEP2 },
+                        onClick = { appState.pageState.value = PageStates.JOURNAL_STEP2 },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
                         modifier = Modifier
                             .padding(start = 32.dp)
@@ -301,44 +290,44 @@ fun JournalPage3(pageState: MutableState<PageStates>,
                 ) {
                     Button(
                         onClick = {
-                            val selectedMoodsInWords = selectedMoods.value.map { emoji ->
+                            val selectedMoodsInWords = appState.selectedMoods.value.map { emoji ->
                                 emojiToWordMap[emoji] ?: "Unknown"
                             }
                             coroutineScope.launch {
                                 val journalRequest = JournalRequest(
-                                    year = selectedDate.value.year,
-                                    month = selectedDate.value.monthValue,
-                                    day = selectedDate.value.dayOfMonth,
+                                    year = appState.selectedDate.value.year,
+                                    month = appState.selectedDate.value.monthValue,
+                                    day = appState.selectedDate.value.dayOfMonth,
                                     moods = selectedMoodsInWords,
-                                    content = journalEntry.value,
+                                    content = appState.journalEntry.value,
                                     userId = "65f6591ebe57c2026bcb2300" // Hardcoded test user for now
                                 )
                                 try {
                                     // we can change this flow in the future, but this current creation doesnt return
                                     // the actual journal response, so we just query it again
-                                    val response2 = JournalApiService.createJournal(journalRequest, jwt.value)
+                                    val response2 = JournalApiService.createJournal(journalRequest, appState.jwt.value)
                                     println(response2)
                                     val response = JournalApiService.getJournalByDateAndUser(
                                         userId = "65f6591ebe57c2026bcb2300", // Example user ID
-                                        year = selectedDate.value.year,
-                                        month = selectedDate.value.monthValue,
-                                        day = selectedDate.value.dayOfMonth,
-                                        jwt = jwt.value
+                                        year = appState.selectedDate.value.year,
+                                        month = appState.selectedDate.value.monthValue,
+                                        day = appState.selectedDate.value.dayOfMonth,
+                                        jwt = appState.jwt.value
                                     )
-                                    journalEntry.value = ""
-                                    selectedMoods.value = listOf("")
+                                    appState.journalEntry.value = ""
+                                    appState.selectedMoods.value = listOf("")
 
                                     if (response.status == HttpStatusCode.OK) {
                                         val journalResponse: JournalResponse = response.body()
-                                        pastJournalEntry.value = journalResponse.content
-                                        pastSelectedMoods.value = journalResponse.moods
-                                        pastDate.value = LocalDate.of(journalResponse.year, journalResponse.month, journalResponse.day)
-                                        pageState.value = PageStates.PAST_JOURNAL
+                                        appState.pastJournalEntry.value = journalResponse.content
+                                        appState.pastSelectedMoods.value = journalResponse.moods
+                                        appState.pastDate.value = LocalDate.of(journalResponse.year, journalResponse.month, journalResponse.day)
+                                        appState.pageState.value = PageStates.PAST_JOURNAL
                                     } else if (response.status == HttpStatusCode.BadRequest || response.status == HttpStatusCode.NotFound) {
                                         val statusResponse: StatusResponse = response.body()
                                         // TODO something with response.body()
 
-                                        pageState.value = PageStates.HOME
+                                        appState.pageState.value = PageStates.HOME
                                     }
                                 } catch (e: Exception) {
                                     // handle in future
@@ -366,17 +355,14 @@ fun JournalPage3(pageState: MutableState<PageStates>,
 }
 
 @Composable
-fun PastJournalPage(pageState: MutableState<PageStates>,
-                    pastSelectedMoods: MutableState<List<String>>,
-                    pastJournalEntry: MutableState<String>,
-                    pastDate: MutableState<LocalDate>)
+fun PastJournalPage(appState: AppState)
 {
 
     DisposableEffect(Unit) {
         onDispose {
-            pastDate.value = LocalDate.now()
-            pastSelectedMoods.value = listOf<String>()
-            pastJournalEntry.value = ""
+            appState.pastDate.value = LocalDate.now()
+            appState.pastSelectedMoods.value = listOf<String>()
+            appState.pastJournalEntry.value = ""
         }
     }
 
@@ -391,7 +377,7 @@ fun PastJournalPage(pageState: MutableState<PageStates>,
                 .padding(top = 64.dp)
         ) {
             Text(
-                text = pastDate.value.format(DateTimeFormatter.ofPattern("MMMM d, yyyy")),
+                text = appState.pastDate.value.format(DateTimeFormatter.ofPattern("MMMM d, yyyy")),
                 style = MaterialTheme.typography.headlineMedium,
                 textAlign = TextAlign.Center,
                 color = Color(0xFF649E8A)
@@ -403,7 +389,7 @@ fun PastJournalPage(pageState: MutableState<PageStates>,
             contentPadding = PaddingValues(16.dp),
             modifier = Modifier.padding(top = 2.dp, start = 16.dp, end = 16.dp, bottom = 2.dp)
         ) {
-            items(pastSelectedMoods.value) { mood ->
+            items(appState.pastSelectedMoods.value) { mood ->
                 val emoji = wordToEmojiMap[mood] ?: "❓"
 
                 Box(
@@ -445,7 +431,7 @@ fun PastJournalPage(pageState: MutableState<PageStates>,
                     .background(color = Color.White, shape = RoundedCornerShape(16.dp))
             ) {
                 Text(
-                    text = pastJournalEntry.value,
+                    text = appState.pastJournalEntry.value,
                     color = Color.Black,
                 )
             }
@@ -463,7 +449,7 @@ fun PastJournalPage(pageState: MutableState<PageStates>,
                     .background(color = Color(0xFF7BB6A1), shape = RoundedCornerShape(16.dp))
             ) {
                 Button(
-                    onClick = { pageState.value = PageStates.HOME },
+                    onClick = { appState.pageState.value = PageStates.HOME },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
                     modifier = Modifier
                         .fillMaxSize()

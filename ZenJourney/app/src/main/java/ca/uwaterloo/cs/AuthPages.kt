@@ -31,7 +31,7 @@ import io.ktor.client.call.body
 import token.TokenResponse
 
 @Composable
-fun SignUpPage1(pageState: MutableState<PageStates>, nameState: MutableState<String>) {
+fun SignUpPage1(appState: AppState) {
     val errorState = remember { mutableStateOf(InputErrorStates.NONE) }
     Column(
         Modifier
@@ -45,10 +45,10 @@ fun SignUpPage1(pageState: MutableState<PageStates>, nameState: MutableState<Str
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 64.dp, bottom = 104.dp),
         )
-        TextFieldComponent(nameState, "My name is...", errorState)
+        TextFieldComponent(appState.nameState, "My name is...", errorState)
         ElevatedButton(
             onClick = {
-                if (nameState.value.isNotBlank()) pageState.value = PageStates.SIGNUP_CLOUD
+                if (appState.nameState.value.isNotBlank()) appState.pageState.value = PageStates.SIGNUP_CLOUD
                 else {
                     errorState.value = InputErrorStates.EMPTY_INPUT
                 }
@@ -70,19 +70,17 @@ fun SignUpPage1(pageState: MutableState<PageStates>, nameState: MutableState<Str
 
 @Composable
 fun SignUpPage2(
-    context: Context, pageState: MutableState<PageStates>, nameState: MutableState<String>, jwt: MutableState<String>
+    appState: AppState
 ) {
     SignUpLoginPage(
-        pageState = pageState,
-        nameState = nameState,
-        headlineText = "\uD83D\uDC69\u200D\uD83D\uDCBB\n\nAwesome!\nLet's create an account for you, ${nameState.value}",
+        appState = appState,
+        headlineText = "\uD83D\uDC69\u200D\uD83D\uDCBB\n\nAwesome!\nLet's create an account for you, ${appState.nameState.value}",
         buttonText = "Register",
-        jwt = jwt,
     )
 }
 
 @Composable
-fun SignUpPage3(pageState: MutableState<PageStates>, nameState: MutableState<String>) {
+fun SignUpPage3(appState: AppState) {
     Column(
         Modifier
             .background(MaterialTheme.colorScheme.background)
@@ -90,7 +88,7 @@ fun SignUpPage3(pageState: MutableState<PageStates>, nameState: MutableState<Str
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            "\uD83D\uDE0D\n\nHi ${nameState.value}!",
+            "\uD83D\uDE0D\n\nHi ${appState.nameState.value}!",
             style = MaterialTheme.typography.headlineLarge,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 64.dp, bottom = 40.dp),
@@ -102,7 +100,7 @@ fun SignUpPage3(pageState: MutableState<PageStates>, nameState: MutableState<Str
             modifier = Modifier.padding(bottom = 224.dp),
         )
         ElevatedButton(
-            onClick = { pageState.value = PageStates.SIGNUP_AFFIRMATION },
+            onClick = { appState.pageState.value = PageStates.SIGNUP_AFFIRMATION },
             modifier = Modifier.size(width = 184.dp, height = 56.dp),
             colors = ButtonDefaults.elevatedButtonColors(MaterialTheme.colorScheme.primaryContainer),
             elevation = ButtonDefaults.elevatedButtonElevation(defaultElevation = 4.dp)
@@ -118,24 +116,20 @@ fun SignUpPage3(pageState: MutableState<PageStates>, nameState: MutableState<Str
 
 @Composable
 fun LoginPage(
-    pageState: MutableState<PageStates>, nameState: MutableState<String>, jwt: MutableState<String>
+    appState: AppState
 ) {
     SignUpLoginPage(
-        pageState = pageState,
-        nameState = nameState,
+        appState = appState,
         headlineText = "\uD83D\uDC69\u200D\uD83D\uDCBB\n\nWelcome back!\nPlease login",
         buttonText = "Login",
-        jwt = jwt,
     )
 }
 
 @Composable
 fun SignUpLoginPage(
-    pageState: MutableState<PageStates>,
-    nameState: MutableState<String>,
+    appState: AppState,
     headlineText: String,
     buttonText: String,
-    jwt: MutableState<String>,
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -178,7 +172,7 @@ fun SignUpLoginPage(
                         // REGISTER USER
                         if (buttonText == "Register") {
                             val userRequest = UserRequest(
-                                name = nameState.value,
+                                name = appState.nameState.value,
                                 email = emailState.value.trimEnd(),
                                 password = passwordState.value,
                             )
@@ -189,8 +183,8 @@ fun SignUpLoginPage(
                                     // TODO: assign statusResponse.body to something
                                 } else if (response.status == HttpStatusCode.Created) {
                                     val tokenResponse: TokenResponse = response.body()
-                                    jwt.value = tokenResponse.token
-                                    pageState.value = PageStates.SIGNUP_STEP3
+                                    appState.jwt.value = tokenResponse.token
+                                    appState.pageState.value = PageStates.SIGNUP_STEP3
                                 }
                             } catch (e: Exception) {
                                 // handle in future
@@ -199,7 +193,7 @@ fun SignUpLoginPage(
                         // LOGIN USER
                         else {
                             val userRequest = UserRequest(
-                                name = nameState.value,
+                                name = appState.nameState.value,
                                 email = emailState.value,
                                 password = passwordState.value,
                             )
@@ -209,8 +203,8 @@ fun SignUpLoginPage(
                                     // TODO: show error
                                 } else if (response.status == HttpStatusCode.OK) {
                                     val tokenResponse: TokenResponse = response.body()
-                                    jwt.value = tokenResponse.token
-                                    pageState.value = PageStates.HOME
+                                    appState.jwt.value = tokenResponse.token
+                                    appState.pageState.value = PageStates.HOME
                                 }
                             } catch (e: Exception) {
                                 // handle in future

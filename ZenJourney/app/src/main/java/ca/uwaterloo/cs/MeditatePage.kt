@@ -42,7 +42,7 @@ import androidx.compose.ui.unit.sp
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun MeditatePage(context: Context, pageState: MutableState<PageStates>, selectedTune: MutableState<Int>) {
+fun MeditatePage(context: Context, appState: AppState) {
     Column(
         Modifier
             .background(color = MaterialTheme.colorScheme.background)
@@ -63,12 +63,12 @@ fun MeditatePage(context: Context, pageState: MutableState<PageStates>, selected
             )
         }
 
-        TimerScreen(context, pageState, selectedTune)
+        TimerScreen(context, appState)
     }
 }
 
 @Composable
-fun MeditatePickTune(pageState: MutableState<PageStates>, selectedTune: MutableState<Int>) {
+fun MeditatePickTune(appState: AppState) {
     Column(
         Modifier
             .background(color = MaterialTheme.colorScheme.background)
@@ -98,7 +98,7 @@ fun MeditatePickTune(pageState: MutableState<PageStates>, selectedTune: MutableS
                 ScrollableTunesList(listOf(
                     Tune("Once in Paris", R.raw.once_in_paris),
                     Tune("Good Night", R.raw.good_night)
-                ), selectedTune)
+                ), appState.selectedTune)
             }
         }
 
@@ -114,7 +114,7 @@ fun MeditatePickTune(pageState: MutableState<PageStates>, selectedTune: MutableS
                     .background(color = Color(0xFF7BB6A1), shape = RoundedCornerShape(16.dp))
             ) {
                 Button(
-                    onClick = { pageState.value = PageStates.MEDITATE },
+                    onClick = { appState.pageState.value = PageStates.MEDITATE },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
                     modifier = Modifier
                         .fillMaxSize()

@@ -1,8 +1,10 @@
 package ca.uwaterloo.cs
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -11,6 +13,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,55 +25,55 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun SettingsPage(appState: AppState) {
+    val customizationTitles = arrayOf("Notifications", "Personalized Affirmations", "PIN")
+    val customizationStates = arrayOf(
+        appState.useJournalForAffirmations,
+        appState.useJournalForAffirmations,
+        appState.usePIN
+    )
+
     Column(
         Modifier
             .background(color = Color(0xFFC7E6C9))
             .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
+        Text(
+            text = "Settings",
+            style = MaterialTheme.typography.headlineMedium,
+            textAlign = TextAlign.Center,
+            color = Color(0xFF3D3D3D),
+            modifier = Modifier.padding(top = 30.dp, bottom = 24.dp)
+        )
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .padding(top = 30.dp)
+                .padding(start = 30.dp, bottom = 24.dp)
                 .fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalArrangement = Arrangement.spacedBy(36.dp)
         ) {
-            Text(
-                text = "Settings",
-                style = MaterialTheme.typography.headlineSmall,
-                textAlign = TextAlign.Center,
-                color = Color(0xFF3D3D3D)
-            )
-        }
-
-        Column(
-            modifier = Modifier
-                .padding(top = 10.dp, end = 50.dp)
-                .fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "Name",
-                style = MaterialTheme.typography.bodyLarge,
-                textAlign = TextAlign.Center,
-                color = Color(0xFF579981)
-            )
-        }
-
-        Column(
-            modifier = Modifier
-                .padding(all = 20.dp)
-                .size(width = 500.dp, height = 320.dp),
-        ) {
-            Column(
-                modifier = Modifier
-                    .padding(top = 50.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(color = Color.White, shape = RoundedCornerShape(16.dp)),
-                ) {
-
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                repeat(3) {
+                    Text(
+                        customizationTitles[it],
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = Color(0xFF3D3D3D)
+                    )
+                }
+            }
+            Column {
+                /* TODO: add a useNotifications state */
+                repeat(3) { idx ->
+                    Switch(
+                        customizationStates[idx].value,
+                        onCheckedChange = {
+                            customizationStates[idx].value = it
+                        },
+                        colors = SwitchDefaults.colors(
+                            checkedTrackColor = Color(0xFF7BB6A1)
+                        )
+                    )
                 }
             }
         }
@@ -81,7 +85,7 @@ fun SettingsPage(appState: AppState) {
         ) {
             Text(
                 text = "Disclaimer",
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.headlineMedium,
                 color = Color(0xFF3D3D3D)
             )
 

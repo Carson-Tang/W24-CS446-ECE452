@@ -9,7 +9,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
-class DataStore(val context: Context) {
+class AppDataStore(val context: Context) {
     // referenced from: https://developer.android.com/topic/libraries/architecture/datastore#kotlin
     val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
         name = "jwt"

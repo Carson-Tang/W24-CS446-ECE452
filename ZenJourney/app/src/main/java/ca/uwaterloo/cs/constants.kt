@@ -45,4 +45,6 @@ val meditationMusic = listOf(
     Tune("Melody of Nature", R.raw.melody_of_nature),
     Tune("Scott Buckley Moonlight", R.raw.scott_buckley_moonlight),
     Tune("Test Song", R.raw.test_song)
-    )
+)
+
+val customizationTitles = arrayOf("Notifications", "Personalized Affirmations", "PIN")

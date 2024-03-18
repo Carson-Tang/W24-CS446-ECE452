@@ -12,8 +12,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -141,13 +144,30 @@ fun WithoutInfo() {
 fun HomePage(appState: AppState) {
     val coroutineScope = rememberCoroutineScope()
     val today = LocalDate.now()
-    var todayJournalData by remember { mutableStateOf(JournalResponse("", 0, 0, 0, listOf(), "", "")) }
+    var todayJournalData by remember {
+        mutableStateOf(
+            JournalResponse(
+                "",
+                0,
+                0,
+                0,
+                listOf(),
+                "",
+                ""
+            )
+        )
+    }
 
     LaunchedEffect(Unit) {
         // This block will be executed when the composable is first displayed
         coroutineScope.launch {
             try {
-                val response = JournalApiService.getJournalByDate(today.year, today.monthValue, today.dayOfMonth, appState.jwt.value)
+                val response = JournalApiService.getJournalByDate(
+                    today.year,
+                    today.monthValue,
+                    today.dayOfMonth,
+                    appState.jwt.value
+                )
                 if (response.status == HttpStatusCode.OK) {
                     todayJournalData = response.body()
                 } else {
@@ -162,93 +182,31 @@ fun HomePage(appState: AppState) {
         }
     }
 
-
     Column(
         Modifier
             .background(color = Color(0xFFC7E6C9))
             .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
-            modifier = Modifier.padding(top = 128.dp)
+        Button(
+            onClick = { appState.pageState.value = PageStates.SETTINGS },
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC7E6C9)),
+            modifier = Modifier.padding(start = 304.dp, top = 12.dp)
         ) {
-            if (todayJournalData.moods.isNotEmpty()) {
-                WithInfo(today, todayJournalData, appState)
-            } else {
-                WithoutInfo()
-            }
+            Icon(
+                Icons.Outlined.Settings,
+                contentDescription = "settings",
+                modifier = Modifier.size(48.dp),
+            )
         }
-
-        Column(
-            modifier = Modifier.padding(top = 50.dp)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
+        Column (horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                modifier = Modifier.padding(top = 72.dp)
             ) {
-                Spacer(modifier = Modifier.padding(start = 64.dp))
-                Box(
-                    modifier = Modifier
-                        .background(color = Color.White, shape = RoundedCornerShape(16.dp))
-                        .size(height = 86.dp, width = 120.dp)
-                ) {
-                    Button(
-                        onClick = { appState.pageState.value = PageStates.AFFIRMATION },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.White),
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .fillMaxSize()
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                text = "☺\uFE0F",
-                                style = TextStyle(
-                                    fontSize = 30.sp
-                                )
-                            )
-                            Text(
-                                text = "Affirmation",
-                                style = TextStyle(
-                                    color = Color.Black,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            )
-                        }
-                    }
+                if (todayJournalData.moods.isNotEmpty()) {
+                    WithInfo(today, todayJournalData, appState)
+                } else {
+                    WithoutInfo()
                 }
-
-                Spacer(modifier = Modifier.padding(start = 30.dp))
-
-                Box(
-                    modifier = Modifier
-                        .background(color = Color.White, shape = RoundedCornerShape(16.dp))
-                        .size(height = 86.dp, width = 120.dp)
-                ) {
-                    Button(
-                        onClick = { appState.pageState.value = PageStates.JOURNAL_STEP1 },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.White),
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .fillMaxSize()
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                text = "\uD83D\uDCA1",
-                                style = TextStyle(
-                                    fontSize = 30.sp
-                                )
-                            )
-                            Text(
-                                text = "Journal",
-                                style = TextStyle(
-                                    color = Color.Black,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            )
-                        }
-                    }
-                }
-                Spacer(modifier = Modifier.padding(end = 64.dp))
             }
 
             Column(
@@ -265,7 +223,7 @@ fun HomePage(appState: AppState) {
                             .size(height = 86.dp, width = 120.dp)
                     ) {
                         Button(
-                            onClick = { appState.pageState.value = PageStates.MEDITATE },
+                            onClick = { appState.pageState.value = PageStates.AFFIRMATION },
                             colors = ButtonDefaults.buttonColors(containerColor = Color.White),
                             modifier = Modifier
                                 .align(Alignment.Center)
@@ -273,13 +231,13 @@ fun HomePage(appState: AppState) {
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(
-                                    text = "\uD83E\uDDD8",
+                                    text = "☺\uFE0F",
                                     style = TextStyle(
                                         fontSize = 30.sp
                                     )
                                 )
                                 Text(
-                                    text = "Meditate",
+                                    text = "Affirmation",
                                     style = TextStyle(
                                         color = Color.Black,
                                         fontWeight = FontWeight.Bold
@@ -297,7 +255,7 @@ fun HomePage(appState: AppState) {
                             .size(height = 86.dp, width = 120.dp)
                     ) {
                         Button(
-                            onClick = { appState.pageState.value = PageStates.PHOTOBOOK },
+                            onClick = { appState.pageState.value = PageStates.JOURNAL_STEP1 },
                             colors = ButtonDefaults.buttonColors(containerColor = Color.White),
                             modifier = Modifier
                                 .align(Alignment.Center)
@@ -305,13 +263,13 @@ fun HomePage(appState: AppState) {
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(
-                                    text = "\uD83D\uDDBC",
+                                    text = "\uD83D\uDCA1",
                                     style = TextStyle(
                                         fontSize = 30.sp
                                     )
                                 )
                                 Text(
-                                    text = "Photobook",
+                                    text = "Journal",
                                     style = TextStyle(
                                         color = Color.Black,
                                         fontWeight = FontWeight.Bold
@@ -319,7 +277,80 @@ fun HomePage(appState: AppState) {
                                 )
                             }
                         }
-                        Spacer(modifier = Modifier.padding(end = 64.dp))
+                    }
+                    Spacer(modifier = Modifier.padding(end = 64.dp))
+                }
+
+                Column(
+                    modifier = Modifier.padding(top = 50.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        Spacer(modifier = Modifier.padding(start = 64.dp))
+                        Box(
+                            modifier = Modifier
+                                .background(color = Color.White, shape = RoundedCornerShape(16.dp))
+                                .size(height = 86.dp, width = 120.dp)
+                        ) {
+                            Button(
+                                onClick = { appState.pageState.value = PageStates.MEDITATE },
+                                colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                                    .fillMaxSize()
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(
+                                        text = "\uD83E\uDDD8",
+                                        style = TextStyle(
+                                            fontSize = 30.sp
+                                        )
+                                    )
+                                    Text(
+                                        text = "Meditate",
+                                        style = TextStyle(
+                                            color = Color.Black,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    )
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.padding(start = 30.dp))
+
+                        Box(
+                            modifier = Modifier
+                                .background(color = Color.White, shape = RoundedCornerShape(16.dp))
+                                .size(height = 86.dp, width = 120.dp)
+                        ) {
+                            Button(
+                                onClick = { appState.pageState.value = PageStates.PHOTOBOOK },
+                                colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                                    .fillMaxSize()
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(
+                                        text = "\uD83D\uDDBC",
+                                        style = TextStyle(
+                                            fontSize = 30.sp
+                                        )
+                                    )
+                                    Text(
+                                        text = "Photobook",
+                                        style = TextStyle(
+                                            color = Color.Black,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.padding(end = 64.dp))
+                        }
                     }
                 }
             }

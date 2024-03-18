@@ -84,6 +84,9 @@ dependencies {
   // optional - Paging 3 Integration
   implementation("androidx.room:room-paging:$roomVersion")
 
+  implementation("androidx.datastore:datastore-preferences:1.0.0")
+
+
   val ktorVersion = "2.3.8"
 
   implementation("io.ktor:ktor-client-core:$ktorVersion")

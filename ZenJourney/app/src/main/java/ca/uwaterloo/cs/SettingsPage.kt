@@ -25,13 +25,11 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun SettingsPage(appState: AppState) {
-    val customizationTitles = arrayOf("Notifications", "Personalized Affirmations", "PIN")
     val customizationStates = arrayOf(
         appState.useJournalForAffirmations,
         appState.useJournalForAffirmations,
         appState.usePIN
     )
-
     Column(
         Modifier
             .background(color = Color(0xFFC7E6C9))

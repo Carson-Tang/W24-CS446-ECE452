@@ -15,13 +15,13 @@ class AppDataStore(val context: Context) {
         name = "jwt"
     )
 
-    suspend fun addToDataStore(jwt: String) {
+    suspend fun addJwt(jwt: String) {
         context.dataStore.edit { store ->
             store[stringPreferencesKey("jwt")] = jwt
         }
     }
 
-    suspend fun getFromDataStore(): String {
+    suspend fun getJwt(): String {
         return context.dataStore.data
             .map { preferences ->
                 preferences[stringPreferencesKey("jwt")] ?: ""

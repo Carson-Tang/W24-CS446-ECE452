@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,6 +41,9 @@ class AppState(val context: Context) {
 
     // users name
     val nameState = mutableStateOf("")
+
+    //photos
+    val photos = mutableStateListOf<PhotobookPhoto>()
 
     // journal
     val selectedDate = mutableStateOf(LocalDate.now())

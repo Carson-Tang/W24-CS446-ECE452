@@ -1,6 +1,5 @@
 package ca.uwaterloo.cs
 
-import android.content.Context
 import android.media.MediaPlayer
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -64,7 +63,7 @@ fun formatTimeTriple(ms: Long): Triple<Int, Int, Int> {
 }
 
 @Composable
-fun TimerScreen(context: Context, appState: AppState) {
+fun TimerScreen(appState: AppState) {
     var isRunning by remember {
         mutableStateOf(false)
     }
@@ -158,7 +157,7 @@ fun TimerScreen(context: Context, appState: AppState) {
                     IconButton(onClick = {
                         if (!isRunning) {
                             isRunning = true
-                            mediaPlayer = MediaPlayer.create(context, appState.selectedTune.value)
+                            mediaPlayer = MediaPlayer.create(appState.context, appState.selectedTune.value)
                             mediaPlayer?.isLooping = true
                             mediaPlayer?.start()
                         }

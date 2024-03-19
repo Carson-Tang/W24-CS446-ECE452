@@ -1,6 +1,5 @@
 package ca.uwaterloo.cs
 
-import android.content.Context
 import android.content.res.AssetFileDescriptor
 import android.media.MediaPlayer
 import androidx.compose.foundation.background
@@ -41,7 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun MeditatePage(context: Context, appState: AppState) {
+fun MeditatePage(appState: AppState) {
     Column(
         Modifier
             .background(color = MaterialTheme.colorScheme.background)
@@ -60,7 +59,7 @@ fun MeditatePage(context: Context, appState: AppState) {
                 style = MaterialTheme.typography.headlineLarge,
                 textAlign = TextAlign.Center,
             )
-            TimerScreen(context, appState)
+            TimerScreen(appState)
             ElevatedButton(
                 onClick = {
                     appState.pageState.value = PageStates.MEDITATE_PICK_TUNE
@@ -82,7 +81,7 @@ fun MeditatePage(context: Context, appState: AppState) {
 }
 
 @Composable
-fun MeditatePickTune(context: Context, appState: AppState) {
+fun MeditatePickTune(appState: AppState) {
     Column(
         Modifier
             .background(color = MaterialTheme.colorScheme.background)
@@ -109,7 +108,7 @@ fun MeditatePickTune(context: Context, appState: AppState) {
                     .background(color = Color.White, shape = RoundedCornerShape(16.dp))
                     .padding(top = 30.dp)
             ) {
-                ScrollableTunesList(meditationMusic, appState.selectedTune, appState.playingTuneId, context, appState)
+                ScrollableTunesList(meditationMusic, appState.selectedTune, appState.playingTuneId, appState)
             }
         }
 
@@ -148,7 +147,7 @@ data class Tune(
     val tuneId: Int // e.g. R.raw.once_in_paris
 )
 @Composable
-fun TuneListItem(tune: Tune, selectedTune: MutableState<Int>, playingTuneId: MutableState<Int>, context: Context, appState: AppState) {
+fun TuneListItem(tune: Tune, selectedTune: MutableState<Int>, playingTuneId: MutableState<Int>, appState: AppState) {
     val mediaPlayer = remember { MediaPlayer() }
     val tunePlaybackState = remember { mutableStateMapOf<Int, Boolean>() }
     val isCurrPlaying = tunePlaybackState[tune.tuneId] ?: false
@@ -205,7 +204,7 @@ fun TuneListItem(tune: Tune, selectedTune: MutableState<Int>, playingTuneId: Mut
                     }
                     if (!isCurrPlaying) {
                         mediaPlayer.reset()
-                        val assetDescriptor: AssetFileDescriptor = context.resources.openRawResourceFd(tune.tuneId)
+                        val assetDescriptor: AssetFileDescriptor = appState.context.resources.openRawResourceFd(tune.tuneId)
                         mediaPlayer.setDataSource(assetDescriptor.fileDescriptor, assetDescriptor.startOffset, assetDescriptor.length)
                         mediaPlayer.prepare()
                         mediaPlayer.start()
@@ -226,10 +225,10 @@ fun TuneListItem(tune: Tune, selectedTune: MutableState<Int>, playingTuneId: Mut
 }
 
 @Composable
-fun ScrollableTunesList(tuneList: List<Tune>, selectedTune: MutableState<Int>, isPickMusicPlaying: MutableState<Int>, context: Context, appState: AppState) {
+fun ScrollableTunesList(tuneList: List<Tune>, selectedTune: MutableState<Int>, isPickMusicPlaying: MutableState<Int>, appState: AppState) {
     LazyColumn {
         items(tuneList) { tune ->
-            TuneListItem(tune, selectedTune, isPickMusicPlaying, context, appState)
+            TuneListItem(tune, selectedTune, isPickMusicPlaying, appState)
         }
     }
 }

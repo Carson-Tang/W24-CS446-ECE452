@@ -85,7 +85,7 @@ fun capitalize(s: String): String {
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun PhotobookPage(context: Context, appState: AppState) {
+fun PhotobookPage(appState: AppState) {
     val currentDate = LocalDate.now()
     val currentMonth = currentDate.month.toString()
     val currentYear = currentDate.year.toString()
@@ -94,15 +94,15 @@ fun PhotobookPage(context: Context, appState: AppState) {
         mutableStateListOf(
             PhotobookPhoto(
                 "21 Wed",
-                BitmapFactory.decodeResource(context.resources, R.drawable.tonton_1)
+                BitmapFactory.decodeResource(appState.context.resources, R.drawable.tonton_1)
             ),
             PhotobookPhoto(
                 "20 Tue",
-                BitmapFactory.decodeResource(context.resources, R.drawable.totoro_2)
+                BitmapFactory.decodeResource(appState.context.resources, R.drawable.totoro_2)
             ),
             PhotobookPhoto(
                 "19 Mon",
-                BitmapFactory.decodeResource(context.resources, R.drawable.pikachu_3)
+                BitmapFactory.decodeResource(appState.context.resources, R.drawable.pikachu_3)
             )
         )
     }
@@ -136,7 +136,7 @@ fun PhotobookPage(context: Context, appState: AppState) {
             addImageToPhotoState(
                 ImageDecoder.decodeBitmap(
                     ImageDecoder.createSource(
-                        context.contentResolver,
+                        appState.context.contentResolver,
                         it
                     )
                 )

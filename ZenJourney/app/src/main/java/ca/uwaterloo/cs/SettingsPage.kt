@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.runBlocking
 
 @Composable
 fun SettingsPage(appState: AppState) {
@@ -123,7 +124,12 @@ fun SettingsPage(appState: AppState) {
                     .background(color = Color(0xFF7BB6A1), shape = RoundedCornerShape(16.dp))
             ) {
                 Button(
-                    onClick = { appState.pageState.value = PageStates.WELCOME },
+                    onClick = {
+                        appState.pageState.value = PageStates.WELCOME
+                        runBlocking {
+                            appState.dataStore.setJwt("")
+                        }
+                    },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
                     modifier = Modifier
                         .fillMaxSize()

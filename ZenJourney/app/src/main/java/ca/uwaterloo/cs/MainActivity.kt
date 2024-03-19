@@ -17,7 +17,9 @@ import androidx.lifecycle.MutableLiveData
 import ca.uwaterloo.cs.ui.theme.ZenJourneyTheme
 import com.an.room.db.UserDB
 import com.an.room.model.User
+import com.auth0.android.jwt.JWT
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
@@ -32,7 +34,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-class AppState {
+class AppState(val context: Context) {
     // what page user sees
     val pageState = mutableStateOf(PageStates.WELCOME)
 
@@ -50,6 +52,7 @@ class AppState {
     // meditation
     val selectedTune = mutableStateOf(R.raw.once_in_paris)
     val playingTuneId = mutableStateOf(selectedTune.value)
+
     // timer time in meditation
     val defaultTimeMs = mutableStateOf(60000L)
     val timeMs = mutableStateOf(defaultTimeMs.value)
@@ -60,12 +63,12 @@ class AppState {
     val usePIN = mutableStateOf(false)
 
     // auth
-    val jwt = mutableStateOf("")
+    val dataStore = AppDataStore(context)
 }
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
-fun loadLocalUserSettings(context: Context, appState: AppState) {
+fun LoadLocalUserSettings(context: Context, appState: AppState) {
     val database = UserDB.getDB(context)
     val userDao = database.userDao()
 
@@ -89,9 +92,16 @@ fun loadLocalUserSettings(context: Context, appState: AppState) {
 
 @Composable
 fun MainContent(context: Context) {
-    val appState = remember { AppState() }
+    val appState = remember { AppState(context) }
 
-    loadLocalUserSettings(context, appState)
+    LoadLocalUserSettings(context, appState)
+
+    runBlocking {
+        val jwt = appState.dataStore.getJwt()
+        if (jwt.isNotEmpty() && !JWT(jwt).isExpired(5)) {
+            appState.pageState.value = PageStates.HOME
+        }
+    }
 
     Scaffold(
         bottomBar = {
@@ -112,19 +122,13 @@ fun MainContent(context: Context) {
         },
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
-            PageContent(
-                context,
-                appState
-            )
+            PageContent(appState)
         }
     }
 }
 
 @Composable
-fun PageContent(
-    context: Context,
-    appState: AppState,
-) {
+fun PageContent(appState: AppState) {
     when (appState.pageState.value) {
         PageStates.WELCOME -> WelcomePage(appState)
         PageStates.LOGIN -> LoginPage(appState)
@@ -134,12 +138,12 @@ fun PageContent(
         PageStates.SIGNUP_CLOUD -> SignUpCloud(appState)
         PageStates.SIGNUP_CLOUD_MORE -> SignUpCloudLearnMore(appState)
         PageStates.SIGNUP_AFFIRMATION -> SignUpAffirmation(appState)
-        PageStates.SIGNUP_PIN -> SignUpPIN(context, appState)
+        PageStates.SIGNUP_PIN -> SignUpPIN(appState)
         PageStates.HOME -> HomePage(appState)
-        PageStates.MEDITATE -> MeditatePage(context, appState)
-        PageStates.MEDITATE_PICK_TUNE -> MeditatePickTune(context, appState)
+        PageStates.MEDITATE -> MeditatePage(appState)
+        PageStates.MEDITATE_PICK_TUNE -> MeditatePickTune(appState)
         PageStates.AFFIRMATION -> AffirmationPage(appState)
-        PageStates.PHOTOBOOK -> PhotobookPage(context, appState)
+        PageStates.PHOTOBOOK -> PhotobookPage(appState)
         PageStates.JOURNAL_STEP1 -> JournalPage1(appState)
         PageStates.JOURNAL_STEP2 -> JournalPage2(appState)
         PageStates.JOURNAL_STEP3 -> JournalPage3(appState)

@@ -1,6 +1,5 @@
 package ca.uwaterloo.cs
 
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -158,16 +157,16 @@ fun SignUpAffirmation(
 }
 
 @OptIn(DelicateCoroutinesApi::class)
-fun storeLocalUserSettings(context: Context, appState: AppState, pinState: String) {
+fun storeLocalUserSettings(appState: AppState, pinState: String) {
     val user = User(
         firstName = appState.nameState.value,
         useCloud = appState.useCloud.value,
         useJournalForAffirmations = appState.useJournalForAffirmations.value,
         // TODO: encrypt?
-        pin = pinState
+        pin = if (appState.usePIN.value) pinState else ""
     )
 
-    val database = UserDB.getDB(context)
+    val database = UserDB.getDB(appState.context)
     val userDao = database.userDao()
 
     GlobalScope.launch {
@@ -181,17 +180,14 @@ fun storeLocalUserSettings(context: Context, appState: AppState, pinState: Strin
 }
 
 @Composable
-fun SignUpPIN(
-    context: Context,
-    appState: AppState
-) {
+fun SignUpPIN(appState: AppState) {
     val pinState = remember { mutableStateOf("") }
     val pinErrorState = remember { mutableStateOf(false) }
 
     fun primaryAction() {
         if (!pinErrorState.value && pinState.value.length == 4) {
             appState.usePIN.value = true
-            storeLocalUserSettings(context, appState, pinState.value)
+            storeLocalUserSettings(appState, pinState.value)
             appState.pageState.value = PageStates.HOME
         } else {
             pinErrorState.value = true
@@ -200,7 +196,7 @@ fun SignUpPIN(
 
     fun secondaryAction() {
         appState.usePIN.value = false
-        storeLocalUserSettings(context, appState, pinState.value)
+        storeLocalUserSettings(appState, pinState.value)
         appState.pageState.value = PageStates.HOME
     }
     Column(

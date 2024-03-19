@@ -128,7 +128,7 @@ fun Day(
                             year = day.date.year,
                             month = day.date.monthValue,
                             day = day.date.dayOfMonth,
-                            jwt = appState.jwt.value
+                            jwt = appState.dataStore.getJwt()
                         )
 
                         if (response.status == HttpStatusCode.OK) {

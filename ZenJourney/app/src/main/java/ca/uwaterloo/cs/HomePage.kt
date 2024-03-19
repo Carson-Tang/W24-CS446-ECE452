@@ -166,7 +166,7 @@ fun HomePage(appState: AppState) {
                     today.year,
                     today.monthValue,
                     today.dayOfMonth,
-                    appState.jwt.value
+                    appState.dataStore.getJwt()
                 )
                 if (response.status == HttpStatusCode.OK) {
                     todayJournalData = response.body()

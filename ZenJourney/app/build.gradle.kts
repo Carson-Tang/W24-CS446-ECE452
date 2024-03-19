@@ -85,7 +85,7 @@ dependencies {
   implementation("androidx.room:room-paging:$roomVersion")
 
   implementation("androidx.datastore:datastore-preferences:1.0.0")
-
+  implementation("com.auth0.android:jwtdecode:2.0.2")
 
   val ktorVersion = "2.3.8"
 

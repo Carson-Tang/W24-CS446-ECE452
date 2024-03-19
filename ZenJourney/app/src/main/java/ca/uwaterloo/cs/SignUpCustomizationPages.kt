@@ -164,7 +164,7 @@ fun storeLocalUserSettings(context: Context, appState: AppState, pinState: Strin
         useCloud = appState.useCloud.value,
         useJournalForAffirmations = appState.useJournalForAffirmations.value,
         // TODO: encrypt?
-        pin = pinState
+        pin = if (appState.usePIN.value) pinState else ""
     )
 
     val database = UserDB.getDB(context)

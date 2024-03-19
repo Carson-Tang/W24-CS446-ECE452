@@ -17,7 +17,9 @@ import androidx.lifecycle.MutableLiveData
 import ca.uwaterloo.cs.ui.theme.ZenJourneyTheme
 import com.an.room.db.UserDB
 import com.an.room.model.User
+import com.auth0.android.jwt.JWT
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
@@ -32,7 +34,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-class AppState {
+class AppState(context: Context) {
     // what page user sees
     val pageState = mutableStateOf(PageStates.WELCOME)
 
@@ -60,12 +62,12 @@ class AppState {
     val usePIN = mutableStateOf(false)
 
     // auth
-    val jwt = mutableStateOf("")
+    val dataStore = AppDataStore(context)
 }
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
-fun loadLocalUserSettings(context: Context, appState: AppState) {
+fun LoadLocalUserSettings(context: Context, appState: AppState) {
     val database = UserDB.getDB(context)
     val userDao = database.userDao()
 
@@ -89,9 +91,16 @@ fun loadLocalUserSettings(context: Context, appState: AppState) {
 
 @Composable
 fun MainContent(context: Context) {
-    val appState = remember { AppState() }
+    val appState = remember { AppState(context) }
 
-    loadLocalUserSettings(context, appState)
+    runBlocking {
+        val jwt = appState.dataStore.getJwt()
+        if (jwt.isNotEmpty() && !JWT(jwt).isExpired(5)) {
+            appState.pageState.value = PageStates.HOME
+        }
+    }
+
+    LoadLocalUserSettings(context, appState)
 
     Scaffold(
         bottomBar = {

@@ -15,7 +15,7 @@ class AppDataStore(val context: Context) {
         name = "jwt"
     )
 
-    suspend fun addJwt(jwt: String) {
+    suspend fun setJwt(jwt: String) {
         context.dataStore.edit { store ->
             store[stringPreferencesKey("jwt")] = jwt
         }

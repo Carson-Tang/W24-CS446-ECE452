@@ -193,7 +193,7 @@ fun SignUpLoginPage(
                                     println(statusResponse.body)
                                 } else if (response.status == HttpStatusCode.Created) {
                                     val tokenResponse: TokenResponse = response.body()
-                                    appState.jwt.value = tokenResponse.token
+                                    appState.dataStore.setJwt(tokenResponse.token)
                                     appState.pageState.value = PageStates.SIGNUP_STEP3
                                 }
                             } catch (e: Exception) {
@@ -217,7 +217,7 @@ fun SignUpLoginPage(
                                     println(statusResponse.body)
                                 } else if (response.status == HttpStatusCode.OK) {
                                     val tokenResponse: TokenResponse = response.body()
-                                    appState.jwt.value = tokenResponse.token
+                                    appState.dataStore.setJwt(tokenResponse.token)
                                     appState.pageState.value = PageStates.HOME
                                 }
                             } catch (e: Exception) {

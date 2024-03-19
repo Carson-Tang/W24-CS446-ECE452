@@ -34,7 +34,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-class AppState(context: Context) {
+class AppState(val context: Context) {
     // what page user sees
     val pageState = mutableStateOf(PageStates.WELCOME)
 
@@ -52,6 +52,7 @@ class AppState(context: Context) {
     // meditation
     val selectedTune = mutableStateOf(R.raw.once_in_paris)
     val playingTuneId = mutableStateOf(selectedTune.value)
+
     // timer time in meditation
     val defaultTimeMs = mutableStateOf(60000L)
     val timeMs = mutableStateOf(defaultTimeMs.value)
@@ -93,14 +94,14 @@ fun LoadLocalUserSettings(context: Context, appState: AppState) {
 fun MainContent(context: Context) {
     val appState = remember { AppState(context) }
 
+    LoadLocalUserSettings(context, appState)
+
     runBlocking {
         val jwt = appState.dataStore.getJwt()
         if (jwt.isNotEmpty() && !JWT(jwt).isExpired(5)) {
             appState.pageState.value = PageStates.HOME
         }
     }
-
-    LoadLocalUserSettings(context, appState)
 
     Scaffold(
         bottomBar = {
@@ -121,19 +122,13 @@ fun MainContent(context: Context) {
         },
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
-            PageContent(
-                context,
-                appState
-            )
+            PageContent(appState)
         }
     }
 }
 
 @Composable
-fun PageContent(
-    context: Context,
-    appState: AppState,
-) {
+fun PageContent(appState: AppState) {
     when (appState.pageState.value) {
         PageStates.WELCOME -> WelcomePage(appState)
         PageStates.LOGIN -> LoginPage(appState)
@@ -143,12 +138,12 @@ fun PageContent(
         PageStates.SIGNUP_CLOUD -> SignUpCloud(appState)
         PageStates.SIGNUP_CLOUD_MORE -> SignUpCloudLearnMore(appState)
         PageStates.SIGNUP_AFFIRMATION -> SignUpAffirmation(appState)
-        PageStates.SIGNUP_PIN -> SignUpPIN(context, appState)
+        PageStates.SIGNUP_PIN -> SignUpPIN(appState)
         PageStates.HOME -> HomePage(appState)
-        PageStates.MEDITATE -> MeditatePage(context, appState)
-        PageStates.MEDITATE_PICK_TUNE -> MeditatePickTune(context, appState)
+        PageStates.MEDITATE -> MeditatePage(appState)
+        PageStates.MEDITATE_PICK_TUNE -> MeditatePickTune(appState)
         PageStates.AFFIRMATION -> AffirmationPage(appState)
-        PageStates.PHOTOBOOK -> PhotobookPage(context, appState)
+        PageStates.PHOTOBOOK -> PhotobookPage(appState)
         PageStates.JOURNAL_STEP1 -> JournalPage1(appState)
         PageStates.JOURNAL_STEP2 -> JournalPage2(appState)
         PageStates.JOURNAL_STEP3 -> JournalPage3(appState)

@@ -299,13 +299,13 @@ fun JournalPage3(appState: AppState) {
                                     day = appState.selectedDate.value.dayOfMonth,
                                     moods = selectedMoodsInWords,
                                     content = appState.journalEntry.value,
-                                    userId = "65f6591ebe57c2026bcb2300" // Hardcoded test user for now
+                                    userId = appState.userId.value // Hardcoded test user for now
                                 )
                                 try {
                                     // we can change this flow in the future, but this current creation doesnt return
                                     // the actual journal response, so we just query it again
                                     val response = JournalApiService.getJournalByDateAndUser(
-                                        userId = "65f6591ebe57c2026bcb2300", // Example user ID
+                                        userId = appState.userId.value, // Example user ID
                                         year = appState.selectedDate.value.year,
                                         month = appState.selectedDate.value.monthValue,
                                         day = appState.selectedDate.value.dayOfMonth,

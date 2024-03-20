@@ -218,6 +218,7 @@ fun SignUpLoginPage(
                                 } else if (response.status == HttpStatusCode.OK) {
                                     val tokenResponse: TokenResponse = response.body()
                                     appState.dataStore.setJwt(tokenResponse.token)
+                                    appState.userId.value = tokenResponse.userId
                                     appState.pageState.value = PageStates.HOME
                                 }
                             } catch (e: Exception) {

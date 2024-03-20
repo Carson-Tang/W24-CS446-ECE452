@@ -22,4 +22,7 @@ interface JournalDao {
 
     @Delete
     fun delete(journal: Journal)
+
+    @Query("DELETE FROM journals")
+    fun deleteAll()
 }

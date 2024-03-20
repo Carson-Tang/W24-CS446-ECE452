@@ -126,6 +126,7 @@ fun PhotobookPage(appState: AppState) {
     val currentYear = currentDate.year.toString()
     val coroutineScope = rememberCoroutineScope()
     val userid = "65f6591ebe57c2026bcb2300" // Hardcoded test user for now
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
     LaunchedEffect(Unit) {
         try {
@@ -151,11 +152,43 @@ fun PhotobookPage(appState: AppState) {
         }
     }
 
+    LaunchedEffect(Unit) {
+        try {
+            val response = PhotoApiService.getAllUserPhotos(userid, appState.jwt.value)
+            if (response.status == HttpStatusCode.OK) {
+                val listResponse: ListResponse<PhotoResponse> = response.body()
+                println(listResponse.list.toString())
+                val photoList = listResponse.list.map { photoRes ->
+                    val date = LocalDate.parse(photoRes.uploadDate, formatter)
+                    val datestr = "${date.dayOfMonth} ${
+                        capitalize(date.dayOfWeek.toString().take(3))
+                    }"
+                    PhotobookPhoto(
+                        datestr, decodeImage(photoRes.photoBase64)
+                    )
+                }
+                appState.photos.clear()
+                appState.photos.addAll(photoList.reversed())
+                println("Done updating photolist")
+                println(photoList.toString())
+            } else {
+                println("getting photolist failed")
+                val statusResponse: StatusResponse = response.body()
+                // TODO: handle failed image creation
+                println(statusResponse.body)
+                appState.pageState.value = PageStates.HOME
+            }
+        } catch (e: Exception) {
+            // TODO: handle error
+            println("some error occured while fetching photolist")
+            println(e)
+        }
+    }
+
     fun addImageToPhotoState(image: Bitmap) {
         coroutineScope.launch {
-            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-            val formattedDate = currentDate.format(formatter)
-            val photoRequest = PhotoRequest(userid, encodeImage(image), formattedDate)
+            val photoRequest =
+                PhotoRequest(userid, encodeImage(image), currentDate.format(formatter))
             try {
                 val response = PhotoApiService.createPhoto(photoRequest, appState.jwt.value)
                 if (response.status != HttpStatusCode.Created) {

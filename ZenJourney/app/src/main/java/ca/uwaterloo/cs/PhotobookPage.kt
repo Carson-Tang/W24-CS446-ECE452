@@ -1,12 +1,12 @@
+@file:OptIn(ExperimentalEncodingApi::class)
+
 package ca.uwaterloo.cs
 
 import StatusResponse
 import android.Manifest
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -42,6 +42,9 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ca.uwaterloo.cs.api.PhotoApiService
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.launch
@@ -49,9 +52,6 @@ import photo.ListResponse
 import photo.PhotoRequest
 import photo.PhotoResponse
 import java.io.ByteArrayOutputStream
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlin.io.encoding.Base64
@@ -98,7 +98,6 @@ fun capitalize(s: String): String {
 }
 
 // bitmap -> base64 string
-@OptIn(ExperimentalEncodingApi::class)
 fun encodeImage(image: Bitmap): String {
     val stream = ByteArrayOutputStream()
     image.compress(Bitmap.CompressFormat.PNG, 100, stream)
@@ -109,7 +108,6 @@ fun encodeImage(image: Bitmap): String {
 }
 
 // base64 string -> bitmap
-@OptIn(ExperimentalEncodingApi::class)
 fun decodeImage(encodedImage: String): Bitmap {
     val decodedByte = Base64.decode(encodedImage)
     val image = BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.size)
@@ -117,9 +115,8 @@ fun decodeImage(encodedImage: String): Bitmap {
     return image
 }
 
-@OptIn(ExperimentalEncodingApi::class)
-@OptIn(ExperimentalPermissionsApi::class)
 @Composable
+@OptIn(ExperimentalPermissionsApi::class)
 fun PhotobookPage(appState: AppState) {
     val currentDate = LocalDate.now()
     val currentMonth = currentDate.month.toString()
@@ -130,31 +127,7 @@ fun PhotobookPage(appState: AppState) {
 
     LaunchedEffect(Unit) {
         try {
-            val response = PhotoApiService.getAllUserPhotos(userid, appState.jwt.value)
-            if (response.status == HttpStatusCode.OK) {
-                val listResponse: ListResponse<PhotoResponse> = response.body()
-                val photoList = listResponse.list.map { photoRes ->
-                    PhotobookPhoto(
-                        photoRes.uploadDate, decodeImage(photoRes.photoBase64)
-                    )
-                }
-                appState.photos.clear()
-                appState.photos.addAll(photoList)
-            } else {
-                val statusResponse: StatusResponse = response.body()
-                // TODO: handle failed image creation
-                println(statusResponse.body)
-                appState.pageState.value = PageStates.HOME
-            }
-        } catch (e: Exception) {
-            // TODO: handle error
-            println(e.message)
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        try {
-            val response = PhotoApiService.getAllUserPhotos(userid, appState.jwt.value)
+            val response = PhotoApiService.getAllUserPhotos(userid, appState.dataStore.getJwt())
             if (response.status == HttpStatusCode.OK) {
                 val listResponse: ListResponse<PhotoResponse> = response.body()
                 println(listResponse.list.toString())
@@ -190,7 +163,7 @@ fun PhotobookPage(appState: AppState) {
             val photoRequest =
                 PhotoRequest(userid, encodeImage(image), currentDate.format(formatter))
             try {
-                val response = PhotoApiService.createPhoto(photoRequest, appState.jwt.value)
+                val response = PhotoApiService.createPhoto(photoRequest, appState.dataStore.getJwt())
                 if (response.status != HttpStatusCode.Created) {
                     val statusResponse: StatusResponse = response.body()
                     // TODO: handle failed image creation

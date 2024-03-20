@@ -103,7 +103,6 @@ fun encodeImage(image: Bitmap): String {
     image.compress(Bitmap.CompressFormat.PNG, 100, stream)
     val imageByteArray = stream.toByteArray()
     val str = Base64.encode(imageByteArray)
-    println("decoded image")
     return str
 }
 
@@ -111,7 +110,6 @@ fun encodeImage(image: Bitmap): String {
 fun decodeImage(encodedImage: String): Bitmap {
     val decodedByte = Base64.decode(encodedImage)
     val image = BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.size)
-    println("decoded image")
     return image
 }
 
@@ -130,7 +128,6 @@ fun PhotobookPage(appState: AppState) {
             val response = PhotoApiService.getAllUserPhotos(userid, appState.dataStore.getJwt())
             if (response.status == HttpStatusCode.OK) {
                 val listResponse: ListResponse<PhotoResponse> = response.body()
-                println(listResponse.list.toString())
                 val photoList = listResponse.list.map { photoRes ->
                     val date = LocalDate.parse(photoRes.uploadDate, formatter)
                     val datestr = "${date.dayOfMonth} ${
@@ -142,13 +139,11 @@ fun PhotobookPage(appState: AppState) {
                 }
                 appState.photos.clear()
                 appState.photos.addAll(photoList.reversed())
-                println("Done updating photolist")
-                println(photoList.toString())
             } else {
-                println("getting photolist failed")
                 val statusResponse: StatusResponse = response.body()
-                // TODO: handle failed image creation
+                println("getting photolist failed")
                 println(statusResponse.body)
+                // TODO:handle failed image creation
                 appState.pageState.value = PageStates.HOME
             }
         } catch (e: Exception) {

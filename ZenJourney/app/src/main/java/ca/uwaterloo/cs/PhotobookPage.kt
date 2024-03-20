@@ -6,6 +6,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -102,14 +103,18 @@ fun encodeImage(image: Bitmap): String {
     val stream = ByteArrayOutputStream()
     image.compress(Bitmap.CompressFormat.PNG, 100, stream)
     val imageByteArray = stream.toByteArray()
-    return Base64.encode(imageByteArray)
+    val str = Base64.encode(imageByteArray)
+    println("decoded image")
+    return str
 }
 
 // base64 string -> bitmap
 @OptIn(ExperimentalEncodingApi::class)
 fun decodeImage(encodedImage: String): Bitmap {
     val decodedByte = Base64.decode(encodedImage)
-    return BitmapFactory.decodeByteArray(decodedByte, 0, encodedImage.length)
+    val image = BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.size)
+    println("decoded image")
+    return image
 }
 
 @OptIn(ExperimentalEncodingApi::class)
@@ -163,14 +168,14 @@ fun PhotobookPage(appState: AppState) {
                 // TODO: handle error
                 println(e.message)
             }
-        }
-        appState.photos.add(
-            0, PhotobookPhoto(
-                "${currentDate.dayOfMonth} ${
-                    capitalize(currentDate.dayOfWeek.toString().take(3))
-                }", image
+            appState.photos.add(
+                0, PhotobookPhoto(
+                    "${currentDate.dayOfMonth} ${
+                        capitalize(currentDate.dayOfWeek.toString().take(3))
+                    }", image
+                )
             )
-        )
+        }
     }
 
     /*

@@ -124,7 +124,7 @@ fun Day(
                 coroutineScope.launch {
                     try {
                         val response = JournalApiService.getJournalByDateAndUser(
-                            userId = "65e5664b99258c800b3ab381", // Example user ID
+                            userId = appState.userId.value,
                             year = day.date.year,
                             month = day.date.monthValue,
                             day = day.date.dayOfMonth,

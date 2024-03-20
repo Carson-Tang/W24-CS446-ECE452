@@ -1,6 +1,8 @@
 package ca.uwaterloo.cs
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,7 +11,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -22,7 +26,29 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.an.room.db.JournalDB
+import com.an.room.db.PhotoDB
+import com.an.room.db.UserDB
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
+
+suspend fun localClearData(appState: AppState) {
+    appState.resetToDefault()
+    withContext(Dispatchers.IO) {
+        val userDB = UserDB.getDB(appState.context)
+        val userDao = userDB.userDao()
+        userDao.deleteAll()
+
+        val photoDB = PhotoDB.getDB(appState.context)
+        val photoDao = photoDB.photoDao()
+        photoDao.deleteAll()
+
+        val journalDB = JournalDB.getDB(appState.context)
+        val journalDao = journalDB.journalDao()
+        journalDao.deleteAll()
+    }
+}
 
 @Composable
 fun SettingsPage(appState: AppState) {
@@ -88,27 +114,36 @@ fun SettingsPage(appState: AppState) {
                 color = Color(0xFF3D3D3D)
             )
 
-            Column(
-                modifier = Modifier.padding(top = 10.dp)
-            ) {
-                Text(
-                    text = "Disclaimer text here",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Color(0xFF579981)
-                )
-            }
+            val scrollState = rememberScrollState()
 
-            Column(
-                modifier = Modifier.padding(top = 10.dp)
+            Box(
+                modifier = Modifier
+                    .size(width = 350.dp, height = 380.dp)
+                    .padding(top = 10.dp, bottom = 20.dp)
+                    .border(BorderStroke(2.dp, Color.White), RoundedCornerShape(8.dp))
             ) {
-                Text(
-                    text = "............................................................................\n" +
-                            "............................................................................\n" +
-                            "............................................................................\n" +
-                            "............................................................................\n",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Color(0xFF579981)
-                )
+                Column(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .verticalScroll(scrollState)
+                ) {
+                    Text(
+                        text =
+                                "By using this mental wellness app, you acknowledge and agree to the following:\n" +
+                                "\n" +
+                                "Data Storage: If you opt to store your data on the cloud, please be aware that your personal information, including photos and journal entries, may be stored securely on third-party servers. While we make every effort to maintain the confidentiality and security of your data, we cannot guarantee absolute protection against unauthorized access or breaches.\n" +
+                                "\n" +
+                                "Personalized Affirmations: This app may utilize the data provided in your journal entries to generate personalized affirmations and recommendations aimed at enhancing your mental wellness. While these affirmations are intended to provide support and encouragement, they are not a substitute for professional advice or treatment. Please consult with a qualified mental health professional if you have any concerns about your mental health.\n" +
+                                "\n" +
+                                "Privacy: We are committed to protecting your privacy and will not share your personal data with third parties without your explicit consent.\n" +
+                                "\n" +
+                                "Disclaimer of Liability: The developers and providers of this app shall not be held liable for any damages, losses, or harm arising from the use of this app, including but not limited to reliance on personalized affirmations, data breaches, or inaccuracies in the generated content.\n" +
+                                "\n" +
+                                "By using this mental wellness app, you agree to the terms outlined in this disclaimer. If you do not agree with any part of this disclaimer, please refrain from using the app.",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color(0xFF579981)
+                    )
+                }
             }
         }
 
@@ -126,8 +161,15 @@ fun SettingsPage(appState: AppState) {
                 Button(
                     onClick = {
                         appState.pageState.value = PageStates.WELCOME
-                        runBlocking {
-                            appState.dataStore.setJwt("")
+                        appState.nameState.value = ""
+                        if (appState.useCloud.value) {
+                            runBlocking {
+                                appState.dataStore.setJwt("")
+                            }
+                        } else {
+                            runBlocking {
+                                localClearData(appState)
+                            }
                         }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
@@ -135,7 +177,7 @@ fun SettingsPage(appState: AppState) {
                         .fillMaxSize()
                 ) {
                     Text(
-                        text = "Log out",
+                        text = if (appState.useCloud.value) "Log out" else "Clear data",
                         style = MaterialTheme.typography.headlineSmall,
                         textAlign = TextAlign.Center,
                         color = Color.White

@@ -35,6 +35,9 @@ class MainActivity : ComponentActivity() {
 }
 
 class AppState(val context: Context) {
+    // user id
+    val userId = mutableStateOf("")
+
     // what page user sees
     val pageState = mutableStateOf(PageStates.WELCOME)
 
@@ -64,6 +67,25 @@ class AppState(val context: Context) {
 
     // auth
     val dataStore = AppDataStore(context)
+
+    fun resetToDefault() {
+        userId.value = ""
+        pageState.value = PageStates.WELCOME
+        nameState.value = ""
+        selectedDate.value = LocalDate.now()
+        selectedMoods.value = emptyList()
+        journalEntry.value = ""
+        pastJournalEntry.value = ""
+        pastSelectedMoods.value = emptyList()
+        pastDate.value = LocalDate.now()
+        selectedTune.value = R.raw.once_in_paris
+        playingTuneId.value = selectedTune.value
+        defaultTimeMs.value = 60000L
+        timeMs.value = defaultTimeMs.value
+        useCloud.value = false
+        useJournalForAffirmations.value = false
+        usePIN.value = false
+    }
 }
 
 @SuppressLint("CoroutineCreationDuringComposition")
@@ -85,6 +107,9 @@ fun LoadLocalUserSettings(context: Context, appState: AppState) {
                 appState.useCloud.value = user.useCloud
                 appState.useJournalForAffirmations.value = user.useJournalForAffirmations
                 appState.usePIN.value = user.pin != ""
+                if (!appState.useCloud.value) {
+                    appState.pageState.value = PageStates.HOME
+                }
             }
         }
     }
@@ -102,6 +127,8 @@ fun MainContent(context: Context) {
             appState.pageState.value = PageStates.HOME
         }
     }
+
+    appState.pageState.value = PageStates.SETTINGS
 
     Scaffold(
         bottomBar = {

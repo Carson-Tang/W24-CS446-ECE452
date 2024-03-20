@@ -128,7 +128,6 @@ fun MainContent(context: Context) {
         }
     }
 
-    appState.pageState.value = PageStates.SETTINGS
 
     Scaffold(
         bottomBar = {

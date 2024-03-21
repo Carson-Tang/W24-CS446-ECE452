@@ -123,7 +123,7 @@ fun SettingsPage(appState: AppState) {
                     )
                 )
                 Switch(
-                    appState.pin.value.isNotEmpty(),
+                    appState.hashedPIN.value.isNotEmpty(),
                     onCheckedChange = {
                         if (it) {
                             // enable PIN
@@ -133,7 +133,7 @@ fun SettingsPage(appState: AppState) {
                             runBlocking {
                                 updateUserPIN(appState, "")
                             }
-                            appState.pin.value = ""
+                            appState.hashedPIN.value = ""
                         }
                     },
                     colors = SwitchDefaults.colors(

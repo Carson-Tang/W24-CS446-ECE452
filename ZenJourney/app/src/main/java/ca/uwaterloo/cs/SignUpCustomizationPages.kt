@@ -4,24 +4,18 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.an.room.db.UserDB
@@ -29,6 +23,7 @@ import com.an.room.model.User
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.mindrot.jbcrypt.BCrypt
 
 @Composable
 fun SignUpCloud(
@@ -159,12 +154,11 @@ fun SignUpAffirmation(
 
 @OptIn(DelicateCoroutinesApi::class)
 fun storeLocalUserSettings(appState: AppState) {
-    val pin = appState.pin.value.ifEmpty { "" }
+    val pin = appState.hashedPIN.value.ifEmpty { "" }
     val user = User(
         firstName = appState.nameState.value,
         useCloud = appState.useCloud.value,
         useJournalForAffirmations = appState.useJournalForAffirmations.value,
-        // TODO: encrypt?
         pin = pin
     )
 
@@ -189,7 +183,7 @@ fun SignUpPIN(appState: AppState) {
 
     fun primaryAction() {
         if (pinErrorState.value == PINErrorStates.NONE && pinState.value.length == 4) {
-            appState.pin.value = pinState.value
+            appState.hashedPIN.value = BCrypt.hashpw(pinState.value, BCrypt.gensalt())
             storeLocalUserSettings(appState)
             appState.pageState.value = PageStates.HOME
         } else {
@@ -198,7 +192,7 @@ fun SignUpPIN(appState: AppState) {
     }
 
     fun secondaryAction() {
-        appState.pin.value = ""
+        appState.hashedPIN.value = ""
         storeLocalUserSettings(appState)
         appState.pageState.value = PageStates.HOME
     }

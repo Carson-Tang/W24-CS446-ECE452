@@ -63,7 +63,7 @@ class AppState(val context: Context) {
     // user settings
     val useCloud = mutableStateOf(false)
     val useJournalForAffirmations = mutableStateOf(false)
-    val pin = mutableStateOf("")
+    val hashedPIN = mutableStateOf("")
     val isPINRequired = mutableStateOf(false)
 
     // auth
@@ -85,7 +85,7 @@ class AppState(val context: Context) {
         timeMs.value = defaultTimeMs.value
         useCloud.value = false
         useJournalForAffirmations.value = false
-        pin.value = ""
+        hashedPIN.value = ""
         isPINRequired.value = false
     }
 }
@@ -108,8 +108,8 @@ fun LoadLocalUserSettings(context: Context, appState: AppState) {
                 appState.nameState.value = user.firstName
                 appState.useCloud.value = user.useCloud
                 appState.useJournalForAffirmations.value = user.useJournalForAffirmations
-                appState.pin.value = user.pin
-                if (appState.pin.value.isNotEmpty()) {
+                appState.hashedPIN.value = user.pin
+                if (appState.hashedPIN.value.isNotEmpty()) {
                     appState.isPINRequired.value = true
                 }
                 if (!appState.useCloud.value) {

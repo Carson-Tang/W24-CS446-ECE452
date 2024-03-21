@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.AlertDialog
@@ -41,6 +40,7 @@ import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode
 import journal.JournalResponse
 import kotlinx.coroutines.launch
+import org.mindrot.jbcrypt.BCrypt
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -198,7 +198,7 @@ fun HomePage(appState: AppState) {
                     Button(
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
                         onClick = {
-                            if (pinInput.value == appState.pin.value) {
+                            if (BCrypt.checkpw(pinInput.value, appState.hashedPIN.value)) {
                                 appState.isPINRequired.value = false
                             } else {
                                 pinErrorState.value = PINErrorStates.INCORRECT_PIN

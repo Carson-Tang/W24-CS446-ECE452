@@ -18,6 +18,12 @@ enum class InputErrorStates {
     INVALID_PASSWORD
 }
 
+enum class PINErrorStates {
+    NONE,
+    INVALID_PIN_FORMAT,
+    INCORRECT_PIN
+}
+
 val moodEmojisWithLabels = listOf(
     "\uD83D\uDE0A" to "Happy",
     "\uD83D\uDE22" to "Sad",

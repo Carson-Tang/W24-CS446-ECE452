@@ -27,7 +27,7 @@ fun Route.userRoutes() {
             val token = JwtConfig.generateToken(user)
             if (existingUser != null) {
                 if (BCrypt.checkpw(user.password, existingUser.password)) {
-                    val userId = existingUser.id
+                    val userId = existingUser.id.toString()
                     return@post call.respond(
                         HttpStatusCode.OK,
                         hashMapOf("token" to token, "userId" to userId),

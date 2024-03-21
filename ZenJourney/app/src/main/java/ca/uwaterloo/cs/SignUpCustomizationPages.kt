@@ -2,6 +2,7 @@ package ca.uwaterloo.cs
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -157,13 +158,14 @@ fun SignUpAffirmation(
 }
 
 @OptIn(DelicateCoroutinesApi::class)
-fun storeLocalUserSettings(appState: AppState, pinState: String) {
+fun storeLocalUserSettings(appState: AppState) {
+    val pin = appState.pin.value.ifEmpty { "" }
     val user = User(
         firstName = appState.nameState.value,
         useCloud = appState.useCloud.value,
         useJournalForAffirmations = appState.useJournalForAffirmations.value,
         // TODO: encrypt?
-        pin = if (appState.usePIN.value) pinState else ""
+        pin = pin
     )
 
     val database = UserDB.getDB(appState.context)
@@ -174,7 +176,8 @@ fun storeLocalUserSettings(appState: AppState, pinState: String) {
         if (userRes == null) {
             userDao.insert(user)
         } else {
-            // THIS SHOULDN'T HAPPEN
+            // when user enables PIN from the settings page
+            userDao.updatePINById(pin)
         }
     }
 }
@@ -182,21 +185,21 @@ fun storeLocalUserSettings(appState: AppState, pinState: String) {
 @Composable
 fun SignUpPIN(appState: AppState) {
     val pinState = remember { mutableStateOf("") }
-    val pinErrorState = remember { mutableStateOf(false) }
+    val pinErrorState = remember { mutableStateOf(PINErrorStates.NONE) }
 
     fun primaryAction() {
-        if (!pinErrorState.value && pinState.value.length == 4) {
-            appState.usePIN.value = true
-            storeLocalUserSettings(appState, pinState.value)
+        if (pinErrorState.value == PINErrorStates.NONE && pinState.value.length == 4) {
+            appState.pin.value = pinState.value
+            storeLocalUserSettings(appState)
             appState.pageState.value = PageStates.HOME
         } else {
-            pinErrorState.value = true
+            pinErrorState.value = PINErrorStates.INVALID_PIN_FORMAT
         }
     }
 
     fun secondaryAction() {
-        appState.usePIN.value = false
-        storeLocalUserSettings(appState, pinState.value)
+        appState.pin.value = ""
+        storeLocalUserSettings(appState)
         appState.pageState.value = PageStates.HOME
     }
     Column(
@@ -211,33 +214,8 @@ fun SignUpPIN(appState: AppState) {
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 104.dp, bottom = 40.dp),
         )
-        TextField(
-            pinState.value,
-            onValueChange = {
-                if (it.all { c -> c.isDigit() }) {
-                    pinState.value = it
-                }
-                pinErrorState.value = pinState.value.length != 4
-            },
-            isError = pinErrorState.value,
-            supportingText = {
-                if (pinErrorState.value) {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = "The PIN must be exactly 4 digits",
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-            },
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                errorContainerColor = MaterialTheme.colorScheme.secondaryContainer
-            ),
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-            modifier = Modifier.padding(bottom = 160.dp),
-        )
+        PINTextFieldComponent(pinState, pinErrorState)
+        Spacer(modifier = Modifier.padding(top = 160.dp))
         CustomizationActionButtons(
             appState,
             ::primaryAction,

@@ -50,13 +50,28 @@ suspend fun localClearData(appState: AppState) {
     }
 }
 
+suspend fun updateUserPIN(appState: AppState, newPIN: String) {
+    withContext(Dispatchers.IO) {
+        val userDB = UserDB.getDB(appState.context)
+        val userDao = userDB.userDao()
+        userDao.updatePINById(newPIN)
+    }
+}
+
+fun logout(appState: AppState) {
+    if (appState.useCloud.value) {
+        runBlocking {
+            appState.dataStore.setJwt("")
+        }
+    } else {
+        runBlocking {
+            localClearData(appState)
+        }
+    }
+}
+
 @Composable
 fun SettingsPage(appState: AppState) {
-    val customizationStates = arrayOf(
-        appState.useJournalForAffirmations,
-        appState.useJournalForAffirmations,
-        appState.usePIN
-    )
     Column(
         Modifier
             .background(color = Color(0xFFC7E6C9))
@@ -89,17 +104,42 @@ fun SettingsPage(appState: AppState) {
             }
             Column {
                 /* TODO: add a useNotifications state */
-                repeat(3) { idx ->
-                    Switch(
-                        customizationStates[idx].value,
-                        onCheckedChange = {
-                            customizationStates[idx].value = it
-                        },
-                        colors = SwitchDefaults.colors(
-                            checkedTrackColor = Color(0xFF7BB6A1)
-                        )
+                Switch(
+                    appState.useJournalForAffirmations.value,
+                    onCheckedChange = {
+                        appState.useJournalForAffirmations.value = it
+                    },
+                    colors = SwitchDefaults.colors(
+                        checkedTrackColor = Color(0xFF7BB6A1)
                     )
-                }
+                )
+                Switch(
+                    appState.useJournalForAffirmations.value,
+                    onCheckedChange = {
+                        appState.useJournalForAffirmations.value = it
+                    },
+                    colors = SwitchDefaults.colors(
+                        checkedTrackColor = Color(0xFF7BB6A1)
+                    )
+                )
+                Switch(
+                    appState.pin.value.isNotEmpty(),
+                    onCheckedChange = {
+                        if (it) {
+                            // enable PIN
+                            appState.pageState.value = PageStates.SIGNUP_PIN
+                        } else {
+                            // disable PIN
+                            runBlocking {
+                                updateUserPIN(appState, "")
+                            }
+                            appState.pin.value = ""
+                        }
+                    },
+                    colors = SwitchDefaults.colors(
+                        checkedTrackColor = Color(0xFF7BB6A1)
+                    )
+                )
             }
         }
 
@@ -162,15 +202,7 @@ fun SettingsPage(appState: AppState) {
                     onClick = {
                         appState.pageState.value = PageStates.WELCOME
                         appState.nameState.value = ""
-                        if (appState.useCloud.value) {
-                            runBlocking {
-                                appState.dataStore.setJwt("")
-                            }
-                        } else {
-                            runBlocking {
-                                localClearData(appState)
-                            }
-                        }
+                        logout(appState)
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
                     modifier = Modifier

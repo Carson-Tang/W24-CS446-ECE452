@@ -184,6 +184,7 @@ fun SignUpPIN(appState: AppState) {
     fun primaryAction() {
         if (pinErrorState.value == PINErrorStates.NONE && pinState.value.length == 4) {
             appState.hashedPIN.value = BCrypt.hashpw(pinState.value, BCrypt.gensalt())
+            // TODO: add logic for cloud users
             storeLocalUserSettings(appState)
             appState.pageState.value = PageStates.HOME
         } else {
@@ -193,6 +194,7 @@ fun SignUpPIN(appState: AppState) {
 
     fun secondaryAction() {
         appState.hashedPIN.value = ""
+        // TODO: add logic for cloud users
         storeLocalUserSettings(appState)
         appState.pageState.value = PageStates.HOME
     }

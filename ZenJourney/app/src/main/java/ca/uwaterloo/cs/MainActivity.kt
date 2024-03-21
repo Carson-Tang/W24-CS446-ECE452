@@ -63,7 +63,8 @@ class AppState(val context: Context) {
     // user settings
     val useCloud = mutableStateOf(false)
     val useJournalForAffirmations = mutableStateOf(false)
-    val usePIN = mutableStateOf(false)
+    val hashedPIN = mutableStateOf("")
+    val isPINRequired = mutableStateOf(false)
 
     // auth
     val dataStore = AppDataStore(context)
@@ -84,7 +85,8 @@ class AppState(val context: Context) {
         timeMs.value = defaultTimeMs.value
         useCloud.value = false
         useJournalForAffirmations.value = false
-        usePIN.value = false
+        hashedPIN.value = ""
+        isPINRequired.value = false
     }
 }
 
@@ -106,7 +108,10 @@ fun LoadLocalUserSettings(context: Context, appState: AppState) {
                 appState.nameState.value = user.firstName
                 appState.useCloud.value = user.useCloud
                 appState.useJournalForAffirmations.value = user.useJournalForAffirmations
-                appState.usePIN.value = user.pin != ""
+                appState.hashedPIN.value = user.pin
+                if (appState.hashedPIN.value.isNotEmpty()) {
+                    appState.isPINRequired.value = true
+                }
                 if (!appState.useCloud.value) {
                     appState.pageState.value = PageStates.HOME
                 }
@@ -119,6 +124,7 @@ fun LoadLocalUserSettings(context: Context, appState: AppState) {
 fun MainContent(context: Context) {
     val appState = remember { AppState(context) }
 
+    /* TODO: add conditional and logic to retrieve setting when user is cloud */
     LoadLocalUserSettings(context, appState)
 
     runBlocking {
@@ -127,7 +133,6 @@ fun MainContent(context: Context) {
             appState.pageState.value = PageStates.HOME
         }
     }
-
 
     Scaffold(
         bottomBar = {

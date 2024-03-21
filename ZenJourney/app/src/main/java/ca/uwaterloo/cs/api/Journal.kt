@@ -18,8 +18,8 @@ import kotlinx.coroutines.withContext
 
 object JournalApiService {
 
-    val gson = Gson()
-    private val baseUrl = "http://10.0.2.2:8080/journal"
+    private val gson = Gson()
+    private const val baseUrl = "http://10.0.2.2:8080/journal"
 
     suspend fun test(): HttpResponse {
         return withContext(Dispatchers.IO){
@@ -29,7 +29,7 @@ object JournalApiService {
     suspend fun createJournal(journalRequest: JournalRequest, jwt: String): HttpResponse {
         val journalJson = gson.toJson(journalRequest)
         return withContext(Dispatchers.IO) {
-            HttpClientSetup.httpClient.post("$baseUrl") {
+            HttpClientSetup.httpClient.post(baseUrl) {
                 contentType(ContentType.Application.Json)
                 setBody(journalJson)
                 headers {
@@ -57,7 +57,7 @@ object JournalApiService {
 
     suspend fun getJournalByDate(year: Int, month: Int, day: Int, jwt: String): HttpResponse {
         return withContext(Dispatchers.IO) {
-            val response: HttpResponse = HttpClientSetup.httpClient.get("$baseUrl") {
+            val response: HttpResponse = HttpClientSetup.httpClient.get(baseUrl) {
                 parameter("year", year)
                 parameter("month", month)
                 parameter("day", day)

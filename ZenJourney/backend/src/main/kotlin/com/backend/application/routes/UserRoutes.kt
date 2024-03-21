@@ -24,8 +24,8 @@ fun Route.userRoutes() {
         post("/login") {
             val user = call.receive<UserRequest>()
             val existingUser = userRepository.findByEmail(user.email)
-            val token = JwtConfig.generateToken(user)
             if (existingUser != null) {
+                val token = JwtConfig.generateToken(user, existingUser.id.toString())
                 if (BCrypt.checkpw(user.password, existingUser.password)) {
                     val userId = existingUser.id.toString()
                     return@post call.respond(
@@ -47,7 +47,6 @@ fun Route.userRoutes() {
 
         post {
             val user = call.receive<UserRequest>()
-            val token = JwtConfig.generateToken(user)
             val existingUser = userRepository.findByEmail(user.email)
             if (existingUser != null) {
                 return@post call.respond(
@@ -59,6 +58,7 @@ fun Route.userRoutes() {
             val insertedId = userRepository.insertOne(user.toDomain())
 
             if (insertedId != null) {
+                val token = JwtConfig.generateToken(user, insertedId.toString())
                 return@post call.respond(
                     HttpStatusCode.Created,
                     hashMapOf("token" to token),

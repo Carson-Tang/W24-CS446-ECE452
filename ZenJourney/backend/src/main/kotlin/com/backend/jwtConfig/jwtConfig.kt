@@ -3,6 +3,7 @@ package com.backend.jwtConfig
 import com.auth0.jwt.JWT
 import com.auth0.jwt.JWTVerifier
 import com.auth0.jwt.algorithms.Algorithm
+import user.User
 import user.UserRequest
 import java.util.Date
 
@@ -20,11 +21,11 @@ object JwtConfig{
     /**
      * Produce a token for this combination of name and password
      */
-    fun generateToken(user: UserRequest): String = JWT.create()
+    fun generateToken(user: UserRequest, userId: String): String = JWT.create()
         .withSubject("Authentication")
         .withIssuer(issuer)
         .withClaim("name", user.name)
-        .withClaim("password", user.password)
+        .withClaim("userId", userId)
         .withExpiresAt(getExpiration())  // optional
         .sign(algorithm)
 

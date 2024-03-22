@@ -30,8 +30,8 @@ fun Application.module() {
             verifier(JwtConfig.verifier)
             validate {
                 val name = it.payload.getClaim("name").asString()
-                val password = it.payload.getClaim("password").asString()
-                if (name != null && password != null) {
+                val userId = it.payload.getClaim("userId").asString()
+                if (name != null && userId != null) {
                     JWTPrincipal(it.payload)
                 } else {
                     null

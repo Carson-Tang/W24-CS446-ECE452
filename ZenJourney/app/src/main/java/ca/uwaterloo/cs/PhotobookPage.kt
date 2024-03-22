@@ -1,7 +1,9 @@
+@file:OptIn(ExperimentalEncodingApi::class)
+
 package ca.uwaterloo.cs
 
+import StatusResponse
 import android.Manifest
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
@@ -29,19 +31,31 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ca.uwaterloo.cs.api.PhotoApiService
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import io.ktor.client.call.body
+import io.ktor.http.HttpStatusCode
+import kotlinx.coroutines.launch
+import photo.ListResponse
+import photo.PhotoRequest
+import photo.PhotoResponse
+import java.io.ByteArrayOutputStream
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 
 data class PhotobookPhoto(
     val date: String,
@@ -83,39 +97,86 @@ fun capitalize(s: String): String {
     return s.substring(0, 1).uppercase() + s.substring(1).lowercase();
 }
 
-@OptIn(ExperimentalPermissionsApi::class)
+// bitmap -> base64 string
+fun encodeImage(image: Bitmap): String {
+    val stream = ByteArrayOutputStream()
+    image.compress(Bitmap.CompressFormat.PNG, 100, stream)
+    val imageByteArray = stream.toByteArray()
+    val str = Base64.encode(imageByteArray)
+    return str
+}
+
+// base64 string -> bitmap
+fun decodeImage(encodedImage: String): Bitmap {
+    val decodedByte = Base64.decode(encodedImage)
+    val image = BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.size)
+    return image
+}
+
 @Composable
+@OptIn(ExperimentalPermissionsApi::class)
 fun PhotobookPage(appState: AppState) {
     val currentDate = LocalDate.now()
     val currentMonth = currentDate.month.toString()
     val currentYear = currentDate.year.toString()
-    /* TODO: remove hardcoded list */
-    val photoState = remember {
-        mutableStateListOf(
-            PhotobookPhoto(
-                "21 Wed",
-                BitmapFactory.decodeResource(appState.context.resources, R.drawable.tonton_1)
-            ),
-            PhotobookPhoto(
-                "20 Tue",
-                BitmapFactory.decodeResource(appState.context.resources, R.drawable.totoro_2)
-            ),
-            PhotobookPhoto(
-                "19 Mon",
-                BitmapFactory.decodeResource(appState.context.resources, R.drawable.pikachu_3)
-            )
-        )
+    val coroutineScope = rememberCoroutineScope()
+    val userid = "65f6591ebe57c2026bcb2300" // Hardcoded test user for now
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
+    LaunchedEffect(Unit) {
+        try {
+            val response = PhotoApiService.getAllUserPhotos(userid, appState.dataStore.getJwt())
+            if (response.status == HttpStatusCode.OK) {
+                val listResponse: ListResponse<PhotoResponse> = response.body()
+                val photoList = listResponse.list.map { photoRes ->
+                    val date = LocalDate.parse(photoRes.uploadDate, formatter)
+                    val datestr = "${date.dayOfMonth} ${
+                        capitalize(date.dayOfWeek.toString().take(3))
+                    }"
+                    PhotobookPhoto(
+                        datestr, decodeImage(photoRes.photoBase64)
+                    )
+                }
+                appState.photos.clear()
+                appState.photos.addAll(photoList.reversed())
+            } else {
+                val statusResponse: StatusResponse = response.body()
+                println("getting photolist failed")
+                println(statusResponse.body)
+                // TODO:handle failed image creation
+                appState.pageState.value = PageStates.HOME
+            }
+        } catch (e: Exception) {
+            // TODO: handle error
+            println("some error occured while fetching photolist")
+            println(e)
+        }
     }
 
     fun addImageToPhotoState(image: Bitmap) {
-        photoState.add(
-            0,
-            PhotobookPhoto(
-                "${currentDate.dayOfMonth} ${
-                    capitalize(currentDate.dayOfWeek.toString().take(3))
-                }", image
+        coroutineScope.launch {
+            val photoRequest =
+                PhotoRequest(userid, encodeImage(image), currentDate.format(formatter))
+            try {
+                val response = PhotoApiService.createPhoto(photoRequest, appState.dataStore.getJwt())
+                if (response.status != HttpStatusCode.Created) {
+                    val statusResponse: StatusResponse = response.body()
+                    // TODO: handle failed image creation
+                    println(statusResponse.body)
+                    appState.pageState.value = PageStates.HOME
+                }
+            } catch (e: Exception) {
+                // TODO: handle error
+                println(e.message)
+            }
+            appState.photos.add(
+                0, PhotobookPhoto(
+                    "${currentDate.dayOfMonth} ${
+                        capitalize(currentDate.dayOfWeek.toString().take(3))
+                    }", image
+                )
             )
-        )
+        }
     }
 
     /*
@@ -238,9 +299,8 @@ fun PhotobookPage(appState: AppState) {
                         .background(color = Color.White, shape = RoundedCornerShape(16.dp))
                         .padding(top = 20.dp)
                 ) {
-                    ScrollablePhotoList(photoState)
-                    FloatingActionButton(
-                        modifier = Modifier.align(Alignment.BottomEnd),
+                    ScrollablePhotoList(appState.photos)
+                    FloatingActionButton(modifier = Modifier.align(Alignment.BottomEnd),
                         shape = CircleShape,
                         containerColor = Color.DarkGray,
                         onClick = { showChoiceDialog.value = true }) {

@@ -158,7 +158,7 @@ fun SettingsPage(appState: AppState) {
 
             Box(
                 modifier = Modifier
-                    .size(width = 350.dp, height = 380.dp)
+                    .size(width = 350.dp, height = 300.dp)
                     .padding(top = 10.dp, bottom = 20.dp)
                     .border(BorderStroke(2.dp, Color.White), RoundedCornerShape(8.dp))
             ) {

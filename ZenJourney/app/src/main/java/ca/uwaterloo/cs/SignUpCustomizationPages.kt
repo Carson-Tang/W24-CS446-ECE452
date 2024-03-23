@@ -187,6 +187,7 @@ fun SignUpPIN(appState: AppState) {
             // TODO: add logic for cloud users
             storeLocalUserSettings(appState)
             appState.pageState.value = PageStates.HOME
+            appState.setPageHistoryToHome()
         } else {
             pinErrorState.value = PINErrorStates.INVALID_PIN_FORMAT
         }
@@ -197,6 +198,7 @@ fun SignUpPIN(appState: AppState) {
         // TODO: add logic for cloud users
         storeLocalUserSettings(appState)
         appState.pageState.value = PageStates.HOME
+        appState.setPageHistoryToHome()
     }
     Column(
         Modifier

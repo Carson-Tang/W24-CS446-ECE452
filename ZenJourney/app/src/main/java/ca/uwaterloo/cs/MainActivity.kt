@@ -1,10 +1,8 @@
 package ca.uwaterloo.cs
 
 import android.annotation.SuppressLint
-import android.content.ContentValues.TAG
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
@@ -34,8 +32,10 @@ class MainActivity : ComponentActivity() {
         val onBackPressedCallback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 appState.backButtonTriggered.value = true
-                if (appState.prevPageStates.size > 0) {
+                if (appState.prevPageStates.size > 1) {
                     appState.pageState.value = appState.prevPageStates.removeAt(appState.prevPageStates.size-1)
+                } else if (appState.prevPageStates.size == 1) {
+                    appState.pageState.value = appState.prevPageStates.get(0)
                 }
             }
         }
@@ -55,7 +55,7 @@ class AppState(val context: Context) {
     // what page user sees
     val pageState = mutableStateOf(PageStates.WELCOME)
     val prevPageStates = mutableStateListOf<PageStates>()
-    val prevPageState = mutableStateOf(PageStates.WELCOME)
+    val prevPageState = mutableStateOf(pageState.value)
     // checks if the back button was pressed cus if it is then we change the current page state
     // the page state change triggers the listener
     val backButtonTriggered = mutableStateOf(false)
@@ -110,6 +110,16 @@ class AppState(val context: Context) {
         hashedPIN.value = ""
         isPINRequired.value = false
     }
+
+    fun setPageHistoryToHome() {
+        prevPageState.value = PageStates.HOME
+        prevPageStates.clear()
+    }
+
+    fun setPageHistoryToWelcome() {
+        prevPageState.value = PageStates.WELCOME
+        prevPageStates.clear()
+    }
 }
 
 @SuppressLint("CoroutineCreationDuringComposition")
@@ -136,6 +146,7 @@ fun LoadLocalUserSettings(context: Context, appState: AppState) {
                 }
                 if (!appState.useCloud.value) {
                     appState.pageState.value = PageStates.HOME
+                    appState.setPageHistoryToHome()
                 }
             }
         }
@@ -151,6 +162,7 @@ fun MainContent(context: Context, appState: AppState) {
         val jwt = appState.dataStore.getJwt()
         if (jwt.isNotEmpty() && !JWT(jwt).isExpired(5)) {
             appState.pageState.value = PageStates.HOME
+            appState.setPageHistoryToHome()
         }
     }
 
@@ -183,12 +195,16 @@ fun PageContent(appState: AppState) {
     LaunchedEffect(appState.pageState.value) {
         // since page changes on back button, we need to check if back button pressed
         // if it was then we don't want to add the previous page into the page history cus it'll go into a loop
+        println("current page: "+appState.pageState.value)
+        println("current list: "+appState.prevPageStates.toList().toString())
+        println("back button pressed: "+appState.backButtonTriggered.value)
         if (!appState.backButtonTriggered.value) {
             appState.prevPageStates.add(appState.prevPageState.value)
-            appState.prevPageState.value = appState.pageState.value
+            println("list AFTER: "+appState.prevPageStates.toList().toString())
         } else {
             appState.backButtonTriggered.value = false
         }
+        appState.prevPageState.value = appState.pageState.value
     }
     when (appState.pageState.value) {
         PageStates.WELCOME -> WelcomePage(appState)

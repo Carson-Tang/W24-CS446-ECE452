@@ -220,6 +220,7 @@ fun SignUpLoginPage(
                                     appState.dataStore.setJwt(tokenResponse.token)
                                     appState.userId.value = tokenResponse.userId
                                     appState.pageState.value = PageStates.HOME
+                                    appState.setPageHistoryToHome()
                                 }
                             } catch (e: Exception) {
                                 // TODO: handle error

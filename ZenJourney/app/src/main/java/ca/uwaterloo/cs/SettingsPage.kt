@@ -203,6 +203,7 @@ fun SettingsPage(appState: AppState) {
                         appState.pageState.value = PageStates.WELCOME
                         appState.nameState.value = ""
                         logout(appState)
+                        appState.setPageHistoryToWelcome()
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
                     modifier = Modifier

@@ -194,6 +194,7 @@ fun SignUpLoginPage(
                                 } else if (response.status == HttpStatusCode.Created) {
                                     val tokenResponse: TokenResponse = response.body()
                                     appState.dataStore.setJwt(tokenResponse.token)
+                                    loadCloudUserSettings(appState)
                                     appState.pageState.value = PageStates.SIGNUP_STEP3
                                 }
                             } catch (e: Exception) {
@@ -218,7 +219,7 @@ fun SignUpLoginPage(
                                 } else if (response.status == HttpStatusCode.OK) {
                                     val tokenResponse: TokenResponse = response.body()
                                     appState.dataStore.setJwt(tokenResponse.token)
-                                    appState.userId.value = tokenResponse.userId
+                                    loadCloudUserSettings(appState)
                                     appState.pageState.value = PageStates.HOME
                                     appState.setPageHistoryToHome()
                                 }

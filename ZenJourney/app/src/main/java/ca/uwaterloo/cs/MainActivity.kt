@@ -14,6 +14,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.activity.OnBackPressedCallback
 import androidx.lifecycle.MutableLiveData
 import ca.uwaterloo.cs.ui.theme.ZenJourneyTheme
 import com.an.room.db.UserDB
@@ -25,11 +26,23 @@ import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
 class MainActivity : ComponentActivity() {
+    val appState = AppState(this)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val onBackPressedCallback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                appState.backButtonTriggered.value = true
+                if (appState.prevPageStates.size > 1) {
+                    appState.pageState.value = appState.prevPageStates.removeAt(appState.prevPageStates.size-1)
+                } else if (appState.prevPageStates.size == 1) {
+                    appState.pageState.value = appState.prevPageStates.get(0)
+                }
+            }
+        }
+        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
         setContent {
             ZenJourneyTheme {
-                MainContent(this)
+                MainContent(this, appState)
             }
         }
     }
@@ -41,6 +54,11 @@ class AppState(val context: Context) {
 
     // what page user sees
     val pageState = mutableStateOf(PageStates.WELCOME)
+    val prevPageStates = mutableStateListOf<PageStates>()
+    val prevPageState = mutableStateOf(pageState.value)
+    // checks if the back button was pressed cus if it is then we change the current page state
+    // the page state change triggers the listener
+    val backButtonTriggered = mutableStateOf(false)
 
     // users name
     val nameState = mutableStateOf("")
@@ -92,6 +110,16 @@ class AppState(val context: Context) {
         hashedPIN.value = ""
         isPINRequired.value = false
     }
+
+    fun setPageHistoryToHome() {
+        prevPageState.value = PageStates.HOME
+        prevPageStates.clear()
+    }
+
+    fun setPageHistoryToWelcome() {
+        prevPageState.value = PageStates.WELCOME
+        prevPageStates.clear()
+    }
 }
 
 @SuppressLint("CoroutineCreationDuringComposition")
@@ -118,6 +146,7 @@ fun LoadLocalUserSettings(context: Context, appState: AppState) {
                 }
                 if (!appState.useCloud.value) {
                     appState.pageState.value = PageStates.HOME
+                    appState.setPageHistoryToHome()
                 }
             }
         }
@@ -125,9 +154,7 @@ fun LoadLocalUserSettings(context: Context, appState: AppState) {
 }
 
 @Composable
-fun MainContent(context: Context) {
-    val appState = remember { AppState(context) }
-
+fun MainContent(context: Context, appState: AppState) {
     /* TODO: add conditional and logic to retrieve setting when user is cloud */
     LoadLocalUserSettings(context, appState)
 
@@ -135,6 +162,7 @@ fun MainContent(context: Context) {
         val jwt = appState.dataStore.getJwt()
         if (jwt.isNotEmpty() && !JWT(jwt).isExpired(5)) {
             appState.pageState.value = PageStates.HOME
+            appState.setPageHistoryToHome()
         }
     }
 
@@ -164,6 +192,16 @@ fun MainContent(context: Context) {
 
 @Composable
 fun PageContent(appState: AppState) {
+    LaunchedEffect(appState.pageState.value) {
+        // since page changes on back button, we need to check if back button pressed
+        // if it was then we don't want to add the previous page into the page history cus it'll go into a loop
+        if (!appState.backButtonTriggered.value) {
+            appState.prevPageStates.add(appState.prevPageState.value)
+        } else {
+            appState.backButtonTriggered.value = false
+        }
+        appState.prevPageState.value = appState.pageState.value
+    }
     when (appState.pageState.value) {
         PageStates.WELCOME -> WelcomePage(appState)
         PageStates.LOGIN -> LoginPage(appState)

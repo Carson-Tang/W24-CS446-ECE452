@@ -1,8 +1,10 @@
 package ca.uwaterloo.cs
 
 import android.annotation.SuppressLint
+import android.content.ContentValues.TAG
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
@@ -14,6 +16,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.activity.OnBackPressedCallback
 import androidx.lifecycle.MutableLiveData
 import ca.uwaterloo.cs.ui.theme.ZenJourneyTheme
 import com.an.room.db.UserDB
@@ -25,11 +28,21 @@ import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
 class MainActivity : ComponentActivity() {
+    val appState = AppState(this)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val onBackPressedCallback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                appState.backButtonTriggered.value = true
+                if (appState.prevPageStates.size > 0) {
+                    appState.pageState.value = appState.prevPageStates.removeAt(appState.prevPageStates.size-1)
+                }
+            }
+        }
+        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
         setContent {
             ZenJourneyTheme {
-                MainContent(this)
+                MainContent(this, appState)
             }
         }
     }
@@ -41,6 +54,11 @@ class AppState(val context: Context) {
 
     // what page user sees
     val pageState = mutableStateOf(PageStates.WELCOME)
+    val prevPageStates = mutableStateListOf<PageStates>()
+    val prevPageState = mutableStateOf(PageStates.WELCOME)
+    // checks if the back button was pressed cus if it is then we change the current page state
+    // the page state change triggers the listener
+    val backButtonTriggered = mutableStateOf(false)
 
     // users name
     val nameState = mutableStateOf("")
@@ -125,9 +143,7 @@ fun LoadLocalUserSettings(context: Context, appState: AppState) {
 }
 
 @Composable
-fun MainContent(context: Context) {
-    val appState = remember { AppState(context) }
-
+fun MainContent(context: Context, appState: AppState) {
     /* TODO: add conditional and logic to retrieve setting when user is cloud */
     LoadLocalUserSettings(context, appState)
 
@@ -164,6 +180,16 @@ fun MainContent(context: Context) {
 
 @Composable
 fun PageContent(appState: AppState) {
+    LaunchedEffect(appState.pageState.value) {
+        // since page changes on back button, we need to check if back button pressed
+        // if it was then we don't want to add the previous page into the page history cus it'll go into a loop
+        if (!appState.backButtonTriggered.value) {
+            appState.prevPageStates.add(appState.prevPageState.value)
+            appState.prevPageState.value = appState.pageState.value
+        } else {
+            appState.backButtonTriggered.value = false
+        }
+    }
     when (appState.pageState.value) {
         PageStates.WELCOME -> WelcomePage(appState)
         PageStates.LOGIN -> LoginPage(appState)

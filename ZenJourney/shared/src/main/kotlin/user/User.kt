@@ -8,12 +8,16 @@ data class User(
     val id: ObjectId,
     val name: String,
     val email: String,
-    val password: String
+    val password: String,
+    val pin: String,
+    val useJournalForAffirmations: Boolean,
 ) {
     fun toResponse() = UserResponse(
         id = id.toString(),
         name = name,
         email = email,
-        password = password
+        password = password,
+        pin = pin,
+        useJournalForAffirmations = useJournalForAffirmations,
     )
 }

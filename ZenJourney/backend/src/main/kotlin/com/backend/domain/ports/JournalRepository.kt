@@ -10,6 +10,5 @@ interface JournalRepository {
     suspend fun updateOne(journalId: ObjectId, journal: JournalRequest): Long
     suspend fun deleteById(objectId: ObjectId): Long
     suspend fun findByDate(year: Int, month: Int, day: Int): Journal?
-
     suspend fun findByDateAndUser(userId: String, year: Int, month: Int, day: Int): Journal?
 }

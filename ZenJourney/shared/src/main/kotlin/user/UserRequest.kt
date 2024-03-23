@@ -6,7 +6,9 @@ import org.mindrot.jbcrypt.BCrypt
 data class UserRequest(
     val name: String,
     val email: String,
-    val password: String
+    val password: String,
+    val pin: String = "",
+    val useJournalForAffirmations: Boolean = false,
 )
 
 fun UserRequest.toDomain(): User {
@@ -15,5 +17,7 @@ fun UserRequest.toDomain(): User {
         name = name,
         email = email,
         password = BCrypt.hashpw(password, BCrypt.gensalt()),
+        pin = pin,
+        useJournalForAffirmations = useJournalForAffirmations,
     )
 }

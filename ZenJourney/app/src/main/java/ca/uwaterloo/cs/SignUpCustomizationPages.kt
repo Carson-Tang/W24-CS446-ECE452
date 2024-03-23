@@ -1,5 +1,6 @@
 package ca.uwaterloo.cs
 
+import StatusResponse
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -18,12 +19,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import ca.uwaterloo.cs.api.UserApiService
 import com.an.room.db.UserDB
 import com.an.room.model.User
+import io.ktor.client.call.body
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.mindrot.jbcrypt.BCrypt
+import user.UserRequest
 
 @Composable
 fun SignUpCloud(
@@ -176,6 +182,31 @@ fun storeLocalUserSettings(appState: AppState) {
     }
 }
 
+fun storeCloudUserSettings(appState: AppState) {
+    runBlocking {
+        try {
+            val response = UserApiService.updateUser(
+                appState.userId.value,
+                UserRequest(
+                    "",
+                    "",
+                    "",
+                    appState.hashedPIN.value,
+                    appState.useJournalForAffirmations.value,
+                )
+            )
+            if (response.status == HttpStatusCode.BadRequest) {
+                val statusResponse: StatusResponse = response.body()
+                // TODO: handle with user id doesn't exist yet
+                println(statusResponse.body)
+            }
+        } catch (e: Exception) {
+            // TODO: handle error
+            println(e.message)
+        }
+    }
+}
+
 @Composable
 fun SignUpPIN(appState: AppState) {
     val pinState = remember { mutableStateOf("") }
@@ -184,8 +215,11 @@ fun SignUpPIN(appState: AppState) {
     fun primaryAction() {
         if (pinErrorState.value == PINErrorStates.NONE && pinState.value.length == 4) {
             appState.hashedPIN.value = BCrypt.hashpw(pinState.value, BCrypt.gensalt())
-            // TODO: add logic for cloud users
-            storeLocalUserSettings(appState)
+            if (appState.useCloud.value) {
+                storeCloudUserSettings(appState)
+            } else {
+                storeLocalUserSettings(appState)
+            }
             appState.pageState.value = PageStates.HOME
             appState.setPageHistoryToHome()
         } else {
@@ -195,8 +229,11 @@ fun SignUpPIN(appState: AppState) {
 
     fun secondaryAction() {
         appState.hashedPIN.value = ""
-        // TODO: add logic for cloud users
-        storeLocalUserSettings(appState)
+        if (appState.useCloud.value) {
+            storeCloudUserSettings(appState)
+        } else {
+            storeLocalUserSettings(appState)
+        }
         appState.pageState.value = PageStates.HOME
         appState.setPageHistoryToHome()
     }

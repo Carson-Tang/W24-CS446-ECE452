@@ -3,6 +3,7 @@ package ca.uwaterloo.cs.api
 import com.google.gson.Gson
 import io.ktor.client.request.get
 import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
@@ -25,7 +26,23 @@ object UserApiService {
     suspend fun createUser(userRequest: UserRequest): HttpResponse {
         val userJson = gson.toJson(userRequest)
         return withContext(Dispatchers.IO) {
-            HttpClientSetup.httpClient.post("$baseUrl") {
+            HttpClientSetup.httpClient.post(baseUrl) {
+                contentType(ContentType.Application.Json)
+                setBody(userJson)
+            }
+        }
+    }
+
+    suspend fun getUser(id: String): HttpResponse {
+        return withContext(Dispatchers.IO) {
+            HttpClientSetup.httpClient.get("${baseUrl}/$id") {}
+        }
+    }
+
+    suspend fun updateUser(id: String, userRequest: UserRequest): HttpResponse {
+        val userJson = gson.toJson(userRequest)
+        return withContext(Dispatchers.IO) {
+            HttpClientSetup.httpClient.put("${baseUrl}/$id") {
                 contentType(ContentType.Application.Json)
                 setBody(userJson)
             }

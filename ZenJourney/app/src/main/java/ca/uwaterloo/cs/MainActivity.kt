@@ -195,12 +195,8 @@ fun PageContent(appState: AppState) {
     LaunchedEffect(appState.pageState.value) {
         // since page changes on back button, we need to check if back button pressed
         // if it was then we don't want to add the previous page into the page history cus it'll go into a loop
-        println("current page: "+appState.pageState.value)
-        println("current list: "+appState.prevPageStates.toList().toString())
-        println("back button pressed: "+appState.backButtonTriggered.value)
         if (!appState.backButtonTriggered.value) {
             appState.prevPageStates.add(appState.prevPageState.value)
-            println("list AFTER: "+appState.prevPageStates.toList().toString())
         } else {
             appState.backButtonTriggered.value = false
         }

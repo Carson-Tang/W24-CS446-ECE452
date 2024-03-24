@@ -34,6 +34,9 @@ interface UserDao {
     @Query("UPDATE users SET pin = :newPIN")
     fun updatePINById(newPIN: String)
 
+    @Query("UPDATE users SET useJournalForAffirmations = :useJournalForAffirmations")
+    fun updateUseJournalForAffirmationsById(useJournalForAffirmations: Boolean)
+
     @Delete
     fun delete(user: User)
 

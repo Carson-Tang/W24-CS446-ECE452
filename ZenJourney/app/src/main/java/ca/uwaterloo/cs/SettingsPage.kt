@@ -66,18 +66,6 @@ suspend fun updateUserPIN(appState: AppState) {
     }
 }
 
-fun logout(appState: AppState) {
-    if (appState.useCloud.value) {
-        runBlocking {
-            appState.dataStore.setJwt("")
-        }
-    } else {
-        runBlocking {
-            localClearData(appState)
-        }
-    }
-}
-
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun SettingsPage(appState: AppState) {
@@ -153,11 +141,7 @@ fun SettingsPage(appState: AppState) {
                     appState.useJournalForAffirmations.value,
                     onCheckedChange = {
                         appState.useJournalForAffirmations.value = it
-                        if (appState.useCloud.value) {
-                            storeCloudUserSettings(appState)
-                        } else {
-                            // TODO: make function to update roomdb
-                        }
+                        appState.userStrategy!!.storeUserSettings(appState)
                     },
                     colors = SwitchDefaults.colors(
                         checkedTrackColor = Color(0xFF7BB6A1)
@@ -172,13 +156,7 @@ fun SettingsPage(appState: AppState) {
                         } else {
                             // disable PIN
                             appState.hashedPIN.value = ""
-                            if (appState.useCloud.value) {
-                                storeCloudUserSettings(appState)
-                            } else {
-                                runBlocking {
-                                    updateUserPIN(appState)
-                                }
-                            }
+                            appState.userStrategy!!.storeUserSettings(appState)
                         }
                     },
                     colors = SwitchDefaults.colors(
@@ -247,7 +225,7 @@ fun SettingsPage(appState: AppState) {
                     onClick = {
                         appState.pageState.value = PageStates.WELCOME
                         appState.nameState.value = ""
-                        logout(appState)
+                        appState.userStrategy!!.logout(appState)
                         appState.setPageHistoryToWelcome()
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
@@ -255,7 +233,7 @@ fun SettingsPage(appState: AppState) {
                         .fillMaxSize()
                 ) {
                     Text(
-                        text = if (appState.useCloud.value) "Log out" else "Clear data",
+                        text = appState.userStrategy!!.logoutLabel,
                         style = MaterialTheme.typography.headlineSmall,
                         textAlign = TextAlign.Center,
                         color = Color.White

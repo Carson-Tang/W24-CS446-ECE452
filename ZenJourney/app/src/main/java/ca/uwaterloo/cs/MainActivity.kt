@@ -1,6 +1,5 @@
 package ca.uwaterloo.cs
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -14,14 +13,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.activity.OnBackPressedCallback
-import ca.uwaterloo.cs.api.UserApiService
+import ca.uwaterloo.cs.userstrategy.CloudUserStrategy
+import ca.uwaterloo.cs.userstrategy.LocalUserStrategy
+import ca.uwaterloo.cs.userstrategy.UserStrategy
 import ca.uwaterloo.cs.ui.theme.ZenJourneyTheme
-import com.an.room.db.UserDB
 import com.auth0.android.jwt.JWT
-import io.ktor.client.call.body
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import user.UserResponse
 import java.time.LocalDate
 
 class MainActivity : ComponentActivity() {
@@ -84,13 +80,14 @@ class AppState(val context: Context) {
     val timeMs = mutableStateOf(defaultTimeMs.value)
 
     // user settings
-    val useCloud = mutableStateOf(false)
     val useJournalForAffirmations = mutableStateOf(false)
     val hashedPIN = mutableStateOf("")
     val isPINRequired = mutableStateOf(false)
 
     // auth
     val dataStore = AppDataStore(context)
+
+    var userStrategy: UserStrategy? = null
 
     fun resetToDefault() {
         userId.value = ""
@@ -106,10 +103,10 @@ class AppState(val context: Context) {
         playingTuneId.value = selectedTune.value
         defaultTimeMs.value = 60000L
         timeMs.value = defaultTimeMs.value
-        useCloud.value = false
         useJournalForAffirmations.value = false
         hashedPIN.value = ""
         isPINRequired.value = false
+        userStrategy = null
     }
 
     fun setPageHistoryToHome() {
@@ -123,60 +120,20 @@ class AppState(val context: Context) {
     }
 }
 
-suspend fun loadLocalUserSettings(appState: AppState) {
-    val database = UserDB.getDB(appState.context)
-    val userDao = database.userDao()
-
-    val user = withContext(Dispatchers.IO) {
-        userDao.getOne().getOrNull(0)
-    }
-    user?.let {
-        withContext(Dispatchers.Main) {
-            appState.nameState.value = user.firstName
-            appState.useCloud.value = user.useCloud
-            appState.useJournalForAffirmations.value = user.useJournalForAffirmations
-            appState.hashedPIN.value = user.pin
-            if (appState.hashedPIN.value.isNotEmpty()) {
-                appState.isPINRequired.value = true
-            }
-            if (!appState.useCloud.value) {
-                appState.pageState.value = PageStates.HOME
-                appState.setPageHistoryToHome()
-            }
-        }
-    }
-}
-
-suspend fun loadCloudUserSettings(appState: AppState) {
+suspend fun determineUserType(appState: AppState) {
     val jwt = appState.dataStore.getJwt()
     if (jwt.isNotEmpty() && !JWT(jwt).isExpired(5)) {
-        appState.userId.value =
-            JWT(jwt).getClaim("userId").asString().toString()
-        try {
-            val user: UserResponse = UserApiService.getUser(appState.userId.value).body()
-            withContext(Dispatchers.Main) {
-                appState.nameState.value = user.name
-                appState.useCloud.value = true
-                appState.useJournalForAffirmations.value = user.useJournalForAffirmations
-                appState.hashedPIN.value = user.pin
-                if (appState.hashedPIN.value.isNotEmpty()) {
-                    appState.isPINRequired.value = true
-                }
-            }
-        } catch (e: Exception) {
-            // TODO: handle error
-            println(e.message)
-        }
-        appState.pageState.value = PageStates.HOME
-        appState.setPageHistoryToHome()
+        appState.userStrategy = CloudUserStrategy()
+    } else {
+        appState.userStrategy = LocalUserStrategy()
     }
 }
 
 @Composable
 fun MainContent(appState: AppState) {
     LaunchedEffect(true) {
-        loadLocalUserSettings(appState)
-        loadCloudUserSettings(appState)
+        determineUserType(appState)
+        appState.userStrategy!!.loadUserSettings(appState)
     }
 
     Scaffold(

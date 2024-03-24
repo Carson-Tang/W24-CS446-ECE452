@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ca.uwaterloo.cs.api.UserApiService
+import ca.uwaterloo.cs.userstrategy.CloudUserStrategy
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
 import io.ktor.client.call.body
@@ -140,12 +141,12 @@ fun SignUpLoginPage(
     buttonText: String,
 ) {
     val coroutineScope = rememberCoroutineScope()
-
     val emailState = remember { mutableStateOf("") }
     val passwordState = remember { mutableStateOf("") }
     val emailErrorState = remember { mutableStateOf(InputErrorStates.NONE) }
     val passwordErrorState = remember { mutableStateOf(InputErrorStates.NONE) }
 
+    appState.userStrategy = CloudUserStrategy()
     Column(
         Modifier
             .background(MaterialTheme.colorScheme.background)
@@ -194,7 +195,7 @@ fun SignUpLoginPage(
                                 } else if (response.status == HttpStatusCode.Created) {
                                     val tokenResponse: TokenResponse = response.body()
                                     appState.dataStore.setJwt(tokenResponse.token)
-                                    loadCloudUserSettings(appState)
+                                    appState.userStrategy!!.loadUserSettings(appState)
                                     appState.pageState.value = PageStates.SIGNUP_STEP3
                                 }
                             } catch (e: Exception) {
@@ -219,7 +220,7 @@ fun SignUpLoginPage(
                                 } else if (response.status == HttpStatusCode.OK) {
                                     val tokenResponse: TokenResponse = response.body()
                                     appState.dataStore.setJwt(tokenResponse.token)
-                                    loadCloudUserSettings(appState)
+                                    appState.userStrategy!!.loadUserSettings(appState)
                                     appState.pageState.value = PageStates.HOME
                                     appState.setPageHistoryToHome()
                                 }

@@ -1,6 +1,5 @@
 package ca.uwaterloo.cs
 
-import StatusResponse
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -19,19 +18,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import ca.uwaterloo.cs.api.UserApiService
 import ca.uwaterloo.cs.userstrategy.CloudUserStrategy
 import ca.uwaterloo.cs.userstrategy.LocalUserStrategy
-import com.an.room.db.UserDB
-import com.an.room.model.User
-import io.ktor.client.call.body
-import io.ktor.http.HttpStatusCode
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.mindrot.jbcrypt.BCrypt
-import user.UserRequest
 
 @Composable
 fun SignUpCloud(

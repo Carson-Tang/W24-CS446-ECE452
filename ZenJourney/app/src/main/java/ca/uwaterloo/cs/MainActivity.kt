@@ -1,6 +1,5 @@
 package ca.uwaterloo.cs
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -14,17 +13,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.activity.OnBackPressedCallback
-import ca.uwaterloo.cs.api.UserApiService
 import ca.uwaterloo.cs.userstrategy.CloudUserStrategy
 import ca.uwaterloo.cs.userstrategy.LocalUserStrategy
 import ca.uwaterloo.cs.userstrategy.UserStrategy
 import ca.uwaterloo.cs.ui.theme.ZenJourneyTheme
-import com.an.room.db.UserDB
 import com.auth0.android.jwt.JWT
-import io.ktor.client.call.body
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import user.UserResponse
 import java.time.LocalDate
 
 class MainActivity : ComponentActivity() {

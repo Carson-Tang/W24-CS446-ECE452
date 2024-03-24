@@ -66,24 +66,6 @@ fun Route.userRoutes() {
             }
         }
 
-        delete("/{id?}") {
-            val id = call.parameters["id"] ?: return@delete call.respond(
-                HttpStatusCode.BadRequest,
-                toStatusResponse(false, "Missing user id")
-            )
-            val delete: Long = userRepository.deleteById(ObjectId(id))
-            if (delete == 1L) {
-                return@delete call.respond(
-                    HttpStatusCode.OK,
-                    toStatusResponse(true, "User deleted successfully")
-                )
-            }
-            return@delete call.respond(
-                HttpStatusCode.NotFound,
-                toStatusResponse(false, "User not found")
-            )
-        }
-
         get("/{id?}") {
             val id = call.parameters["id"]
             if (id.isNullOrEmpty()) {
@@ -99,5 +81,26 @@ fun Route.userRoutes() {
                 toStatusResponse(false, "No records found for id: $id")
             )
         }
+    }
+}
+
+fun Route.userProtectedRoutes() {
+    val userRepository by inject<UserRepository>()
+    delete("/{id?}") {
+        val id = call.parameters["id"] ?: return@delete call.respond(
+            HttpStatusCode.BadRequest,
+            toStatusResponse(false, "Missing user id")
+        )
+        val delete: Long = userRepository.deleteById(ObjectId(id))
+        if (delete == 1L) {
+            return@delete call.respond(
+                HttpStatusCode.OK,
+                toStatusResponse(true, "User deleted successfully")
+            )
+        }
+        return@delete call.respond(
+            HttpStatusCode.NotFound,
+            toStatusResponse(false, "User not found")
+        )
     }
 }

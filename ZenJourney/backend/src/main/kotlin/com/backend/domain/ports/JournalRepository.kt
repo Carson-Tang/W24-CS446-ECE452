@@ -1,5 +1,6 @@
 package com.backend.domain.ports
 
+import com.mongodb.client.result.DeleteResult
 import journal.Journal
 import journal.JournalRequest
 import org.bson.BsonValue
@@ -12,4 +13,6 @@ interface JournalRepository {
     suspend fun findByDate(year: Int, month: Int, day: Int): Journal?
 
     suspend fun findByDateAndUser(userId: String, year: Int, month: Int, day: Int): Journal?
+
+    suspend fun deleteByUserId(userId: String): DeleteResult
 }

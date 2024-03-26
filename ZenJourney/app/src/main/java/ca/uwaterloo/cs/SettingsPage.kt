@@ -286,7 +286,7 @@ fun SettingsPage(appState: AppState) {
             }
         }
 
-        Colu
+        Column(
             modifier = Modifier
                 .padding(top = 8.dp, start = 20.dp, end = 20.dp)
                 .size(width = 200.dp, height = 50.dp),

@@ -8,10 +8,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -20,6 +23,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -36,6 +40,7 @@ import ca.uwaterloo.cs.api.JournalApiService.deleteJournalByUserId
 import ca.uwaterloo.cs.api.PhotoApiService.deleteUserPhotos
 import ca.uwaterloo.cs.api.UserApiService.deleteUser
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import com.an.room.db.JournalDB
 import com.an.room.db.PhotoDB
 import com.an.room.db.UserDB
@@ -71,7 +76,6 @@ suspend fun updateUserPIN(appState: AppState) {
     }
 }
 
-@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun DisclaimerPage(appState: AppState) {
     Column(
@@ -148,14 +152,14 @@ fun DisclaimerPage(appState: AppState) {
         }
     }
 }
-
-@OptIn(ExperimentalPermissionsApi::class)
 @Composable
+@OptIn(ExperimentalPermissionsApi::class)
 fun SettingsPage(appState: AppState) {
     val notificationPermissions =
         rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
     val showNotificationSettingsDialog = remember { mutableStateOf(false) }
-
+    val showDeleteAccountDialog = remember { mutableStateOf(false) }
+//    val customizationTitles = arrayOf("Notifications", "Personalized Affirmations", "PIN")
 
     if (showNotificationSettingsDialog.value) {
         AlertDialog(
@@ -317,21 +321,43 @@ fun SettingsPage(appState: AppState) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             TextButton( onClick = {
-                runBlocking {
-                    // catch errors
-                    deleteUser(appState.userId.value, appState.dataStore.getJwt())
-                    deleteJournalByUserId(appState.userId.value, appState.dataStore.getJwt())
-                    deleteUserPhotos(appState.userId.value, appState.dataStore.getJwt())
-                }
+//                runBlocking {
+//                    // catch errors
+//                    deleteUser(appState.userId.value, appState.dataStore.getJwt())
+//                    deleteJournalByUserId(appState.userId.value, appState.dataStore.getJwt())
+//                    deleteUserPhotos(appState.userId.value, appState.dataStore.getJwt())
+//                }
+                showDeleteAccountDialog.value = true
             }) {
                 Text(
-                    text = if (appState.useCloud.value) "Delete account" else "",
+                    text = appState.userStrategy!!.deleteAccountLabel,
                     style = MaterialTheme.typography.headlineSmall,
                     color = Color(0xFF649E8A)
                 )
             }
         }
 
+        if (showDeleteAccountDialog.value) {
+            DeleteAccountDialog()
+            showDeleteAccountDialog.value = false
+        }
+
     }
 }
 
+@Composable
+fun DeleteAccountDialog() {
+    Dialog(onDismissRequest = { /* Dismiss the dialog */ }) {
+        Surface(
+            modifier = Modifier.width(280.dp),
+            shape = MaterialTheme.shapes.medium,
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = "Meditation Time", style = MaterialTheme.typography.headlineSmall, color = Color.Black)
+            }
+        }
+    }
+}

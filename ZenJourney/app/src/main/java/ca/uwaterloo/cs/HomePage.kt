@@ -44,7 +44,6 @@ import org.mindrot.jbcrypt.BCrypt
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-
 fun generateFeelingStatement(moods: List<String>): String {
     val moodMap = moodEmojisWithLabels.map { it.first to it.second.lowercase() }.toMap()
     val feelings = moods.mapNotNull { moodMap[it] }
@@ -212,9 +211,9 @@ fun HomePage(appState: AppState) {
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
                         onClick = {
                             appState.isPINRequired.value = false
-                            logout(appState)
+                            appState.userStrategy!!.logout(appState)
                         }) {
-                        Text(if (appState.useCloud.value) "Log out" else "Exit, clear all data")
+                        Text(appState.userStrategy!!.forgotPINLabel)
                     }
                 },
                 text = {

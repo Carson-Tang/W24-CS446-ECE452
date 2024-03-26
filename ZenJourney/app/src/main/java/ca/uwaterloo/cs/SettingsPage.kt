@@ -1,5 +1,6 @@
 package ca.uwaterloo.cs
 
+import android.Manifest
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
@@ -23,6 +25,8 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,9 +35,13 @@ import androidx.compose.ui.unit.dp
 import ca.uwaterloo.cs.api.JournalApiService.deleteJournalByUserId
 import ca.uwaterloo.cs.api.PhotoApiService.deleteUserPhotos
 import ca.uwaterloo.cs.api.UserApiService.deleteUser
+import androidx.compose.ui.unit.sp
 import com.an.room.db.JournalDB
 import com.an.room.db.PhotoDB
 import com.an.room.db.UserDB
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -55,26 +63,15 @@ suspend fun localClearData(appState: AppState) {
     }
 }
 
-suspend fun updateUserPIN(appState: AppState, newPIN: String) {
+suspend fun updateUserPIN(appState: AppState) {
     withContext(Dispatchers.IO) {
         val userDB = UserDB.getDB(appState.context)
         val userDao = userDB.userDao()
-        userDao.updatePINById(newPIN)
+        userDao.updatePINById(appState.hashedPIN.value)
     }
 }
 
-fun logout(appState: AppState) {
-    if (appState.useCloud.value) {
-        runBlocking {
-            appState.dataStore.setJwt("")
-        }
-    } else {
-        runBlocking {
-            localClearData(appState)
-        }
-    }
-}
-
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun DisclaimerPage(appState: AppState) {
     Column(
@@ -152,8 +149,37 @@ fun DisclaimerPage(appState: AppState) {
     }
 }
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun SettingsPage(appState: AppState) {
+    val notificationPermissions =
+        rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
+    val showNotificationSettingsDialog = remember { mutableStateOf(false) }
+
+
+    if (showNotificationSettingsDialog.value) {
+        AlertDialog(
+            onDismissRequest = {
+                showNotificationSettingsDialog.value = false
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showNotificationSettingsDialog.value = false
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
+                ) {
+                    Text("OK")
+                }
+            },
+            text = {
+                Text(
+                    color = Color(0xFF4F4F4F),
+                    text = "Please update preferences for notifications in your phone settings.",
+                    fontSize = 16.sp
+                )
+            })
+    }
     Column(
         Modifier
             .background(color = Color(0xFFC7E6C9))
@@ -185,11 +211,10 @@ fun SettingsPage(appState: AppState) {
                 }
             }
             Column {
-                /* TODO: add a useNotifications state */
                 Switch(
-                    appState.useJournalForAffirmations.value,
+                    notificationPermissions.status.isGranted,
                     onCheckedChange = {
-                        appState.useJournalForAffirmations.value = it
+                        showNotificationSettingsDialog.value = true
                     },
                     colors = SwitchDefaults.colors(
                         checkedTrackColor = Color(0xFF7BB6A1)
@@ -199,6 +224,7 @@ fun SettingsPage(appState: AppState) {
                     appState.useJournalForAffirmations.value,
                     onCheckedChange = {
                         appState.useJournalForAffirmations.value = it
+                        appState.userStrategy!!.storeUserSettings(appState)
                     },
                     colors = SwitchDefaults.colors(
                         checkedTrackColor = Color(0xFF7BB6A1)
@@ -212,10 +238,8 @@ fun SettingsPage(appState: AppState) {
                             appState.pageState.value = PageStates.SIGNUP_PIN
                         } else {
                             // disable PIN
-                            runBlocking {
-                                updateUserPIN(appState, "")
-                            }
                             appState.hashedPIN.value = ""
+                            appState.userStrategy!!.storeUserSettings(appState)
                         }
                     },
                     colors = SwitchDefaults.colors(
@@ -269,7 +293,7 @@ fun SettingsPage(appState: AppState) {
                     onClick = {
                         appState.pageState.value = PageStates.WELCOME
                         appState.nameState.value = ""
-                        logout(appState)
+                        appState.userStrategy!!.logout(appState)
                         appState.setPageHistoryToWelcome()
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
@@ -277,7 +301,7 @@ fun SettingsPage(appState: AppState) {
                         .fillMaxSize()
                 ) {
                     Text(
-                        text = if (appState.useCloud.value) "Log out" else "Clear data",
+                        text = appState.userStrategy!!.logoutLabel,
                         style = MaterialTheme.typography.headlineSmall,
                         textAlign = TextAlign.Center,
                         color = Color.White

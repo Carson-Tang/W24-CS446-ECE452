@@ -1,6 +1,5 @@
 package ca.uwaterloo.cs
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -12,17 +11,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.activity.OnBackPressedCallback
-import androidx.lifecycle.MutableLiveData
+import ca.uwaterloo.cs.userstrategy.CloudUserStrategy
+import ca.uwaterloo.cs.userstrategy.LocalUserStrategy
+import ca.uwaterloo.cs.userstrategy.UserStrategy
 import ca.uwaterloo.cs.ui.theme.ZenJourneyTheme
-import com.an.room.db.UserDB
-import com.an.room.model.User
 import com.auth0.android.jwt.JWT
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
 class MainActivity : ComponentActivity() {
@@ -33,7 +28,8 @@ class MainActivity : ComponentActivity() {
             override fun handleOnBackPressed() {
                 appState.backButtonTriggered.value = true
                 if (appState.prevPageStates.size > 1) {
-                    appState.pageState.value = appState.prevPageStates.removeAt(appState.prevPageStates.size-1)
+                    appState.pageState.value =
+                        appState.prevPageStates.removeAt(appState.prevPageStates.size - 1)
                 } else if (appState.prevPageStates.size == 1) {
                     appState.pageState.value = appState.prevPageStates.get(0)
                 }
@@ -42,7 +38,7 @@ class MainActivity : ComponentActivity() {
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
         setContent {
             ZenJourneyTheme {
-                MainContent(this, appState)
+                MainContent(appState)
             }
         }
     }
@@ -56,6 +52,7 @@ class AppState(val context: Context) {
     val pageState = mutableStateOf(PageStates.WELCOME)
     val prevPageStates = mutableStateListOf<PageStates>()
     val prevPageState = mutableStateOf(pageState.value)
+
     // checks if the back button was pressed cus if it is then we change the current page state
     // the page state change triggers the listener
     val backButtonTriggered = mutableStateOf(false)
@@ -83,13 +80,14 @@ class AppState(val context: Context) {
     val timeMs = mutableStateOf(defaultTimeMs.value)
 
     // user settings
-    val useCloud = mutableStateOf(false)
     val useJournalForAffirmations = mutableStateOf(false)
     val hashedPIN = mutableStateOf("")
     val isPINRequired = mutableStateOf(false)
 
     // auth
     val dataStore = AppDataStore(context)
+
+    var userStrategy: UserStrategy? = null
 
     fun resetToDefault() {
         userId.value = ""
@@ -105,10 +103,10 @@ class AppState(val context: Context) {
         playingTuneId.value = selectedTune.value
         defaultTimeMs.value = 60000L
         timeMs.value = defaultTimeMs.value
-        useCloud.value = false
         useJournalForAffirmations.value = false
         hashedPIN.value = ""
         isPINRequired.value = false
+        userStrategy = null
     }
 
     fun setPageHistoryToHome() {
@@ -122,48 +120,20 @@ class AppState(val context: Context) {
     }
 }
 
-@SuppressLint("CoroutineCreationDuringComposition")
-@Composable
-fun LoadLocalUserSettings(context: Context, appState: AppState) {
-    val database = UserDB.getDB(context)
-    val userDao = database.userDao()
-
-    val userRes = remember { MutableLiveData<User>() }
-
-    LaunchedEffect(true) {
-        val user = withContext(Dispatchers.IO) {
-            userDao.getOne().getOrNull(0)
-        }
-        user?.let {
-            userRes.value = it
-            withContext(Dispatchers.Main) {
-                appState.nameState.value = user.firstName
-                appState.useCloud.value = user.useCloud
-                appState.useJournalForAffirmations.value = user.useJournalForAffirmations
-                appState.hashedPIN.value = user.pin
-                if (appState.hashedPIN.value.isNotEmpty()) {
-                    appState.isPINRequired.value = true
-                }
-                if (!appState.useCloud.value) {
-                    appState.pageState.value = PageStates.HOME
-                    appState.setPageHistoryToHome()
-                }
-            }
-        }
+suspend fun determineUserType(appState: AppState) {
+    val jwt = appState.dataStore.getJwt()
+    if (jwt.isNotEmpty() && !JWT(jwt).isExpired(5)) {
+        appState.userStrategy = CloudUserStrategy()
+    } else {
+        appState.userStrategy = LocalUserStrategy()
     }
 }
 
 @Composable
-fun MainContent(context: Context, appState: AppState) {
-    /* TODO: add conditional and logic to retrieve setting when user is cloud */
-    LoadLocalUserSettings(context, appState)
-
-    runBlocking {
-        val jwt = appState.dataStore.getJwt()
-        if (jwt.isNotEmpty() && !JWT(jwt).isExpired(5)) {
-            appState.pageState.value = PageStates.HOME
-            appState.setPageHistoryToHome()
-        }
+fun MainContent(appState: AppState) {
+    LaunchedEffect(true) {
+        determineUserType(appState)
+        appState.userStrategy!!.loadUserSettings(appState)
     }
 
     Scaffold(

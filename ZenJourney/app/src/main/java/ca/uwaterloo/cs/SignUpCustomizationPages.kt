@@ -18,11 +18,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.an.room.db.UserDB
-import com.an.room.model.User
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import ca.uwaterloo.cs.userstrategy.CloudUserStrategy
+import ca.uwaterloo.cs.userstrategy.LocalUserStrategy
 import org.mindrot.jbcrypt.BCrypt
 
 @Composable
@@ -30,12 +27,12 @@ fun SignUpCloud(
     appState: AppState
 ) {
     fun primaryAction() {
-        appState.useCloud.value = true
+        appState.userStrategy = CloudUserStrategy()
         appState.pageState.value = PageStates.SIGNUP_STEP2
     }
 
     fun secondaryAction() {
-        appState.useCloud.value = false
+        appState.userStrategy = LocalUserStrategy()
         appState.pageState.value = PageStates.SIGNUP_STEP3
     }
     Column(
@@ -80,13 +77,11 @@ fun SignUpCloudLearnMore(
     appState: AppState
 ) {
     fun primaryAction() {
-        appState.useCloud.value = true
         appState.pageState.value = PageStates.SIGNUP_CLOUD
     }
 
-    fun secondaryAction() {
-        appState.pageState.value = PageStates.SIGNUP_CLOUD
-    }
+    fun secondaryAction() {}
+
     Column(
         Modifier
             .background(MaterialTheme.colorScheme.background)
@@ -152,30 +147,6 @@ fun SignUpAffirmation(
     }
 }
 
-@OptIn(DelicateCoroutinesApi::class)
-fun storeLocalUserSettings(appState: AppState) {
-    val pin = appState.hashedPIN.value.ifEmpty { "" }
-    val user = User(
-        firstName = appState.nameState.value,
-        useCloud = appState.useCloud.value,
-        useJournalForAffirmations = appState.useJournalForAffirmations.value,
-        pin = pin
-    )
-
-    val database = UserDB.getDB(appState.context)
-    val userDao = database.userDao()
-
-    GlobalScope.launch {
-        val userRes = userDao.getOne().getOrNull(0)
-        if (userRes == null) {
-            userDao.insert(user)
-        } else {
-            // when user enables PIN from the settings page
-            userDao.updatePINById(pin)
-        }
-    }
-}
-
 @Composable
 fun SignUpPIN(appState: AppState) {
     val pinState = remember { mutableStateOf("") }
@@ -184,8 +155,7 @@ fun SignUpPIN(appState: AppState) {
     fun primaryAction() {
         if (pinErrorState.value == PINErrorStates.NONE && pinState.value.length == 4) {
             appState.hashedPIN.value = BCrypt.hashpw(pinState.value, BCrypt.gensalt())
-            // TODO: add logic for cloud users
-            storeLocalUserSettings(appState)
+            appState.userStrategy!!.storeUserSettings(appState)
             appState.pageState.value = PageStates.HOME
             appState.setPageHistoryToHome()
         } else {
@@ -195,8 +165,7 @@ fun SignUpPIN(appState: AppState) {
 
     fun secondaryAction() {
         appState.hashedPIN.value = ""
-        // TODO: add logic for cloud users
-        storeLocalUserSettings(appState)
+        appState.userStrategy!!.storeUserSettings(appState)
         appState.pageState.value = PageStates.HOME
         appState.setPageHistoryToHome()
     }

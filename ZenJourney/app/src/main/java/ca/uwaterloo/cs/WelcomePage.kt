@@ -16,6 +16,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import android.widget.ImageView
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import coil.ImageLoader
+import coil.compose.AsyncImage
+import coil.decode.GifDecoder
+import coil.decode.ImageDecoderDecoder
+import coil.request.ImageRequest
 
 @Composable
 fun WelcomePage(appState: AppState) {
@@ -61,6 +71,39 @@ fun WelcomePage(appState: AppState) {
             TextButton(onClick = { appState.pageState.value = PageStates.LOGIN }) {
                 Text("I have an account", style = MaterialTheme.typography.headlineSmall)
             }
+        }
+    }
+}
+
+@Composable
+fun LoadingPage(appState: AppState) {
+    Column(
+        Modifier
+            .background(MaterialTheme.colorScheme.background)
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Column(
+            modifier = Modifier.padding(top = 250.dp),
+            verticalArrangement = Arrangement.spacedBy(25.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(R.raw.loading)
+                    .decoderFactory(GifDecoder.Factory())
+                    .build(),
+                contentDescription = "loadingIcon",
+                modifier = Modifier
+                    .width(50.dp)
+                    .height(50.dp),
+                contentScale = ContentScale.FillBounds
+            )
+            Text(
+                "Loading...",
+                style = MaterialTheme.typography.headlineLarge,
+                textAlign = TextAlign.Center
+            )
         }
     }
 }

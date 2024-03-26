@@ -8,7 +8,7 @@ enum class PageStates {
     JOURNAL_STEP1, JOURNAL_STEP2, JOURNAL_STEP3, PAST_JOURNAL,
     MEDITATE, MEDITATE_PICK_TUNE,
     PHOTOBOOK,
-    SETTINGS
+    SETTINGS, DISCLAIMER
 }
 
 enum class InputErrorStates {

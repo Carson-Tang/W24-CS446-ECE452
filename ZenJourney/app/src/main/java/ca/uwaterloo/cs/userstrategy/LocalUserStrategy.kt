@@ -16,6 +16,7 @@ import kotlinx.coroutines.withContext
 class LocalUserStrategy : UserStrategy {
     override val forgotPINLabel = "Exit, clear all data"
     override val logoutLabel = "Clear data"
+    override val deleteAccountLabel = ""
     override suspend fun loadUserSettings(appState: AppState) {
         val database = UserDB.getDB(appState.context)
         val userDao = database.userDao()
@@ -80,4 +81,6 @@ class LocalUserStrategy : UserStrategy {
             }
         }
     }
+
+    override fun deleteAccount(appState: AppState) {}
 }

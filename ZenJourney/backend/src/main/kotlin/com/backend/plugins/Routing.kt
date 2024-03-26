@@ -2,6 +2,7 @@ package com.backend.plugins
 
 import com.backend.application.routes.photoRoutes
 import com.backend.application.routes.journalRoutes
+import com.backend.application.routes.userProtectedRoutes
 import io.ktor.server.application.*
 import io.ktor.server.http.content.*
 import io.ktor.server.response.*
@@ -16,6 +17,7 @@ fun Application.configureRouting() {
         }
         userRoutes()
         authenticate("auth-jwt") {
+            userProtectedRoutes()
             photoRoutes()
             journalRoutes()
         }

@@ -1,12 +1,16 @@
 package ca.uwaterloo.cs.api
 
 import com.google.gson.Gson
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
+import io.ktor.client.request.headers
+import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -56,6 +60,18 @@ object UserApiService {
                 contentType(ContentType.Application.Json)
                 setBody(userJson)
             }
+        }
+    }
+
+    suspend fun deleteUser(userId: String, jwt: String): HttpResponse {
+        return withContext(Dispatchers.IO) {
+            val response: HttpResponse = HttpClientSetup.httpClient.delete("$baseUrl") {
+                parameter("id", userId)
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer $jwt")
+                }
+            }
+            response
         }
     }
 }

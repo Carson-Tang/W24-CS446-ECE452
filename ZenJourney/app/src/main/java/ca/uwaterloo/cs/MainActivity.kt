@@ -192,5 +192,6 @@ fun PageContent(appState: AppState) {
         PageStates.JOURNAL_STEP3 -> JournalPage3(appState)
         PageStates.PAST_JOURNAL -> PastJournalPage(appState)
         PageStates.SETTINGS -> SettingsPage(appState)
+        PageStates.DISCLAIMER -> DisclaimerPage(appState)
     }
 }

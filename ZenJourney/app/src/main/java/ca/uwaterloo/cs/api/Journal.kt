@@ -83,4 +83,16 @@ object JournalApiService {
             response
         }
     }
+
+    suspend fun deleteJournalByUserId(userId: String, jwt: String): HttpResponse {
+        return withContext(Dispatchers.IO) {
+            val response: HttpResponse = HttpClientSetup.httpClient.delete("$baseUrl/user") {
+                parameter("userId", userId)
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer $jwt")
+                }
+            }
+            response
+        }
+    }
 }

@@ -16,6 +16,7 @@ import user.UserResponse
 class CloudUserStrategy : UserStrategy {
     override val forgotPINLabel = "Log out"
     override val logoutLabel = "Log out"
+    override val deleteAccountLabel = "Delete account"
     override suspend fun loadUserSettings(appState: AppState) {
         val jwt = appState.dataStore.getJwt()
         if (jwt.isNotEmpty() && !JWT(jwt).isExpired(5)) {
@@ -66,6 +67,12 @@ class CloudUserStrategy : UserStrategy {
     }
 
     override fun logout(appState: AppState) {
+        runBlocking {
+            appState.dataStore.setJwt("")
+        }
+    }
+
+    override fun deleteAccount(appState: AppState) {
         runBlocking {
             appState.dataStore.setJwt("")
         }

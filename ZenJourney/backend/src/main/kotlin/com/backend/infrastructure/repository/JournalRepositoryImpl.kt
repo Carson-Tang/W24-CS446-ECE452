@@ -4,6 +4,7 @@ import com.backend.domain.ports.JournalRepository
 import com.mongodb.MongoException
 import com.mongodb.client.model.Filters
 import com.mongodb.client.model.Updates
+import com.mongodb.client.result.DeleteResult
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import journal.Journal
 import journal.JournalRequest
@@ -80,5 +81,13 @@ class JournalRepositoryImpl(
                 )
             )
             .firstOrNull()
+    }
+
+    override suspend fun deleteByUserId(userId: String): DeleteResult {
+        return mongoDatabase.getCollection<Journal>(JOURNAL_COLLECTION).withDocumentClass<Journal>()
+            .deleteMany(
+                Filters.eq("userId", ObjectId(userId)
+            )
+        )
     }
 }

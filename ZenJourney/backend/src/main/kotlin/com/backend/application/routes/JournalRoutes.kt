@@ -131,5 +131,22 @@ fun Route.journalRoutes() {
                 )
             call.respond(HttpStatusCode.OK, journal.toResponse())
         }
+        delete {
+            val userId = call.request.queryParameters["userId"]
+                ?: return@delete call.respond(
+                    status = HttpStatusCode.BadRequest,
+                    toStatusResponse(false, "Missing user ID query parameter")
+                )
+
+            try {
+                journalRepository.deleteByUserId(userId)
+                call.respond(HttpStatusCode.OK, toStatusResponse(true, "Journals deleted successfully"))
+            } catch (e: Exception) {
+                call.respond(
+                    status = HttpStatusCode.InternalServerError,
+                    toStatusResponse(false, "Failed to delete journals: ${e.message}")
+                )
+            }
+        }
     }
 }

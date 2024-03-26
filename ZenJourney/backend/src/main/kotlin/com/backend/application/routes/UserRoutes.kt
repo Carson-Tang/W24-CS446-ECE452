@@ -121,3 +121,24 @@ fun Route.userRoutes() {
         }
     }
 }
+
+fun Route.userProtectedRoutes() {
+    val userRepository by inject<UserRepository>()
+    delete("/{id?}") {
+        val id = call.parameters["id"] ?: return@delete call.respond(
+            HttpStatusCode.BadRequest,
+            toStatusResponse(false, "Missing user id")
+        )
+        val delete: Long = userRepository.deleteById(ObjectId(id))
+        if (delete == 1L) {
+            return@delete call.respond(
+                HttpStatusCode.OK,
+                toStatusResponse(true, "User deleted successfully")
+            )
+        }
+        return@delete call.respond(
+            HttpStatusCode.NotFound,
+            toStatusResponse(false, "User not found")
+        )
+    }
+}

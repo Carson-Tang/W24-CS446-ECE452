@@ -129,7 +129,7 @@ fun PhotobookPage(appState: AppState) {
             if (response.status == HttpStatusCode.OK) {
                 val listResponse: ListResponse<PhotoResponse> = response.body()
                 val photoList = listResponse.list.map { photoRes ->
-                    val date = LocalDate.parse(photoRes.uploadDate, formatter)
+                    val date = LocalDate.of(photoRes.year.toInt(), photoRes.month.toInt(), photoRes.day.toInt())
                     val datestr = "${date.dayOfMonth} ${
                         capitalize(date.dayOfWeek.toString().take(3))
                     }"
@@ -156,7 +156,13 @@ fun PhotobookPage(appState: AppState) {
     fun addImageToPhotoState(image: Bitmap) {
         coroutineScope.launch {
             val photoRequest =
-                PhotoRequest(userid, encodeImage(image), currentDate.format(formatter))
+                PhotoRequest(
+                    userid,
+                    encodeImage(image),
+                    currentDate.year.toString(),
+                    currentDate.month.toString(),
+                    currentDate.dayOfMonth.toString()
+                )
             try {
                 val response = PhotoApiService.createPhoto(photoRequest, appState.dataStore.getJwt())
                 if (response.status != HttpStatusCode.Created) {

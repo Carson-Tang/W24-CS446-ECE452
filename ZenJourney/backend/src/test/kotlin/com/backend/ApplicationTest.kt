@@ -36,7 +36,7 @@ class ApplicationTest {
         }
         val gson = Gson()
         val userid = "65e3652d9501eb63529692fa"
-        val req = PhotoRequest(userid, "arbitrarytestvalue", "2024-03-01")
+        val req = PhotoRequest(userid, "arbitrarytestvalue", "2024", "3", "1")
         client.post("/photo") {
             setBody(gson.toJson(req))
             contentType(ContentType.Application.Json)
@@ -51,7 +51,7 @@ class ApplicationTest {
                 val res = gson.fromJson(bodyAsText(), PhotoResponse::class.java)
                 assertEquals(
                     res,
-                    PhotoResponse(map["id"]!!, req.userid, req.photoBase64, req.uploadDate)
+                    PhotoResponse(map["id"]!!, req.userid, req.photoBase64, req.year, req.month, req.day)
                 )
             }
 
@@ -68,7 +68,7 @@ class ApplicationTest {
         }
         val gson = Gson()
         val userid = "65e3652d9501eb63529692fa"
-        val req = PhotoRequest(userid, "arbitrarytestvalue", "2024-03-01")
+        val req = PhotoRequest(userid, "arbitrarytestvalue", "2024", "3", "1")
         client.post("/photo") {
             setBody(gson.toJson(req))
             contentType(ContentType.Application.Json)

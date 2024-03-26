@@ -50,7 +50,7 @@ class PhotoRepositoryImpl(
     override suspend fun findByUserId(userid: ObjectId): List<Photo> =
         mongoDatabase.getCollection<Photo>(PHOTO_COLLECTION)
             .find(Filters.eq("userid", userid))
-            .sort(Document("uploadDate", 1)) // sort by uploadDate string in ascending order
+            .sort(Document(mapOf("year" to 1, "month" to 1, "day" to 1)))
             .toList()
     override suspend fun findById(id: ObjectId): Photo? =
         mongoDatabase.getCollection<Photo>(PHOTO_COLLECTION)

@@ -373,6 +373,7 @@ fun SettingsPage(appState: AppState) {
                                     } catch(e: Exception) {
                                         showDeleteAccountDialog.value = false
                                         unsuccessfulDeleteAccountDialog.value = true
+                                        // TODO: handle error
                                         println(e)
                                     }
                                 }

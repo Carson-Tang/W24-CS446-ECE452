@@ -82,5 +82,7 @@ class LocalUserStrategy : UserStrategy {
         }
     }
 
-    override fun deleteAccount(appState: AppState) {}
+    override fun deleteAccount(appState: AppState): Pair<Boolean, Boolean> { return Pair(false, false) }
+
+    override fun clearJWT(appState: AppState) {}
 }

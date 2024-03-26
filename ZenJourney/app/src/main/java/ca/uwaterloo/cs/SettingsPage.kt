@@ -361,22 +361,11 @@ fun SettingsPage(appState: AppState) {
                             Button(
                                 colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondaryContainer),
                                 onClick = {
-                                    try {
-                                        runBlocking {
-                                            // catch errors
-                                            val userResponse = deleteUser(appState.userId.value, appState.dataStore.getJwt())
-                                            val journalResponse = deleteJournalByUserId(appState.userId.value, appState.dataStore.getJwt())
-                                            val photoResponse = deleteUserPhotos(appState.userId.value, appState.dataStore.getJwt())
-                                            appState.userStrategy!!.deleteAccount(appState)
-                                            showDeleteAccountDialog.value = false
-                                            successfulDeleteAccountDialog.value = true
-                                        }
-                                    } catch(e: Exception) {
-                                        showDeleteAccountDialog.value = false
-                                        unsuccessfulDeleteAccountDialog.value = true
-                                        // TODO: handle error
-                                        println(e)
-                                    }
+                                    val showDialog = appState.userStrategy!!.deleteAccount(appState)
+                                    showDeleteAccountDialog.value = false
+                                    successfulDeleteAccountDialog.value = showDialog.first
+                                    unsuccessfulDeleteAccountDialog.value = showDialog.second
+                                    appState.userStrategy!!.clearJWT(appState)
                                 }
                             ) {
                                 Text("Yes")

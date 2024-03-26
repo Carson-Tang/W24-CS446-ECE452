@@ -1,6 +1,7 @@
 package ca.uwaterloo.cs.userstrategy
 
 import StatusResponse
+import androidx.compose.runtime.Composable
 import ca.uwaterloo.cs.AppState
 import ca.uwaterloo.cs.PageStates
 import ca.uwaterloo.cs.api.UserApiService
@@ -12,6 +13,9 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import user.UserRequest
 import user.UserResponse
+import ca.uwaterloo.cs.api.JournalApiService.deleteJournalByUserId
+import ca.uwaterloo.cs.api.PhotoApiService.deleteUserPhotos
+import ca.uwaterloo.cs.api.UserApiService.deleteUser
 
 class CloudUserStrategy : UserStrategy {
     override val forgotPINLabel = "Log out"
@@ -72,7 +76,25 @@ class CloudUserStrategy : UserStrategy {
         }
     }
 
-    override fun deleteAccount(appState: AppState) {
+    override fun deleteAccount(appState: AppState): Pair<Boolean, Boolean> {
+        var successful = false
+        var unsuccessful = false
+        runBlocking {
+            try {
+                val userResponse = deleteUser(appState.userId.value, appState.dataStore.getJwt())
+                val journalResponse = deleteJournalByUserId(appState.userId.value, appState.dataStore.getJwt())
+                val photoResponse = deleteUserPhotos(appState.userId.value, appState.dataStore.getJwt())
+                successful = true
+            } catch (e: Exception) {
+                unsuccessful = true
+                // TODO: handle error
+                println(e)
+            }
+        }
+        return Pair(successful, unsuccessful)
+    }
+
+    override fun clearJWT(appState: AppState) {
         runBlocking {
             appState.dataStore.setJwt("")
         }

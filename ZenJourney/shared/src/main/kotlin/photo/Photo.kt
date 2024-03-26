@@ -8,12 +8,16 @@ data class Photo(
     val id: ObjectId,
     val userid: ObjectId,
     val photoBase64: String,
-    val uploadDate: String  // in format YYYY-MM-DD
+    val year: Int,
+    val month: Int,
+    val day: Int
 ) {
     fun toResponse() = PhotoResponse(
         id = id.toString(),
         userid = userid.toString(),
         photoBase64 = photoBase64,
-        uploadDate = uploadDate
+        year = year.toString(),
+        month = month.toString(),
+        day = day.toString()
     )
 }

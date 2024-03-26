@@ -7,7 +7,9 @@ import org.bson.types.ObjectId
 data class PhotoRequest(
     val userid: String,
     val photoBase64: String,
-    val uploadDate: String // in YYYY-MM-DD format
+    val year: String,
+    val month: String,
+    val day: String
 )
 
 fun PhotoRequest.toDomain(): Photo {
@@ -15,6 +17,8 @@ fun PhotoRequest.toDomain(): Photo {
         id = ObjectId(),
         userid = ObjectId(userid),
         photoBase64 = photoBase64,
-        uploadDate = uploadDate
+        year = year.toInt(),
+        month = month.toInt(),
+        day = day.toInt()
     )
 }

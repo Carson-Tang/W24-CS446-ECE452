@@ -7,5 +7,7 @@ data class PhotoResponse(
         val id: String,
         val userid: String,
         val photoBase64: String,
-        val uploadDate: String  // in format YYYY-MM-DD
+        val year: String,
+        val month: String,
+        val day: String
 )

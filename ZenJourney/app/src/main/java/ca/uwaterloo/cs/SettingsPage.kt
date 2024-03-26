@@ -159,7 +159,8 @@ fun SettingsPage(appState: AppState) {
         rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
     val showNotificationSettingsDialog = remember { mutableStateOf(false) }
     val showDeleteAccountDialog = remember { mutableStateOf(false) }
-//    val customizationTitles = arrayOf("Notifications", "Personalized Affirmations", "PIN")
+    val unsuccessfulDeleteAccountDialog = remember { mutableStateOf(false) }
+    val successfulDeleteAccountDialog = remember { mutableStateOf(false) }
 
     if (showNotificationSettingsDialog.value) {
         AlertDialog(
@@ -255,7 +256,7 @@ fun SettingsPage(appState: AppState) {
 
         Column(
             modifier = Modifier
-                .padding(start = 20.dp, end = 20.dp, bottom = 175.dp)
+                .padding(start = 20.dp, end = 20.dp, bottom = 210.dp)
                 .size(width = 460.dp, height = 75.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -320,13 +321,7 @@ fun SettingsPage(appState: AppState) {
                 .size(width = 200.dp, height = 50.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            TextButton( onClick = {
-//                runBlocking {
-//                    // catch errors
-//                    deleteUser(appState.userId.value, appState.dataStore.getJwt())
-//                    deleteJournalByUserId(appState.userId.value, appState.dataStore.getJwt())
-//                    deleteUserPhotos(appState.userId.value, appState.dataStore.getJwt())
-//                }
+            TextButton(onClick = {
                 showDeleteAccountDialog.value = true
             }) {
                 Text(
@@ -338,25 +333,104 @@ fun SettingsPage(appState: AppState) {
         }
 
         if (showDeleteAccountDialog.value) {
-            DeleteAccountDialog()
-            showDeleteAccountDialog.value = false
+            Dialog(onDismissRequest = { showDeleteAccountDialog.value = false }) {
+                Surface(
+                    modifier = Modifier.width(280.dp),
+                    shape = MaterialTheme.shapes.medium,
+                ) {
+                    Column(
+                        modifier = Modifier.padding(18.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Are you sure?",
+                            style = MaterialTheme.typography.headlineSmall,
+                            modifier = Modifier.padding(bottom = 10.dp),
+                            color = Color.Black
+                        )
+                        Text(
+                            text = "This will permanently delete your account and CANNOT be undone. You will lose all of your data, including saved journals and photos.",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = Color.Black,
+                            textAlign = TextAlign.Center
+                        )
+                        Row (
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(top = 10.dp)
+                        ) {
+                            Button(
+                                colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondaryContainer),
+                                onClick = {
+                                    try {
+                                        runBlocking {
+                                            // catch errors
+                                            deleteUser(appState.userId.value, appState.dataStore.getJwt())
+                                            deleteJournalByUserId(appState.userId.value, appState.dataStore.getJwt())
+                                            deleteUserPhotos(appState.userId.value, appState.dataStore.getJwt())
+                                            showDeleteAccountDialog.value = false
+                                            successfulDeleteAccountDialog.value = true
+                                        }
+                                    } catch(e: Exception) {
+                                        showDeleteAccountDialog.value = false
+                                        unsuccessfulDeleteAccountDialog.value = true
+                                        println(e)
+                                    }
+                                }
+                            ) {
+                                Text("Yes")
+                            }
+                            Spacer(modifier = Modifier.padding(20.dp))
+                            Button(
+                                colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondaryContainer),
+                                onClick = { showDeleteAccountDialog.value = false }
+                            ) {
+                                Text("No")
+                            }
+                        }
+                    }
+                }
+            }
         }
 
-    }
-}
+        if (successfulDeleteAccountDialog.value) {
+            Dialog(onDismissRequest = { appState.pageState.value = PageStates.WELCOME }) {
+                Surface(
+                    modifier = Modifier.width(280.dp),
+                    shape = MaterialTheme.shapes.medium,
+                ) {
+                    Column(
+                        modifier = Modifier.padding(18.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "We successfully deleted your account. Goodbye and thank you for using ZenJourney!",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = Color.Black,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
+        }
 
-@Composable
-fun DeleteAccountDialog() {
-    Dialog(onDismissRequest = { /* Dismiss the dialog */ }) {
-        Surface(
-            modifier = Modifier.width(280.dp),
-            shape = MaterialTheme.shapes.medium,
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(text = "Meditation Time", style = MaterialTheme.typography.headlineSmall, color = Color.Black)
+        if (unsuccessfulDeleteAccountDialog.value) {
+            Dialog(onDismissRequest = { unsuccessfulDeleteAccountDialog.value = false }) {
+                Surface(
+                    modifier = Modifier.width(280.dp),
+                    shape = MaterialTheme.shapes.medium,
+                ) {
+                    Column(
+                        modifier = Modifier.padding(18.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "We were unable to delete your account. Please try again later.",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = Color.Black,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
             }
         }
     }

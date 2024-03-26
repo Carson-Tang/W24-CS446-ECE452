@@ -71,4 +71,10 @@ class CloudUserStrategy : UserStrategy {
             appState.dataStore.setJwt("")
         }
     }
+
+    override fun deleteAccount(appState: AppState) {
+        runBlocking {
+            appState.dataStore.setJwt("")
+        }
+    }
 }

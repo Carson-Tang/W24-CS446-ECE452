@@ -364,9 +364,10 @@ fun SettingsPage(appState: AppState) {
                                     try {
                                         runBlocking {
                                             // catch errors
-                                            deleteUser(appState.userId.value, appState.dataStore.getJwt())
-                                            deleteJournalByUserId(appState.userId.value, appState.dataStore.getJwt())
-                                            deleteUserPhotos(appState.userId.value, appState.dataStore.getJwt())
+                                            val userResponse = deleteUser(appState.userId.value, appState.dataStore.getJwt())
+                                            val journalResponse = deleteJournalByUserId(appState.userId.value, appState.dataStore.getJwt())
+                                            val photoResponse = deleteUserPhotos(appState.userId.value, appState.dataStore.getJwt())
+                                            appState.userStrategy!!.deleteAccount(appState)
                                             showDeleteAccountDialog.value = false
                                             successfulDeleteAccountDialog.value = true
                                         }

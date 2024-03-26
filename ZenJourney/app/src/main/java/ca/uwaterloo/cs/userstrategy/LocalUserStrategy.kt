@@ -81,4 +81,6 @@ class LocalUserStrategy : UserStrategy {
             }
         }
     }
+
+    override fun deleteAccount(appState: AppState) {}
 }

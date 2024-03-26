@@ -9,4 +9,5 @@ interface UserStrategy {
     suspend fun loadUserSettings(appState: AppState)
     fun storeUserSettings(appState: AppState)
     fun logout(appState: AppState)
+    fun deleteAccount(appState: AppState)
 }

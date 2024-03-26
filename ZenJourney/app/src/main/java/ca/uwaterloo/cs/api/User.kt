@@ -65,7 +65,6 @@ object UserApiService {
 
     suspend fun deleteUser(userId: String, jwt: String): HttpResponse {
         return withContext(Dispatchers.IO) {
-            // maybe have id in the delete urlString
             val response: HttpResponse = HttpClientSetup.httpClient.delete("$baseUrl") {
                 parameter("id", userId)
                 headers {

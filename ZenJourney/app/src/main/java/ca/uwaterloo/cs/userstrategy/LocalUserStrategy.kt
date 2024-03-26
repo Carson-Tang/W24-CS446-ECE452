@@ -24,6 +24,10 @@ class LocalUserStrategy : UserStrategy {
         val user = withContext(Dispatchers.IO) {
             userDao.getOne().getOrNull(0)
         }
+        if (user == null) {
+            appState.pageState.value = PageStates.WELCOME
+            appState.setPageHistoryToWelcome()
+        }
         user?.let {
             withContext(Dispatchers.Main) {
                 appState.nameState.value = user.firstName

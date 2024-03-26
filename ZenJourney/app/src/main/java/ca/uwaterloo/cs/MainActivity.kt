@@ -49,7 +49,7 @@ class AppState(val context: Context) {
     val userId = mutableStateOf("")
 
     // what page user sees
-    val pageState = mutableStateOf(PageStates.WELCOME)
+    val pageState = mutableStateOf(PageStates.LOADING)
     val prevPageStates = mutableStateListOf<PageStates>()
     val prevPageState = mutableStateOf(pageState.value)
 
@@ -193,5 +193,6 @@ fun PageContent(appState: AppState) {
         PageStates.PAST_JOURNAL -> PastJournalPage(appState)
         PageStates.SETTINGS -> SettingsPage(appState)
         PageStates.DISCLAIMER -> DisclaimerPage(appState)
+        PageStates.LOADING -> LoadingPage(appState)
     }
 }

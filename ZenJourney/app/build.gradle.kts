@@ -63,6 +63,9 @@ dependencies {
   implementation("androidx.room:room-runtime:$roomVersion")
   annotationProcessor("androidx.room:room-compiler:$roomVersion")
 
+  implementation("io.coil-kt:coil-compose:2.6.0")
+  implementation("io.coil-kt:coil-gif:2.6.0")
+
   // To use Kotlin Symbol Processing (KSP)
   ksp("androidx.room:room-compiler:$roomVersion")
 

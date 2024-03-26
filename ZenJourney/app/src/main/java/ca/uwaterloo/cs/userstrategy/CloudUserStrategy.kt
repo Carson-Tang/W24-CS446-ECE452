@@ -42,6 +42,9 @@ class CloudUserStrategy : UserStrategy {
             }
             appState.pageState.value = PageStates.HOME
             appState.setPageHistoryToHome()
+        } else {
+            appState.pageState.value = PageStates.WELCOME
+            appState.setPageHistoryToWelcome()
         }
     }
 

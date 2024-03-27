@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.icu.util.Calendar
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -47,6 +48,6 @@ class NotificationReceiver : BroadcastReceiver() {
             }
             notify(1, notificationBuilder.build())
         }
-        NotificationScheduler.scheduleNotification(context)
+        NotificationScheduler.scheduleNotification(context, Calendar.getInstance().get(Calendar.HOUR_OF_DAY), Calendar.getInstance().get(Calendar.MINUTE))
     }
 }

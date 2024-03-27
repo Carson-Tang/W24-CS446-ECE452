@@ -38,6 +38,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import ca.uwaterloo.cs.notifications.NotificationScheduler
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -119,8 +120,9 @@ fun DisclaimerPage(appState: AppState) {
     }
 }
 
-fun onTimeSet(hour: Int, min: Int) {
-    /* TODO: do something with this */
+fun onTimeSet(appState: AppState, hour: Int, min: Int) {
+    NotificationScheduler.pauseNotification(appState)
+    NotificationScheduler.scheduleNotification(appState.context, hour, min)
 }
 
 @Composable
@@ -129,7 +131,6 @@ fun SettingsPage(appState: AppState) {
     val notificationPermissions =
         rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
     val showNotificationSettingsDialog = remember { mutableStateOf(false) }
-    val showTimePicker = remember { mutableStateOf(false) }
     val showDeleteAccountDialog = remember { mutableStateOf(false) }
     val unsuccessfulDeleteAccountDialog = remember { mutableStateOf(false) }
     val successfulDeleteAccountDialog = remember { mutableStateOf(false) }
@@ -333,7 +334,7 @@ fun SettingsPage(appState: AppState) {
                     onClick = {
                         TimePickerDialog(
                             appState.context,
-                            { _, hour, min -> onTimeSet(hour, min) },
+                            { _, hour, min -> onTimeSet(appState, hour, min) },
                             8,
                             0,
                             true,

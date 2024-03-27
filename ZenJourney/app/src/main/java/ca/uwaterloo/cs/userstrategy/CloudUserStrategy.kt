@@ -85,6 +85,7 @@ class CloudUserStrategy : UserStrategy {
         runBlocking {
             appState.dataStore.setJwt("")
         }
+        appState.resetToDefault()
     }
 
     override fun deleteAccount(appState: AppState): Pair<Boolean, Boolean> {

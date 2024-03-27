@@ -1,6 +1,9 @@
 package ca.uwaterloo.cs
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
+import android.content.Context.NOTIFICATION_SERVICE
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -13,6 +16,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.activity.OnBackPressedCallback
+import ca.uwaterloo.cs.notifications.NotificationScheduler
 import ca.uwaterloo.cs.userstrategy.CloudUserStrategy
 import ca.uwaterloo.cs.userstrategy.LocalUserStrategy
 import ca.uwaterloo.cs.userstrategy.UserStrategy
@@ -41,6 +45,10 @@ class MainActivity : ComponentActivity() {
                 MainContent(appState)
             }
         }
+
+        // set up notification channel and alerts
+        setUpNotificationChannel(appState.context)
+        NotificationScheduler.scheduleNotification(appState.context)
     }
 }
 
@@ -127,6 +135,13 @@ suspend fun determineUserType(appState: AppState) {
     } else {
         appState.userStrategy = LocalUserStrategy()
     }
+}
+
+fun setUpNotificationChannel(context: Context) {
+    val channel = NotificationChannel("1", "zenJourney", NotificationManager.IMPORTANCE_HIGH)
+    channel.description = "Channel to send push notifications to user"
+    val notificationManager = context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+    notificationManager.createNotificationChannel(channel)
 }
 
 @Composable

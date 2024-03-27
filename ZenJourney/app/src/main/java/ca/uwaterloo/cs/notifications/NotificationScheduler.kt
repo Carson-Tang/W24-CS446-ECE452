@@ -11,19 +11,19 @@ import ca.uwaterloo.cs.AppState
 // https://developer.android.com/develop/ui/views/notifications/build-notification
 object NotificationScheduler {
     private lateinit var notificationIntent: PendingIntent
+    val isCustomDefaultNotificationSet get() = ::notificationIntent.isInitialized
 
-    fun scheduleNotification(context: Context) {
+    fun scheduleNotification(context: Context, hour: Int, min: Int) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         notificationIntent = Intent(context, NotificationReceiver::class.java).let { intent ->
             PendingIntent.getBroadcast(context, 1, intent, PendingIntent.FLAG_IMMUTABLE)
         }
 
-        // TODO: alarm hardcoded at certain time
         val calendar: Calendar = Calendar.getInstance().apply {
             timeInMillis = System.currentTimeMillis()
-            set(Calendar.HOUR_OF_DAY, 19)
-            set(Calendar.MINUTE, 39)
-            if (before(Calendar.getInstance())) {
+            set(Calendar.HOUR_OF_DAY, hour)
+            set(Calendar.MINUTE, min)
+            if (!after(Calendar.getInstance())) {
                 // schedule for tomorrow if specified time has passed
                 add(Calendar.DATE, 1)
             }
@@ -37,6 +37,8 @@ object NotificationScheduler {
 
     fun pauseNotification(appState: AppState) {
         val alarmManager = appState.context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        alarmManager.cancel(notificationIntent)
+        if (isCustomDefaultNotificationSet) {
+            alarmManager.cancel(notificationIntent)
+        }
     }
 }

@@ -1,6 +1,5 @@
 package ca.uwaterloo.cs
 
-import StatusResponse
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -35,9 +34,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ca.uwaterloo.cs.api.JournalApiService
-import io.ktor.client.call.body
-import io.ktor.http.HttpStatusCode
 import journal.JournalResponse
 import kotlinx.coroutines.launch
 import org.mindrot.jbcrypt.BCrypt
@@ -165,21 +161,20 @@ fun HomePage(appState: AppState) {
         // This block will be executed when the composable is first displayed
         coroutineScope.launch {
             try {
-                val response = JournalApiService.getJournalByDate(
-                    today.year,
-                    today.monthValue,
-                    today.dayOfMonth,
-                    appState.dataStore.getJwt()
+                val response = appState.userStrategy?.getJournalByDate(
+                    appState = appState,
+                    day = today.dayOfMonth,
+                    month = today.monthValue,
+                    year = today.year
                 )
-                if (response.status == HttpStatusCode.OK) {
-                    todayJournalData = response.body()
+
+                if (response == null) {
+                    println("error")
                 } else {
-                    // TODO: handle error
-                    val statusResponse: StatusResponse = response.body()
-                    println(statusResponse.body)
+                    todayJournalData = response
                 }
+
             } catch (e: Exception) {
-                // TODO: handle error
                 println(e.message)
             }
         }

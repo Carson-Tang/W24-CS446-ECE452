@@ -4,6 +4,7 @@ import StatusResponse
 import androidx.compose.runtime.Composable
 import ca.uwaterloo.cs.AppState
 import ca.uwaterloo.cs.PageStates
+import ca.uwaterloo.cs.api.JournalApiService
 import ca.uwaterloo.cs.api.UserApiService
 import com.auth0.android.jwt.JWT
 import io.ktor.client.call.body
@@ -16,6 +17,13 @@ import user.UserResponse
 import ca.uwaterloo.cs.api.JournalApiService.deleteJournalByUserId
 import ca.uwaterloo.cs.api.PhotoApiService.deleteUserPhotos
 import ca.uwaterloo.cs.api.UserApiService.deleteUser
+import com.an.room.db.JournalDB
+import journal.JournalRequest
+import journal.JournalResponse
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 class CloudUserStrategy : UserStrategy {
     override val forgotPINLabel = "Log out"
@@ -97,6 +105,49 @@ class CloudUserStrategy : UserStrategy {
         return Pair(successful, unsuccessful)
     }
 
+    override suspend fun getJournalByDate(appState: AppState, day: Int, month: Int, year: Int): JournalResponse? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = JournalApiService.getJournalByDateAndUser(
+                    userId = appState.userId.value,
+                    year = year,
+                    month = month,
+                    day = day,
+                    jwt = appState.dataStore.getJwt()
+                )
+
+                if (response.status == HttpStatusCode.OK) {
+                    val journalResponse: JournalResponse = response.body()
+
+                    withContext(Dispatchers.Main) {
+                        appState.pastJournalEntry.value = journalResponse.content
+                        appState.pastSelectedMoods.value = journalResponse.moods
+                        appState.pastDate.value = LocalDate.of(journalResponse.year, journalResponse.month, journalResponse.day)
+                        appState.pageState.value = PageStates.PAST_JOURNAL
+                    }
+                    journalResponse
+                } else {
+                    null
+                }
+            } catch (e: Exception) {
+                println(e.message)
+                null
+            }
+        }
+    }
+
+    override suspend fun createJournal(appState: AppState, journalRequest: JournalRequest) {
+        return withContext(Dispatchers.IO){
+            try {
+                JournalApiService.createJournal(
+                    journalRequest = journalRequest,
+                    jwt = appState.dataStore.getJwt()
+                )
+            } catch (e: Exception) {
+                println(e.message)
+            }
+        }
+    }
     override fun clearJWT(appState: AppState) {
         runBlocking {
             appState.dataStore.setJwt("")

@@ -1,6 +1,5 @@
 package ca.uwaterloo.cs
 
-import StatusResponse
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -30,18 +29,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ca.uwaterloo.cs.api.JournalApiService
 import com.kizitonwose.calendar.compose.CalendarState
 import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.CalendarDay
 import com.kizitonwose.calendar.core.firstDayOfWeekFromLocale
-import io.ktor.client.call.body
-import io.ktor.http.HttpStatusCode
 import journal.JournalResponse
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
-import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
@@ -121,32 +116,22 @@ fun Day(
             .aspectRatio(1f)
             .clickable {
                 appState.selectedDate.value = day.date
-                coroutineScope.launch {
-                    try {
-                        val response = JournalApiService.getJournalByDateAndUser(
-                            userId = appState.userId.value,
-                            year = day.date.year,
-                            month = day.date.monthValue,
-                            day = day.date.dayOfMonth,
-                            jwt = appState.dataStore.getJwt()
-                        )
 
-                        if (response.status == HttpStatusCode.OK) {
-                            val journalResponse: JournalResponse = response.body()
-                            appState.pastJournalEntry.value = journalResponse.content
-                            appState.pastSelectedMoods.value = journalResponse.moods
-                            appState.pastDate.value = LocalDate.of(journalResponse.year, journalResponse.month, journalResponse.day)
-                            appState.pageState.value = PageStates.PAST_JOURNAL
-                        } else if (response.status == HttpStatusCode.BadRequest || response.status == HttpStatusCode.NotFound) {
-                            val statusResponse: StatusResponse = response.body()
-                            // TODO: handle invalid query params or no data for date
-                            println(statusResponse.body)
-                            appState.pageState.value = PageStates.JOURNAL_STEP2
-                        }
-                    } catch (e: Exception) {
-                        println(e.message)
+                coroutineScope.launch {
+                    val journalRes: JournalResponse? = appState.userStrategy?.getJournalByDate(
+                        appState = appState,
+                        day = day.date.dayOfMonth,
+                        month = day.date.monthValue,
+                        year = day.date.year
+                    )
+
+                    if (journalRes == null) {
+                        appState.pageState.value = PageStates.JOURNAL_STEP2
+                    } else {
+                        appState.pageState.value = PageStates.PAST_JOURNAL
                     }
                 }
+
             },
         contentAlignment = Alignment.Center
     ) {

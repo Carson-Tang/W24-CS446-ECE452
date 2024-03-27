@@ -28,6 +28,7 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -155,16 +156,6 @@ fun SettingsPage(appState: AppState) {
                     fontSize = 16.sp
                 )
             })
-    }
-
-    if (showTimePicker.value) {
-        TimePickerDialog(
-            appState.context,
-            { _, hour, min -> onTimeSet(hour, min) },
-            8,
-            0,
-            true,
-        ).show()
     }
 
     if (successfulDeleteAccountDialog.value) {
@@ -339,7 +330,15 @@ fun SettingsPage(appState: AppState) {
         ) {
             if (notificationPermissions.status.isGranted) {
                 Button(
-                    onClick = { showTimePicker.value = true },
+                    onClick = {
+                        TimePickerDialog(
+                            appState.context,
+                            { _, hour, min -> onTimeSet(hour, min) },
+                            8,
+                            0,
+                            true,
+                        ).show()
+                    },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFA1CDB0)),
                     modifier = Modifier.size(400.dp, 70.dp),
                     shape = RoundedCornerShape(16.dp)

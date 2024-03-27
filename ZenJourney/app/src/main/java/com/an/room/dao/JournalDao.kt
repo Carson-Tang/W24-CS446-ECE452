@@ -12,7 +12,7 @@ interface JournalDao {
     fun getAll(): List<Journal>
 
     @Query("SELECT * FROM journals WHERE year = :year AND month = :month AND day = :day")
-    fun findByDate(year: Int, month: Int, day: Int): Journal
+    fun findByDate(year: Int, month: Int, day: Int): Journal?
 
     @Insert
     fun insertAll(vararg journals: Journal)

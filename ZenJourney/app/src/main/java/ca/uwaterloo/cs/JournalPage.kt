@@ -1,6 +1,5 @@
 package ca.uwaterloo.cs
 
-import StatusResponse
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -34,11 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ca.uwaterloo.cs.api.JournalApiService
-import io.ktor.client.call.body
-import io.ktor.http.HttpStatusCode
 import journal.JournalRequest
-import journal.JournalResponse
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -304,26 +299,24 @@ fun JournalPage3(appState: AppState) {
                                 try {
                                     // we can change this flow in the future, but this current creation doesnt return
                                     // the actual journal response, so we just query it again
-                                    val response = JournalApiService.getJournalByDateAndUser(
-                                        userId = appState.userId.value, // Example user ID
+                                    appState.userStrategy?.createJournal(appState, journalRequest)
+
+                                    val journalResponse = appState.userStrategy?.getJournalByDate(
+                                        appState = appState,
                                         year = appState.selectedDate.value.year,
                                         month = appState.selectedDate.value.monthValue,
                                         day = appState.selectedDate.value.dayOfMonth,
-                                        jwt = appState.dataStore.getJwt()
                                     )
+
                                     appState.journalEntry.value = ""
                                     appState.selectedMoods.value = listOf("")
 
-                                    if (response.status == HttpStatusCode.OK) {
-                                        val journalResponse: JournalResponse = response.body()
+                                    if (journalResponse != null) {
                                         appState.pastJournalEntry.value = journalResponse.content
                                         appState.pastSelectedMoods.value = journalResponse.moods
                                         appState.pastDate.value = LocalDate.of(journalResponse.year, journalResponse.month, journalResponse.day)
                                         appState.pageState.value = PageStates.PAST_JOURNAL
-                                    } else if (response.status == HttpStatusCode.BadRequest || response.status == HttpStatusCode.NotFound) {
-                                        val statusResponse: StatusResponse = response.body()
-                                        // TODO: handle invalid query params or no data for date
-                                        println(statusResponse.body)
+                                    } else {
                                         appState.pageState.value = PageStates.HOME
                                     }
                                 } catch (e: Exception) {

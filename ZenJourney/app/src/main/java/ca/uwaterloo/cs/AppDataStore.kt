@@ -9,12 +9,12 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
-class AppDataStore(val context: Context) {
-    // referenced from: https://developer.android.com/topic/libraries/architecture/datastore#kotlin
-    val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
-        name = "jwt"
-    )
+val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
+    name = "jwt"
+)
 
+// referenced from: https://developer.android.com/topic/libraries/architecture/datastore#kotlin
+class AppDataStore(val context: Context) {
     suspend fun setJwt(jwt: String) {
         context.dataStore.edit { store ->
             store[stringPreferencesKey("jwt")] = jwt

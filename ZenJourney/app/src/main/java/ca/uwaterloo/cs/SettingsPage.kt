@@ -1,6 +1,7 @@
 package ca.uwaterloo.cs
 
 import android.Manifest
+import android.app.TimePickerDialog
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -27,6 +28,7 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -36,39 +38,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.an.room.db.JournalDB
-import com.an.room.db.PhotoDB
-import com.an.room.db.UserDB
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-
-suspend fun localClearData(appState: AppState) {
-    appState.resetToDefault()
-    withContext(Dispatchers.IO) {
-        val userDB = UserDB.getDB(appState.context)
-        val userDao = userDB.userDao()
-        userDao.deleteAll()
-
-        val photoDB = PhotoDB.getDB(appState.context)
-        val photoDao = photoDB.photoDao()
-        photoDao.deleteAll()
-
-        val journalDB = JournalDB.getDB(appState.context)
-        val journalDao = journalDB.journalDao()
-        journalDao.deleteAll()
-    }
-}
-
-suspend fun updateUserPIN(appState: AppState) {
-    withContext(Dispatchers.IO) {
-        val userDB = UserDB.getDB(appState.context)
-        val userDao = userDB.userDao()
-        userDao.updatePINById(appState.hashedPIN.value)
-    }
-}
 
 @Composable
 fun DisclaimerPage(appState: AppState) {
@@ -146,12 +118,18 @@ fun DisclaimerPage(appState: AppState) {
         }
     }
 }
+
+fun onTimeSet(hour: Int, min: Int) {
+    /* TODO: do something with this */
+}
+
 @Composable
 @OptIn(ExperimentalPermissionsApi::class)
 fun SettingsPage(appState: AppState) {
     val notificationPermissions =
         rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
     val showNotificationSettingsDialog = remember { mutableStateOf(false) }
+    val showTimePicker = remember { mutableStateOf(false) }
     val showDeleteAccountDialog = remember { mutableStateOf(false) }
     val unsuccessfulDeleteAccountDialog = remember { mutableStateOf(false) }
     val successfulDeleteAccountDialog = remember { mutableStateOf(false) }
@@ -179,6 +157,100 @@ fun SettingsPage(appState: AppState) {
                 )
             })
     }
+
+    if (successfulDeleteAccountDialog.value) {
+        Dialog(onDismissRequest = { appState.pageState.value = PageStates.WELCOME }) {
+            Surface(
+                modifier = Modifier.width(280.dp),
+                shape = MaterialTheme.shapes.medium,
+            ) {
+                Column(
+                    modifier = Modifier.padding(18.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "We successfully deleted your account. Goodbye and thank you for using ZenJourney!",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color.Black,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        }
+    }
+
+    if (unsuccessfulDeleteAccountDialog.value) {
+        Dialog(onDismissRequest = { unsuccessfulDeleteAccountDialog.value = false }) {
+            Surface(
+                modifier = Modifier.width(280.dp),
+                shape = MaterialTheme.shapes.medium,
+            ) {
+                Column(
+                    modifier = Modifier.padding(18.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "We were unable to delete your account. Please try again later.",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color.Black,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        }
+    }
+
+    if (showDeleteAccountDialog.value) {
+        Dialog(onDismissRequest = { showDeleteAccountDialog.value = false }) {
+            Surface(
+                modifier = Modifier.width(280.dp),
+                shape = MaterialTheme.shapes.medium,
+            ) {
+                Column(
+                    modifier = Modifier.padding(18.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Are you sure?",
+                        style = MaterialTheme.typography.headlineSmall,
+                        modifier = Modifier.padding(bottom = 10.dp),
+                        color = Color.Black
+                    )
+                    Text(
+                        text = "This will permanently delete your account and CANNOT be undone. You will lose all of your data, including saved journals and photos.",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color.Black,
+                        textAlign = TextAlign.Center
+                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(top = 10.dp)
+                    ) {
+                        Button(
+                            colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondaryContainer),
+                            onClick = {
+                                val showDialog = appState.userStrategy!!.deleteAccount(appState)
+                                showDeleteAccountDialog.value = false
+                                successfulDeleteAccountDialog.value = showDialog.first
+                                unsuccessfulDeleteAccountDialog.value = showDialog.second
+                                appState.userStrategy!!.clearJWT(appState)
+                            }
+                        ) {
+                            Text("Yes")
+                        }
+                        Spacer(modifier = Modifier.padding(20.dp))
+                        Button(
+                            colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondaryContainer),
+                            onClick = { showDeleteAccountDialog.value = false }
+                        ) {
+                            Text("No")
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     Column(
         Modifier
             .background(color = Color(0xFFC7E6C9))
@@ -192,7 +264,6 @@ fun SettingsPage(appState: AppState) {
             color = Color(0xFF3D3D3D),
             modifier = Modifier.padding(top = 30.dp, bottom = 24.dp)
         )
-
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
@@ -249,31 +320,51 @@ fun SettingsPage(appState: AppState) {
         }
 
         Column(
-            modifier = Modifier
-                .padding(start = 20.dp, end = 20.dp, bottom = 210.dp)
-                .size(width = 460.dp, height = 75.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier.padding(
+                start = 20.dp,
+                end = 20.dp,
+                bottom = if (notificationPermissions.status.isGranted) 150.dp else 210.dp
+            ),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .size(400.dp, 80.dp)
-                    .background(color = Color(0xFFA1CDB0), shape = RoundedCornerShape(16.dp))
-            ) {
+            if (notificationPermissions.status.isGranted) {
                 Button(
                     onClick = {
-                        appState.pageState.value = PageStates.DISCLAIMER
+                        TimePickerDialog(
+                            appState.context,
+                            { _, hour, min -> onTimeSet(hour, min) },
+                            8,
+                            0,
+                            true,
+                        ).show()
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFA1CDB0)),
-                    modifier = Modifier
-                        .fillMaxSize()
+                    modifier = Modifier.size(400.dp, 70.dp),
+                    shape = RoundedCornerShape(16.dp)
                 ) {
                     Text(
-                        text = "Disclaimer",
+                        text = "Customize Notification Time",
                         style = MaterialTheme.typography.headlineSmall,
                         textAlign = TextAlign.Center,
                         color = Color.White
                     )
                 }
+            }
+            Button(
+                onClick = {
+                    appState.pageState.value = PageStates.DISCLAIMER
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFA1CDB0)),
+                modifier = Modifier.size(400.dp, 70.dp),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Text(
+                    text = "Disclaimer",
+                    style = MaterialTheme.typography.headlineSmall,
+                    textAlign = TextAlign.Center,
+                    color = Color.White
+                )
             }
         }
 
@@ -283,29 +374,23 @@ fun SettingsPage(appState: AppState) {
                 .size(width = 460.dp, height = 75.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box(
-                modifier = Modifier
-                    .size(400.dp, 80.dp)
-                    .background(color = Color(0xFF7BB6A1), shape = RoundedCornerShape(16.dp))
+            Button(
+                onClick = {
+                    appState.pageState.value = PageStates.WELCOME
+                    appState.nameState.value = ""
+                    appState.userStrategy!!.logout(appState)
+                    appState.setPageHistoryToWelcome()
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
+                modifier = Modifier.size(400.dp, 70.dp),
+                shape = RoundedCornerShape(16.dp)
             ) {
-                Button(
-                    onClick = {
-                        appState.pageState.value = PageStates.WELCOME
-                        appState.nameState.value = ""
-                        appState.userStrategy!!.logout(appState)
-                        appState.setPageHistoryToWelcome()
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
-                    modifier = Modifier
-                        .fillMaxSize()
-                ) {
-                    Text(
-                        text = appState.userStrategy!!.logoutLabel,
-                        style = MaterialTheme.typography.headlineSmall,
-                        textAlign = TextAlign.Center,
-                        color = Color.White
-                    )
-                }
+                Text(
+                    text = appState.userStrategy!!.logoutLabel,
+                    style = MaterialTheme.typography.headlineSmall,
+                    textAlign = TextAlign.Center,
+                    color = Color.White
+                )
             }
         }
 
@@ -323,99 +408,6 @@ fun SettingsPage(appState: AppState) {
                     style = MaterialTheme.typography.headlineSmall,
                     color = Color(0xFF649E8A)
                 )
-            }
-        }
-
-        if (showDeleteAccountDialog.value) {
-            Dialog(onDismissRequest = { showDeleteAccountDialog.value = false }) {
-                Surface(
-                    modifier = Modifier.width(280.dp),
-                    shape = MaterialTheme.shapes.medium,
-                ) {
-                    Column(
-                        modifier = Modifier.padding(18.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "Are you sure?",
-                            style = MaterialTheme.typography.headlineSmall,
-                            modifier = Modifier.padding(bottom = 10.dp),
-                            color = Color.Black
-                        )
-                        Text(
-                            text = "This will permanently delete your account and CANNOT be undone. You will lose all of your data, including saved journals and photos.",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = Color.Black,
-                            textAlign = TextAlign.Center
-                        )
-                        Row (
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(top = 10.dp)
-                        ) {
-                            Button(
-                                colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondaryContainer),
-                                onClick = {
-                                    val showDialog = appState.userStrategy!!.deleteAccount(appState)
-                                    showDeleteAccountDialog.value = false
-                                    successfulDeleteAccountDialog.value = showDialog.first
-                                    unsuccessfulDeleteAccountDialog.value = showDialog.second
-                                    appState.userStrategy!!.clearJWT(appState)
-                                }
-                            ) {
-                                Text("Yes")
-                            }
-                            Spacer(modifier = Modifier.padding(20.dp))
-                            Button(
-                                colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondaryContainer),
-                                onClick = { showDeleteAccountDialog.value = false }
-                            ) {
-                                Text("No")
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        if (successfulDeleteAccountDialog.value) {
-            Dialog(onDismissRequest = { appState.pageState.value = PageStates.WELCOME }) {
-                Surface(
-                    modifier = Modifier.width(280.dp),
-                    shape = MaterialTheme.shapes.medium,
-                ) {
-                    Column(
-                        modifier = Modifier.padding(18.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "We successfully deleted your account. Goodbye and thank you for using ZenJourney!",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = Color.Black,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
-            }
-        }
-
-        if (unsuccessfulDeleteAccountDialog.value) {
-            Dialog(onDismissRequest = { unsuccessfulDeleteAccountDialog.value = false }) {
-                Surface(
-                    modifier = Modifier.width(280.dp),
-                    shape = MaterialTheme.shapes.medium,
-                ) {
-                    Column(
-                        modifier = Modifier.padding(18.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "We were unable to delete your account. Please try again later.",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = Color.Black,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
             }
         }
     }

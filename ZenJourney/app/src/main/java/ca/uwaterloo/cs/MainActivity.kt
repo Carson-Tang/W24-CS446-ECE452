@@ -48,7 +48,6 @@ class MainActivity : ComponentActivity() {
 
         // set up notification channel and alerts
         setUpNotificationChannel(appState.context)
-        NotificationScheduler.scheduleNotification(appState.context)
     }
 }
 

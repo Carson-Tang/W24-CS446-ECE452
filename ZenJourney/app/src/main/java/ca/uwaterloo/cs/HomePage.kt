@@ -34,6 +34,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ca.uwaterloo.cs.notifications.NotificationScheduler.isCustomDefaultNotificationSet
+import ca.uwaterloo.cs.notifications.NotificationScheduler.scheduleNotification
 import journal.JournalResponse
 import kotlinx.coroutines.launch
 import org.mindrot.jbcrypt.BCrypt
@@ -53,7 +55,7 @@ fun generateFeelingStatement(moods: List<String>): String {
 }
 
 @Composable
-fun WithInfo(today: java.time.LocalDate, todayJournalData: JournalResponse, appState: AppState) {
+fun WithInfo(today: LocalDate, todayJournalData: JournalResponse, appState: AppState) {
     Column(
         modifier = Modifier
             .fillMaxWidth(),
@@ -156,6 +158,10 @@ fun HomePage(appState: AppState) {
             )
         )
     }
+    if (!isCustomDefaultNotificationSet) {
+        // default notification time (if not custom set) is 12PM
+        scheduleNotification(appState.context, 12, 0)
+    }
 
     LaunchedEffect(Unit) {
         // This block will be executed when the composable is first displayed
@@ -169,7 +175,7 @@ fun HomePage(appState: AppState) {
                 )
 
                 if (response == null) {
-                    println("error")
+                    println("no journal today")
                 } else {
                     todayJournalData = response
                 }
@@ -205,8 +211,8 @@ fun HomePage(appState: AppState) {
                     Button(
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
                         onClick = {
-                            appState.isPINRequired.value = false
                             appState.userStrategy!!.logout(appState)
+                            appState.setPageHistoryToWelcome()
                         }) {
                         Text(appState.userStrategy!!.forgotPINLabel)
                     }

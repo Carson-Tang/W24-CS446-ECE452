@@ -160,7 +160,7 @@ fun HomePage(appState: AppState) {
     }
     if (!isCustomDefaultNotificationSet) {
         // default notification time (if not custom set) is 12PM
-        scheduleNotification(appState.context, 19, 29)
+        scheduleNotification(appState.context, 12, 0)
     }
 
     LaunchedEffect(Unit) {

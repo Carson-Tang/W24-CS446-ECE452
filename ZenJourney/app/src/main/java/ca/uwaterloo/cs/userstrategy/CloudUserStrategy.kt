@@ -1,28 +1,26 @@
 package ca.uwaterloo.cs.userstrategy
 
 import StatusResponse
-import androidx.compose.runtime.Composable
 import ca.uwaterloo.cs.AppState
 import ca.uwaterloo.cs.PageStates
 import ca.uwaterloo.cs.api.JournalApiService
+import ca.uwaterloo.cs.api.JournalApiService.deleteJournalByUserId
+import ca.uwaterloo.cs.api.PhotoApiService.deleteUserPhotos
 import ca.uwaterloo.cs.api.UserApiService
+import ca.uwaterloo.cs.api.UserApiService.deleteUser
 import com.auth0.android.jwt.JWT
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import io.ktor.client.call.body
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
+import journal.JournalRequest
+import journal.JournalResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import user.UserRequest
 import user.UserResponse
-import ca.uwaterloo.cs.api.JournalApiService.deleteJournalByUserId
-import ca.uwaterloo.cs.api.PhotoApiService.deleteUserPhotos
-import ca.uwaterloo.cs.api.UserApiService.deleteUser
-import com.an.room.db.JournalDB
-import journal.JournalRequest
-import journal.JournalResponse
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 class CloudUserStrategy : UserStrategy {
@@ -136,6 +134,34 @@ class CloudUserStrategy : UserStrategy {
         }
     }
 
+    override suspend fun getJournalByMonth(appState: AppState, month: Int, year: Int): List<JournalResponse> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = JournalApiService.getJournalByMonth(
+                    userId = appState.userId.value,
+                    year = year,
+                    month = month,
+                    jwt = appState.dataStore.getJwt()
+                )
+
+                if (response.status == HttpStatusCode.OK) {
+                    val responseBody = response.bodyAsText()
+                    val gson = Gson()
+                    val journalList: List<JournalResponse> = gson.fromJson(
+                        responseBody,
+                        object : TypeToken<List<JournalResponse>?>() {}.type
+                    )
+                    journalList
+                } else {
+                    emptyList()
+                }
+            } catch (e: Exception) {
+                println("Error fetching journals by month: ${e.message}")
+                emptyList()
+            }
+        }
+    }
+
     override suspend fun createJournal(appState: AppState, journalRequest: JournalRequest) {
         return withContext(Dispatchers.IO){
             try {
@@ -148,6 +174,8 @@ class CloudUserStrategy : UserStrategy {
             }
         }
     }
+
+
     override fun clearJWT(appState: AppState) {
         runBlocking {
             appState.dataStore.setJwt("")

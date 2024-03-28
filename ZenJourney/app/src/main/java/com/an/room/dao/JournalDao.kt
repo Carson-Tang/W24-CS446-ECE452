@@ -14,6 +14,8 @@ interface JournalDao {
     @Query("SELECT * FROM journals WHERE year = :year AND month = :month AND day = :day")
     fun findByDate(year: Int, month: Int, day: Int): Journal?
 
+    @Query("SELECT * FROM journals WHERE year = :year AND month = :month")
+    fun findByMonth(year: Int, month: Int): List<Journal>
     @Insert
     fun insertAll(vararg journals: Journal)
 

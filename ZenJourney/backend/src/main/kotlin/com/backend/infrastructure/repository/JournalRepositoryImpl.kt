@@ -8,7 +8,9 @@ import com.mongodb.client.result.DeleteResult
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import journal.Journal
 import journal.JournalRequest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.toList
 import org.bson.BsonValue
 import org.bson.types.ObjectId
 
@@ -83,6 +85,21 @@ class JournalRepositoryImpl(
             .firstOrNull()
     }
 
+    override suspend fun findByMonth(userId: String, year: Int, month: Int): List<Journal> {
+        return try {
+            mongoDatabase.getCollection<Journal>(JOURNAL_COLLECTION)
+                .find(
+                    Filters.and(
+                        Filters.eq("userId", ObjectId(userId)),
+                        Filters.eq("year", year),
+                        Filters.eq("month", month)
+                    )
+                ).toList()
+        } catch (e: MongoException) {
+            System.err.println("Unable to retrieve journals due to an error: $e")
+            emptyList()
+        }
+    }
     override suspend fun deleteByUserId(userId: String): DeleteResult {
         return mongoDatabase.getCollection<Journal>(JOURNAL_COLLECTION).withDocumentClass<Journal>()
             .deleteMany(

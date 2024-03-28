@@ -84,6 +84,20 @@ object JournalApiService {
         }
     }
 
+    suspend fun getJournalByMonth(userId: String, year: Int, month: Int, jwt: String) : HttpResponse {
+        return withContext(Dispatchers.IO) {
+            val response: HttpResponse = HttpClientSetup.httpClient.get("$baseUrl/user/month") {
+                parameter("user", userId)
+                parameter("year", year)
+                parameter("month", month)
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer $jwt")
+                }
+            }
+            response
+        }
+    }
+
     suspend fun deleteJournalByUserId(userId: String, jwt: String): HttpResponse {
         return withContext(Dispatchers.IO) {
             val response: HttpResponse = HttpClientSetup.httpClient.delete("$baseUrl/user") {

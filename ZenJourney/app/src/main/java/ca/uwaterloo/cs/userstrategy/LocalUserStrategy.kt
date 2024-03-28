@@ -124,6 +124,29 @@ class LocalUserStrategy : UserStrategy {
         }
     }
 
+    override suspend fun getJournalByMonth(appState: AppState, month: Int, year: Int): List<JournalResponse> {
+        return withContext(Dispatchers.IO) {
+            val database = JournalDB.getDB(appState.context)
+            val journalDao = database.journalDao()
+
+            val journalList = journalDao.findByMonth(year, month)
+
+            val journalResponses = journalList.map { journal ->
+                JournalResponse(
+                    id = journal.id.toString(),
+                    content = journal.content,
+                    moods = journal.moods,
+                    year = journal.year,
+                    month = journal.month,
+                    day = journal.day,
+                    userId = "local"
+                )
+            }
+
+            journalResponses
+        }
+    }
+
     override suspend fun createJournal(appState: AppState, journalRequest: JournalRequest) {
         return withContext(Dispatchers.IO){
             val database = JournalDB.getDB(appState.context)

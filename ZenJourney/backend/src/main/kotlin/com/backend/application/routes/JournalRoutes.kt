@@ -131,6 +131,46 @@ fun Route.journalRoutes() {
                 )
             call.respond(HttpStatusCode.OK, journal.toResponse())
         }
+        get("/month") {
+            val userId = call.request.queryParameters["user"]
+            val year = call.request.queryParameters["year"]
+            val month = call.request.queryParameters["month"]
+
+            if (userId == null || year == null || month == null) {
+                return@get call.respond(
+                    HttpStatusCode.BadRequest,
+                    toStatusResponse(false, "Missing query parameters: user, year and/or month are required")
+                )
+            }
+
+            val yearInt = year.toIntOrNull()
+            val monthInt = month.toIntOrNull()
+            if (yearInt == null || monthInt == null || monthInt !in 1..12) {
+                return@get call.respond(
+                    HttpStatusCode.BadRequest,
+                    toStatusResponse(false, "Invalid year or month. Ensure year is a number and month is between 1 and 12.")
+                )
+            }
+
+            try {
+                // Fetch journals for the specified month and year
+                val journals = journalRepository.findByMonth(userId = userId, year = yearInt, month = monthInt)
+                if (journals.isEmpty()) {
+                    return@get call.respond(
+                        HttpStatusCode.NotFound,
+                        toStatusResponse(false, "No journals found for the specified month and year")
+                    )
+                }
+                // Respond with the list of journals
+                call.respond(HttpStatusCode.OK, journals.map { it.toResponse() })
+            } catch (e: Exception) {
+                // Handle potential errors, such as issues with the database
+                call.respond(
+                    HttpStatusCode.InternalServerError,
+                    toStatusResponse(false, "An error occurred: ${e.message}")
+                )
+            }
+        }
         delete {
             val userId = call.request.queryParameters["userId"]
                 ?: return@delete call.respond(

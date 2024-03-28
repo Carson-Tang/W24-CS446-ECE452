@@ -13,5 +13,6 @@ interface JournalRepository {
     suspend fun findByDate(year: Int, month: Int, day: Int): Journal?
     suspend fun findByDateAndUser(userId: String, year: Int, month: Int, day: Int): Journal?
 
+    suspend fun findByMonth(userId: String, year: Int, month: Int): List<Journal>
     suspend fun deleteByUserId(userId: String): DeleteResult
 }

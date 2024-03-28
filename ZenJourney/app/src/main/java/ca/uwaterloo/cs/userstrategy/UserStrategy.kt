@@ -12,6 +12,7 @@ interface UserStrategy {
     fun logout(appState: AppState)
     fun deleteAccount(appState: AppState): Pair<Boolean, Boolean>
     suspend fun getJournalByDate(appState: AppState, day: Int, month: Int, year: Int): JournalResponse?
+    suspend fun getJournalByMonth(appState: AppState, month: Int, year: Int): List<JournalResponse>
     suspend fun createJournal(appState: AppState, journalRequest: JournalRequest)
     fun clearJWT(appState: AppState)
 }

@@ -77,6 +77,7 @@ class AppState(val context: Context) {
     val pastJournalEntry = mutableStateOf("")
     val pastSelectedMoods = mutableStateOf(listOf<String>())
     val pastDate = mutableStateOf(LocalDate.now())
+    var currMonthJournals = mutableStateOf(listOf<LocalDate>())
 
     // meditation
     val selectedTune = mutableStateOf(R.raw.once_in_paris)
@@ -114,6 +115,7 @@ class AppState(val context: Context) {
         hashedPIN.value = ""
         isPINRequired.value = false
         userStrategy = null
+        currMonthJournals.value = emptyList()
     }
 
     fun setPageHistoryToHome() {

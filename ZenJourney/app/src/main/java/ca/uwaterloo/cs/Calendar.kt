@@ -137,7 +137,7 @@ fun Day(
     currentMonth: YearMonth,
     appState: AppState,
 ) {
-    val lightGreen = Color(0xFF90EE90)
+    val lightGreen = Color(0xFFD6F3D8)
     val lightGray = Color(0xFFB0B0B0)
 
     val coroutineScope = rememberCoroutineScope()

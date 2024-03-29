@@ -9,5 +9,7 @@ data class Photo(
     @ColumnInfo(name = "id") val id: Int = 0,
 
     @ColumnInfo(name = "photoBase64") val photoBase64: String,
-    @ColumnInfo(name = "uploadDate") val uploadDate: String,
+    @ColumnInfo(name = "year") val year: Int,
+    @ColumnInfo(name = "month") val month: Int,
+    @ColumnInfo(name = "day") val day: Int,
 ): java.io.Serializable;

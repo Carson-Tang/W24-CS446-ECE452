@@ -15,6 +15,10 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import journal.JournalResponse
 import com.an.room.model.Journal
+import com.an.room.model.Photo
+import photo.PhotoRequest
+import photo.PhotoResponse
+
 class LocalUserStrategy : UserStrategy {
     override val forgotPINLabel = "Exit, clear all data"
     override val logoutLabel = "Clear data"
@@ -158,6 +162,48 @@ class LocalUserStrategy : UserStrategy {
             }
         }
     }
+
+    override suspend fun createPhoto(appState: AppState, photoRequest: PhotoRequest):Boolean{
+        return withContext(Dispatchers.IO){
+            val database = PhotoDB.getDB(appState.context)
+            val photoDao = database.photoDao()
+            try {
+                val photo = Photo(
+                    photoBase64 = photoRequest.photoBase64,
+                    year = photoRequest.year,
+                    month = photoRequest.month,
+                    day = photoRequest.day
+                )
+                photoDao.insert(photo)
+                true
+            } catch (e: Exception) {
+                println(e.message)
+                false
+            }
+        }
+    }
+
+    override suspend fun getAllPhotos(appState: AppState): List<PhotoResponse> {
+        return withContext(Dispatchers.IO) {
+            val database = PhotoDB.getDB(appState.context)
+            val photoDao = database.photoDao()
+            val photolist = photoDao.getAll()
+
+            val photoResponses = photolist.map { photo ->
+                PhotoResponse(
+                    id = photo.id.toString(),
+                    photoBase64 = photo.photoBase64,
+                    year = photo.year,
+                    month = photo.month,
+                    day = photo.day,
+                    userid = "local"
+                )
+            }
+
+            photoResponses
+        }
+    }
+
     override fun deleteAccount(appState: AppState): Pair<Boolean, Boolean> { return Pair(false, false) }
 
     override fun clearJWT(appState: AppState) {}

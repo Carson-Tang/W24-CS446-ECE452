@@ -3,11 +3,15 @@ package ca.uwaterloo.cs.userstrategy
 import StatusResponse
 import ca.uwaterloo.cs.AppState
 import ca.uwaterloo.cs.PageStates
+import ca.uwaterloo.cs.PhotobookPhoto
 import ca.uwaterloo.cs.api.JournalApiService
 import ca.uwaterloo.cs.api.JournalApiService.deleteJournalByUserId
+import ca.uwaterloo.cs.api.PhotoApiService
 import ca.uwaterloo.cs.api.PhotoApiService.deleteUserPhotos
 import ca.uwaterloo.cs.api.UserApiService
 import ca.uwaterloo.cs.api.UserApiService.deleteUser
+import ca.uwaterloo.cs.capitalize
+import ca.uwaterloo.cs.decodeImage
 import com.auth0.android.jwt.JWT
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -19,6 +23,9 @@ import journal.JournalResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import photo.ListResponse
+import photo.PhotoRequest
+import photo.PhotoResponse
 import user.UserRequest
 import user.UserResponse
 
@@ -159,11 +166,57 @@ class CloudUserStrategy : UserStrategy {
         return withContext(Dispatchers.IO){
             try {
                 JournalApiService.createJournal(
-                    journalRequest = journalRequest,
-                    jwt = appState.dataStore.getJwt()
+                    journalRequest = journalRequest, jwt = appState.dataStore.getJwt()
                 )
             } catch (e: Exception) {
                 println(e.message)
+            }
+        }
+    }
+
+    override suspend fun createPhoto(appState: AppState, photoRequest: PhotoRequest): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response =
+                    PhotoApiService.createPhoto(photoRequest, appState.dataStore.getJwt())
+                //failed to create photo successfully
+                if (response.status != HttpStatusCode.Created) {
+                    val statusResponse: StatusResponse = response.body()
+                    println("createPhoto failed")
+                    println(statusResponse.body)
+                    return@withContext false
+                }
+                return@withContext true
+                //some other error happened
+            } catch (e: Exception) {
+                println("createPhoto failed")
+                println(e.message)
+                false
+            }
+        }
+    }
+
+    override suspend fun getAllPhotos(appState: AppState): List<PhotoResponse>? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = PhotoApiService.getAllUserPhotos(
+                    appState.userId.value, appState.dataStore.getJwt()
+                )
+                //got photos
+                if (response.status == HttpStatusCode.OK) {
+                    val listResponse: ListResponse<PhotoResponse> = response.body()
+                    listResponse.list
+                } else { // status code is bad
+                    val statusResponse: StatusResponse = response.body()
+                    println("getAllUserPhotos failed due to response code")
+                    println(statusResponse.body)
+                    null
+                }
+                // some other error occured
+            } catch (e: Exception) {
+                println("getAllPhotos failed")
+                println(e)
+                null
             }
         }
     }

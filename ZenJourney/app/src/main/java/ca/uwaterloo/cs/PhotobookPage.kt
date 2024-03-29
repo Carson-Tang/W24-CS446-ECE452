@@ -98,6 +98,7 @@ fun capitalize(s: String): String {
 }
 
 // bitmap -> base64 string
+@OptIn(ExperimentalEncodingApi::class)
 fun encodeImage(image: Bitmap): String {
     val stream = ByteArrayOutputStream()
     image.compress(Bitmap.CompressFormat.PNG, 100, stream)
@@ -159,9 +160,9 @@ fun PhotobookPage(appState: AppState) {
                 PhotoRequest(
                     userid,
                     encodeImage(image),
-                    currentDate.year.toString(),
-                    currentDate.monthValue.toString(),
-                    currentDate.dayOfMonth.toString()
+                    currentDate.year ,
+                    currentDate.monthValue ,
+                    currentDate.dayOfMonth
                 )
             try {
                 val response = PhotoApiService.createPhoto(photoRequest, appState.dataStore.getJwt())

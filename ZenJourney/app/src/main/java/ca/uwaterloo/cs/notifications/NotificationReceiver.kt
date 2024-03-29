@@ -13,6 +13,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import ca.uwaterloo.cs.MainActivity
 import ca.uwaterloo.cs.R
+import ca.uwaterloo.cs.affirmations
 
 // https://developer.android.com/reference/android/content/BroadcastReceiver
 class NotificationReceiver : BroadcastReceiver() {
@@ -32,7 +33,7 @@ class NotificationReceiver : BroadcastReceiver() {
             )
         val notificationBuilder = NotificationCompat.Builder(context, "1")
             .setContentTitle("ZenJourney")
-            .setContentText("Hello! How has your day been? Log your daily moods anytime in ZenJourney.")
+            .setContentText(affirmations.random())
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)

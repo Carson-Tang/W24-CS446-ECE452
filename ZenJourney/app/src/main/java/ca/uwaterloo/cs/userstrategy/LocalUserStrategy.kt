@@ -101,25 +101,19 @@ class LocalUserStrategy : UserStrategy {
                 day = day
             )
 
-            withContext(Dispatchers.Main) {
-                if (journalRes == null) {
-                    null
-                } else {
-                    appState.pastJournalEntry.value = journalRes.content
-                    appState.pastSelectedMoods.value = journalRes.moods
-                    appState.pastDate.value = LocalDate.of(journalRes.year, journalRes.month, journalRes.day)
-                    appState.pageState.value = PageStates.PAST_JOURNAL
+            if (journalRes == null) {
+                null
+            } else {
 
-                    JournalResponse(
-                        id = journalRes.id.toString(),
-                        content = journalRes.content,
-                        moods = journalRes.moods,
-                        year = journalRes.year,
-                        month = journalRes.month,
-                        day = journalRes.day,
-                        userId = ""
-                    )
-                }
+                JournalResponse(
+                    id = journalRes.id.toString(),
+                    content = journalRes.content,
+                    moods = journalRes.moods,
+                    year = journalRes.year,
+                    month = journalRes.month,
+                    day = journalRes.day,
+                    userId = ""
+                )
             }
         }
     }

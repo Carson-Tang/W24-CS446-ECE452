@@ -77,6 +77,9 @@ class AppState(val context: Context) {
     val pastJournalEntry = mutableStateOf("")
     val pastSelectedMoods = mutableStateOf(listOf<String>())
     val pastDate = mutableStateOf(LocalDate.now())
+    val showAddMoodDialog = mutableStateOf(false)
+    val newMoodLabel = mutableStateOf("")
+    val newMoodEmoji = mutableStateOf("")
     var currMonthJournals = mutableStateOf(listOf<LocalDate>())
 
     // meditation

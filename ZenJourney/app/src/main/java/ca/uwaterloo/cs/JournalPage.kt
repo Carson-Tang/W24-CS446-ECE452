@@ -18,14 +18,22 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,6 +45,7 @@ import journal.JournalRequest
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import com.makeappssimple.abhimanyu.composeemojipicker.ComposeEmojiPickerEmojiUI
 
 @Composable
 fun JournalPage1(appState: AppState) {
@@ -78,6 +87,10 @@ fun JournalPage1(appState: AppState) {
 
 @Composable
 fun JournalPage2(appState: AppState) {
+    if (appState.showAddMoodDialog.value) {
+        CustomMoodDialog(appState = appState)
+    }
+
     Column(
         Modifier
             .background(color = MaterialTheme.colorScheme.background)
@@ -136,9 +149,22 @@ fun JournalPage2(appState: AppState) {
                         }
                     }
                 }
+                item {
+                    Box(
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .background(Color.Transparent, RoundedCornerShape(8.dp))
+                            .clickable {
+                                appState.showAddMoodDialog.value = true
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(text = "+", fontSize = 40.sp)
+                        }
+                    }
+                }
             }
-
-
 
             Column(
                 modifier = Modifier
@@ -167,6 +193,62 @@ fun JournalPage2(appState: AppState) {
                 }
             }
         }
+    }
+}
+@Composable
+fun CustomMoodDialog(appState: AppState) {
+    var isModalBottomSheetVisible by remember {
+        mutableStateOf(false)
+    }
+    var selectedEmoji by remember {
+        mutableStateOf("😃")
+    }
+    var searchText by remember {
+        mutableStateOf("")
+    }
+
+    if (appState.showAddMoodDialog.value) {
+        AlertDialog(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            onDismissRequest = { appState.showAddMoodDialog.value = false },
+            title = { Text("Add Custom Mood") },
+            text = {
+                Column {
+                    TextField(
+                        colors = TextFieldDefaults.colors(),
+                        value = appState.newMoodLabel.value,
+                        onValueChange = { appState.newMoodLabel.value = it },
+                        label = { Text("Mood Text") }
+                    )
+                    TextField(
+                        colors = TextFieldDefaults.colors(),
+                        value = appState.newMoodEmoji.value,
+                        onValueChange = { appState.newMoodEmoji.value = it },
+                        label = { Text("Mood Emoji") }
+                    )
+                }
+            },
+            confirmButton = {
+                Button(onClick = {
+                        appState.selectedMoods.value = appState.selectedMoods.value + (appState.newMoodLabel.value + "," + appState.newMoodEmoji.value)
+                        appState.newMoodLabel.value = ""
+                        appState.newMoodEmoji.value = ""
+                        appState.showAddMoodDialog.value = false
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1))
+                ) {
+                    Text(color = Color(0xFF4F4F4F), text = "Save")
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = { appState.showAddMoodDialog.value = false },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1))
+                ) {
+                    Text(color = Color(0xFF4F4F4F), text = "Cancel")
+                }
+            }
+        )
     }
 }
 
@@ -455,5 +537,4 @@ fun PastJournalPage(appState: AppState)
         }
     }
 }
-
 

@@ -118,12 +118,6 @@ class CloudUserStrategy : UserStrategy {
                 if (response.status == HttpStatusCode.OK) {
                     val journalResponse: JournalResponse = response.body()
 
-                    withContext(Dispatchers.Main) {
-                        appState.pastJournalEntry.value = journalResponse.content
-                        appState.pastSelectedMoods.value = journalResponse.moods
-                        appState.pastDate.value = LocalDate.of(journalResponse.year, journalResponse.month, journalResponse.day)
-                        appState.pageState.value = PageStates.PAST_JOURNAL
-                    }
                     journalResponse
                 } else {
                     null

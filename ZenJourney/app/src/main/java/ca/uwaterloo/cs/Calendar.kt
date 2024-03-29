@@ -167,6 +167,9 @@ fun Day(
                         if (journalRes == null) {
                             appState.pageState.value = PageStates.JOURNAL_STEP2
                         } else {
+                            appState.pastJournalEntry.value = journalRes.content
+                            appState.pastSelectedMoods.value = journalRes.moods
+                            appState.pastDate.value = LocalDate.of(journalRes.year, journalRes.month, journalRes.day)
                             appState.pageState.value = PageStates.PAST_JOURNAL
                         }
                     }

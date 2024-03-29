@@ -2,7 +2,6 @@ package ca.uwaterloo.cs.userstrategy
 
 import ca.uwaterloo.cs.AppState
 import ca.uwaterloo.cs.PageStates
-import ca.uwaterloo.cs.api.JournalApiService
 import com.an.room.db.JournalDB
 import com.an.room.db.PhotoDB
 import com.an.room.db.UserDB
@@ -15,7 +14,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import journal.JournalResponse
-import java.time.LocalDate
 import com.an.room.model.Journal
 class LocalUserStrategy : UserStrategy {
     override val forgotPINLabel = "Exit, clear all data"
@@ -101,25 +99,18 @@ class LocalUserStrategy : UserStrategy {
                 day = day
             )
 
-            withContext(Dispatchers.Main) {
-                if (journalRes == null) {
-                    null
-                } else {
-                    appState.pastJournalEntry.value = journalRes.content
-                    appState.pastSelectedMoods.value = journalRes.moods
-                    appState.pastDate.value = LocalDate.of(journalRes.year, journalRes.month, journalRes.day)
-                    appState.pageState.value = PageStates.PAST_JOURNAL
-
-                    JournalResponse(
-                        id = journalRes.id.toString(),
-                        content = journalRes.content,
-                        moods = journalRes.moods,
-                        year = journalRes.year,
-                        month = journalRes.month,
-                        day = journalRes.day,
-                        userId = ""
-                    )
-                }
+            if (journalRes == null) {
+                null
+            } else {
+                JournalResponse(
+                    id = journalRes.id.toString(),
+                    content = journalRes.content,
+                    moods = journalRes.moods,
+                    year = journalRes.year,
+                    month = journalRes.month,
+                    day = journalRes.day,
+                    userId = ""
+                )
             }
         }
     }

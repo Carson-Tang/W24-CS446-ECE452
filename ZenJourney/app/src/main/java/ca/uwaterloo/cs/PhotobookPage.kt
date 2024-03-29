@@ -160,7 +160,7 @@ fun PhotobookPage(appState: AppState) {
                     userid,
                     encodeImage(image),
                     currentDate.year.toString(),
-                    currentDate.month.toString(),
+                    currentDate.monthValue.toString(),
                     currentDate.dayOfMonth.toString()
                 )
             try {
@@ -173,6 +173,7 @@ fun PhotobookPage(appState: AppState) {
                 }
             } catch (e: Exception) {
                 // TODO: handle error
+                println("adding image to photobook failed")
                 println(e.message)
             }
             appState.photos.add(

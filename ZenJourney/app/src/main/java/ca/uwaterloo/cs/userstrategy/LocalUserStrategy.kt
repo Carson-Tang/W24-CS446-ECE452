@@ -2,7 +2,6 @@ package ca.uwaterloo.cs.userstrategy
 
 import ca.uwaterloo.cs.AppState
 import ca.uwaterloo.cs.PageStates
-import ca.uwaterloo.cs.api.JournalApiService
 import com.an.room.db.JournalDB
 import com.an.room.db.PhotoDB
 import com.an.room.db.UserDB
@@ -15,7 +14,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import journal.JournalResponse
-import java.time.LocalDate
 import com.an.room.model.Journal
 class LocalUserStrategy : UserStrategy {
     override val forgotPINLabel = "Exit, clear all data"

@@ -21,7 +21,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import user.UserRequest
 import user.UserResponse
-import java.time.LocalDate
 
 class CloudUserStrategy : UserStrategy {
     override val forgotPINLabel = "Log out"

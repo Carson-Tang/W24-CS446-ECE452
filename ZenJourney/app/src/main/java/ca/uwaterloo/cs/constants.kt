@@ -32,9 +32,8 @@ val moodEmojisWithLabels = listOf(
     "\uD83D\uDE31" to "Shocked",
     "\uD83D\uDE1E" to "Disappointed",
     "\uD83D\uDE0D" to "Loved",
-    "\uD83E\uDD2F" to "Mind Blown",
-    "\uD83D\uDE0E" to "Cool",
-    "\uD83E\uDD73" to "Party"
+    "\uD83D\uDE30" to "Anxious",
+    "\uD83D\uDE0C" to "Relieved",
 )
 
 // same as above but map

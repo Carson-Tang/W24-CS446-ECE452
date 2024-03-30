@@ -75,6 +75,8 @@ fun Route.photoRoutes() {
         }
 
         // findByUserId(userid: ObjectId)  /photo/byuserid/{userid}
+        // if month and year are not null, then 
+        // findByYearMonth(userid: ObjectId, year: Int, month: Int)
         get("/byuserid/{userid?}") {
             val id = call.parameters["userid"]
             if (id.isNullOrEmpty()) {
@@ -82,12 +84,18 @@ fun Route.photoRoutes() {
                     text = "Missing user id in photo GET", status = HttpStatusCode.BadRequest
                 )
             }
-            repository.findByUserId(ObjectId(id))?.let { list ->
-                val listRes = list.map {
-                    it.toResponse()
-                }
-                call.respond(ListResponse(listRes))
-            } ?: call.respondText("No photos found for user id $id")
+            val year = call.request.queryParameters["year"]
+            val month = call.request.queryParameters["month"]
+            val list = if (month != null && year != null){
+                repository.findByYearMonth(ObjectId(id), year.toInt(), month.toInt())
+            }else{
+                repository.findByUserId(ObjectId(id))
+            }
+            val photoresponse = list.map {
+                it.toResponse()
+            }
+            call.respond(ListResponse(photoresponse))
         }
+
     }
 }

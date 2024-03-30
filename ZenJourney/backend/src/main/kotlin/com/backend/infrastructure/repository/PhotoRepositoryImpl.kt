@@ -71,4 +71,19 @@ class PhotoRepositoryImpl(
             null
         }
     }
+
+    override suspend fun findByYearMonth(userid: ObjectId, year: Int, month: Int): List<Photo> {
+        return try {
+            mongoDatabase.getCollection<Photo>(PHOTO_COLLECTION).find(
+                Filters.and(
+                    Filters.eq("userid", userid),
+                    Filters.eq("year", year),
+                    Filters.eq("month", month),
+                )
+            ).sort(Document(mapOf("year" to 1, "month" to 1, "day" to 1))).toList()
+        } catch (e: MongoException) {
+            System.err.println("findByYearMonth failed due to an error: $e")
+            emptyList()
+        }
+    }
 }

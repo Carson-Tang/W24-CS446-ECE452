@@ -222,7 +222,6 @@ fun AllPhotosPage(appState: AppState) {
             appState.photos.addAll(photoList.reversed())
         }
     }
-    println(appState.photos.toString())
     val showPhotoErrorDialogue = remember { mutableStateOf(false) }
 
     /* Permissions popups */

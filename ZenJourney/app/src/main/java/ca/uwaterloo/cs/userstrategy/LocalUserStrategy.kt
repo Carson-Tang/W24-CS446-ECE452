@@ -204,6 +204,30 @@ class LocalUserStrategy : UserStrategy {
         }
     }
 
+    override suspend fun getUserPhotosByYearMonth(
+        appState: AppState,
+        year: Int,
+        month: Int
+    ): List<PhotoResponse>? {
+        return withContext(Dispatchers.IO) {
+            val database = PhotoDB.getDB(appState.context)
+            val photoDao = database.photoDao()
+            val photolist = photoDao.getByYearMonth(year, month)
+
+            val photoResponses = photolist.map { photo ->
+                PhotoResponse(
+                    id = photo.id.toString(),
+                    photoBase64 = photo.photoBase64,
+                    year = photo.year,
+                    month = photo.month,
+                    day = photo.day,
+                    userid = "local"
+                )
+            }
+            photoResponses
+        }
+    }
+
     override fun deleteAccount(appState: AppState): Pair<Boolean, Boolean> { return Pair(false, false) }
 
     override fun clearJWT(appState: AppState) {}

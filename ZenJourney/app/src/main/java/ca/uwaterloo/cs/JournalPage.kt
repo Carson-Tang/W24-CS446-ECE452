@@ -1,6 +1,5 @@
 package ca.uwaterloo.cs
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -33,12 +32,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -59,6 +53,10 @@ import androidx.compose.ui.graphics.RectangleShape
 
 @Composable
 fun JournalPage1(appState: AppState) {
+    LaunchedEffect (key1 = true) {
+        appState.isEditing.value = false
+    }
+
     Column(
         Modifier
             .background(color = MaterialTheme.colorScheme.background)
@@ -99,14 +97,15 @@ fun JournalPage1(appState: AppState) {
 @Composable
 fun JournalPage2(appState: AppState) {
     LaunchedEffect (key1 = true) {
-        appState.currSelectedMoods.value = listOf()
-        appState.currSelectedCustomMoods.value = listOf()
+        if (!appState.isEditing.value) {
+            appState.currSelectedMoods.value = listOf()
+            appState.currSelectedCustomMoods.value = listOf()
+        }
     }
 
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true,
     )
-
 
     if (appState.showAddMoodDialog.value && !appState.isModalBottomSheetVisible.value) {
         CustomMoodDialog(appState = appState)
@@ -181,7 +180,7 @@ fun JournalPage2(appState: AppState) {
                 columns = GridCells.Fixed(3),
                 contentPadding = PaddingValues(16.dp),
                 modifier = Modifier.padding(16.dp),
-                horizontalArrangement = Arrangement.Center
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 items(moodEmojisWithLabels) { (emoji, label) ->
                     val isSelected = emoji in appState.currSelectedMoods.value
@@ -479,8 +478,14 @@ fun JournalPage3(appState: AppState) {
                                 )
                                 try {
                                     // we can change this flow in the future, but this current creation doesnt return
-                                    // the actual journal response, so we just query it again
-                                    appState.userStrategy?.createJournal(appState, journalRequest)
+                                    // the actual journal response, so we just query it agai
+                                    if (appState.isEditing.value) {
+                                        appState.userStrategy?.updateJournal(appState, journalRequest, appState.journalId.value)
+                                        appState.isEditing.value = false
+                                    } else {
+                                        appState.userStrategy?.createJournal(appState, journalRequest)
+                                    }
+
 
                                     val journalResponse = appState.userStrategy?.getJournalByDate(
                                         appState = appState,
@@ -539,12 +544,9 @@ fun PastJournalPage(appState: AppState) {
         onDispose {
             appState.pastDate.value = LocalDate.now()
             appState.pastJournalEntry.value = ""
-            appState.isEditing.value = false
             appState.pastJournalId.value = ""
         }
     }
-
-    val coroutineScope = rememberCoroutineScope()
 
     Column(
         Modifier
@@ -564,11 +566,12 @@ fun PastJournalPage(appState: AppState) {
             )
         }
 
+
         LazyVerticalGrid(
             columns = GridCells.Fixed(3), // need to make this dynamic in future
             contentPadding = PaddingValues(16.dp),
             modifier = Modifier.padding(top = 2.dp, start = 16.dp, end = 16.dp, bottom = 2.dp),
-            horizontalArrangement = Arrangement.Center
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             items(appState.pastSelectedMoods.value) { mood ->
                 val parts = mood.split(",")
@@ -610,153 +613,80 @@ fun PastJournalPage(appState: AppState) {
                 .size(width = 500.dp, height = 270.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            if (appState.isEditing.value) {
-                OutlinedTextField(
-                    value = appState.editableContent.value,
-                    onValueChange = { newValue -> appState.editableContent.value = newValue },
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.White, RoundedCornerShape(16.dp))
-                        .clip(RoundedCornerShape(16.dp))
-                        .verticalScroll(rememberScrollState()),
-                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = Color.Black),
-                    maxLines = 10,
-                    singleLine = false,
-                    shape = RoundedCornerShape(16.dp)
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(color = Color.White, shape = RoundedCornerShape(16.dp))
+                    .padding(10.dp)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                Text(
+                    text = appState.pastJournalEntry.value,
+                    color = Color.Black,
                 )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(color = Color.White, shape = RoundedCornerShape(16.dp))
-                        .padding(10.dp)
-                        .verticalScroll(rememberScrollState())
-                        .clickable {
-                            appState.isEditing.value = true
+            }
+
+        }
+        Column(
+            Modifier
+                .padding(top = 8.dp, start = 20.dp, end = 20.dp)
+                .size(width = 460.dp, height = 75.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Button(
+                    onClick = {
+                        // Set the editing context
+                        appState.isEditing.value = true
+
+                        val (selectedMoods, customSelectedMoods) = appState.pastSelectedMoods.value.partition { !it.contains(",") }
+                        val selectedMoodsInEmoji = selectedMoods.map { word ->
+                            wordToEmojiMap[word] ?: "?"
                         }
+
+                        appState.currSelectedMoods.value = selectedMoodsInEmoji
+                        appState.currSelectedCustomMoods.value = customSelectedMoods
+
+                        appState.journalEntry.value = appState.pastJournalEntry.value
+                        appState.selectedDate.value = appState.pastDate.value
+                        appState.journalId.value = appState.pastJournalId.value
+
+                        // Navigate to JournalPage2 for editing
+                        appState.pageState.value = PageStates.JOURNAL_STEP2
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
+                    modifier = Modifier
+                        .height(48.dp)
+                        .weight(1f),
+                    shape = RoundedCornerShape(16.dp)
                 ) {
                     Text(
-                        text = appState.pastJournalEntry.value,
-                        color = Color.Black,
+                        text = "Edit",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = Color.White,
+                        textAlign = TextAlign.Center
                     )
                 }
-            }
 
-        }
-        if(appState.isEditing.value){
-            Column(
-                modifier = Modifier
-                    .padding(start = 20.dp, end = 20.dp)
-                    .size(width = 460.dp, height = 75.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Button(
-                        onClick = {
-                            appState.isEditing.value = false
-                            appState.editableContent.value = appState.pastJournalEntry.value
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
-                        modifier = Modifier
-                            .height(56.dp)
-                            .weight(1f),
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-                        Text(
-                            text = "Cancel",
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = Color.White
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Button(
-                        onClick = {
-                            val updatedJournal = JournalRequest(
-                                year = appState.pastDate.value.year,
-                                month = appState.pastDate.value.monthValue,
-                                day = appState.pastDate.value.dayOfMonth,
-                                moods = appState.pastSelectedMoods.value,
-                                content = appState.editableContent.value,
-                                userId = appState.userId.value,
-                            )
+                Spacer(modifier = Modifier.width(16.dp))
 
-                            coroutineScope.launch{
-                                try {
-                                    appState.userStrategy?.updateJournal(
-                                        appState = appState,
-                                        journalRequest = updatedJournal,
-                                        id = appState.pastJournalId.value
-                                    )
-
-                                    // update information
-                                    val journalResponse = appState.userStrategy?.getJournalByDate(
-                                        appState = appState,
-                                        year = appState.pastDate.value.year,
-                                        month = appState.pastDate.value.monthValue,
-                                        day = appState.pastDate.value.dayOfMonth,
-                                    )
-
-                                    appState.journalEntry.value = ""
-                                    appState.selectedMoods.value = listOf("")
-                                    appState.selectedCustomMoods.value = listOf("")
-
-                                    if (journalResponse != null) {
-                                        appState.pastJournalEntry.value = journalResponse.content
-                                        appState.pastSelectedMoods.value = journalResponse.moods
-                                        appState.pastDate.value = LocalDate.of(
-                                            journalResponse.year,
-                                            journalResponse.month,
-                                            journalResponse.day
-                                        )
-                                        appState.pastJournalId.value = journalResponse.id
-                                        appState.pageState.value = PageStates.PAST_JOURNAL
-                                    } else {
-                                        appState.pageState.value = PageStates.HOME
-                                    }
-                                } catch (e: Exception) {
-                                    println(e)
-                                }
-
-                            }
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
-                        modifier = Modifier
-                            .height(56.dp)
-                            .weight(1f),
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-                        Text(
-                            text = "Save",
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = Color.White
-                        )
-                    }
-                }
-            }
-
-        }
-        else {
-            Column(
-                modifier = Modifier
-                    .padding(start = 20.dp, end = 20.dp)
-                    .size(width = 460.dp, height = 75.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
                 Button(
                     onClick = { appState.pageState.value = PageStates.HOME },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
-                    modifier = Modifier.size(400.dp, 80.dp),
+                    modifier = Modifier
+                        .height(48.dp)
+                        .weight(1f),
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Text(
                         text = "Done",
                         style = MaterialTheme.typography.headlineSmall,
-                        textAlign = TextAlign.Center,
-                        color = Color.White
+                        color = Color.White,
+                        textAlign = TextAlign.Center
                     )
                 }
             }

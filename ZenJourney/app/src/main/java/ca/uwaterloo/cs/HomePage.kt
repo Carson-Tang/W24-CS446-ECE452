@@ -71,10 +71,8 @@ fun WithInfo(today: LocalDate, todayJournalData: JournalResponse, appState: AppS
 
     val parts = firstMood.split(",")
     val (label, emoji) = if (parts.size > 1) {
-        // If it's a "label,emoji" format, split it
         Pair(parts[0].replaceFirstChar(Char::titlecase), parts[1])
     } else {
-        // Original
         Pair(firstMood, wordToEmojiMap[firstMood] ?: "?")
     }
 
@@ -104,8 +102,7 @@ fun WithInfo(today: LocalDate, todayJournalData: JournalResponse, appState: AppS
             modifier = Modifier
                 .background(color = Color.White, shape = RoundedCornerShape(16.dp))
                 .padding(5.dp)
-                .fillMaxWidth()
-                .size(height = 60.dp, width = 140.dp),
+                .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(

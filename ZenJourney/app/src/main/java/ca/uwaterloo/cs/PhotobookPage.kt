@@ -405,7 +405,7 @@ fun AllPhotosPage(appState: AppState) {
 @OptIn(ExperimentalPermissionsApi::class)
 fun PhotobookPage(appState: AppState) {
     val coroutineScope = rememberCoroutineScope()
-    val userid = appState.userId.value // Hardcoded test user for now
+    val userid = appState.userId.value
 
     LaunchedEffect(Unit) {
         val photos = appState.userStrategy!!.getAllPhotos(appState)

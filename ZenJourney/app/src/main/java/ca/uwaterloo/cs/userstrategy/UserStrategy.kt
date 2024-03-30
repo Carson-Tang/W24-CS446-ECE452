@@ -14,5 +14,7 @@ interface UserStrategy {
     suspend fun getJournalByDate(appState: AppState, day: Int, month: Int, year: Int): JournalResponse?
     suspend fun getJournalByMonth(appState: AppState, month: Int, year: Int): List<JournalResponse>
     suspend fun createJournal(appState: AppState, journalRequest: JournalRequest)
+
+    suspend fun updateJournal(appState: AppState, journalRequest: JournalRequest, id: String)
     fun clearJWT(appState: AppState)
 }

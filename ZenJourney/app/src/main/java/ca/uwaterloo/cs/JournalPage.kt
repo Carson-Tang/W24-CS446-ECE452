@@ -1,5 +1,6 @@
 package ca.uwaterloo.cs
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -21,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -46,6 +49,11 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import com.makeappssimple.abhimanyu.composeemojipicker.ComposeEmojiPickerEmojiUI
+import com.makeappssimple.abhimanyu.composeemojipicker.ComposeEmojiPickerBottomSheetUI
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.graphics.RectangleShape
 
 @Composable
 fun JournalPage1(appState: AppState) {
@@ -85,11 +93,57 @@ fun JournalPage1(appState: AppState) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun JournalPage2(appState: AppState) {
-    if (appState.showAddMoodDialog.value) {
+    LaunchedEffect (key1 = true) {
+        appState.currSelectedMoods.value = listOf()
+        appState.currSelectedCustomMoods.value = listOf()
+    }
+
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true,
+    )
+
+
+    if (appState.showAddMoodDialog.value && !appState.isModalBottomSheetVisible.value) {
         CustomMoodDialog(appState = appState)
     }
+
+    if (appState.isModalBottomSheetVisible.value) {
+        ModalBottomSheet(
+            sheetState = sheetState,
+            shape = RectangleShape,
+            tonalElevation = 0.dp,
+            onDismissRequest = {
+                appState.isModalBottomSheetVisible.value = false
+                appState.searchText.value = ""
+            },
+            dragHandle = null,
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            windowInsets = WindowInsets(0),
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxWidth() // Fill the width of the modal bottom sheet
+                    .background(Color.Transparent)
+            ){
+                ComposeEmojiPickerBottomSheetUI(
+                    onEmojiClick = { emoji ->
+                        appState.isModalBottomSheetVisible.value = false
+                        appState.newMoodEmoji.value = emoji.character
+                    },
+                    searchText = appState.searchText.value,
+                    updateSearchText = { updatedSearchText ->
+                        appState.searchText.value = updatedSearchText
+                    },
+                )
+            }
+
+        }
+    }
+
 
     Column(
         Modifier
@@ -127,17 +181,16 @@ fun JournalPage2(appState: AppState) {
                 modifier = Modifier.padding(16.dp)
             ) {
                 items(moodEmojisWithLabels) { (emoji, label) ->
-                    val isSelected = emoji in appState.selectedMoods.value
+                    val isSelected = emoji in appState.currSelectedMoods.value
                     Box(
                         modifier = Modifier
                             .padding(8.dp)
                             .background(if (isSelected) Color.LightGray else Color.Transparent, RoundedCornerShape(8.dp))
                             .clickable {
-                                // Toggle selection
                                 if (isSelected) {
-                                    appState.selectedMoods.value = appState.selectedMoods.value - emoji
+                                    appState.currSelectedMoods.value = appState.currSelectedMoods.value - emoji
                                 } else {
-                                    appState.selectedMoods.value = appState.selectedMoods.value + emoji
+                                    appState.currSelectedMoods.value = appState.currSelectedMoods.value + emoji
                                 }
                             },
                         contentAlignment = Alignment.Center
@@ -148,6 +201,26 @@ fun JournalPage2(appState: AppState) {
                             Text(text = label, fontSize = 12.sp)
                         }
                     }
+                }
+                items(appState.currSelectedCustomMoods.value) { customEmotion ->
+                    val (label, emoji) = customEmotion.split(",")
+
+                    Box(
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .background(Color.LightGray, RoundedCornerShape(8.dp))
+                            .clickable {
+                                appState.currSelectedCustomMoods.value = appState.currSelectedCustomMoods.value - customEmotion
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(text = emoji, fontSize = 40.sp)
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(text = label, fontSize = 12.sp)
+                        }
+                    }
+
                 }
                 item {
                     Box(
@@ -161,6 +234,8 @@ fun JournalPage2(appState: AppState) {
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(text = "+", fontSize = 40.sp)
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(text = "Other", fontSize = 12.sp)
                         }
                     }
                 }
@@ -178,7 +253,13 @@ fun JournalPage2(appState: AppState) {
                         .background(color = Color(0xFF7BB6A1), shape = RoundedCornerShape(16.dp))
                 ) {
                     Button(
-                        onClick = { appState.pageState.value = PageStates.JOURNAL_STEP3 },
+                        onClick = {
+                            appState.selectedMoods.value = appState.currSelectedMoods.value
+                            appState.selectedCustomMoods.value = appState.currSelectedCustomMoods.value
+                            appState.currSelectedMoods.value = listOf()
+                            appState.currSelectedCustomMoods.value = listOf()
+                            appState.pageState.value = PageStates.JOURNAL_STEP3
+                                  },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
                         modifier = Modifier
                             .fillMaxSize()
@@ -195,47 +276,51 @@ fun JournalPage2(appState: AppState) {
         }
     }
 }
+
 @Composable
 fun CustomMoodDialog(appState: AppState) {
-    var isModalBottomSheetVisible by remember {
-        mutableStateOf(false)
-    }
-    var selectedEmoji by remember {
-        mutableStateOf("😃")
-    }
-    var searchText by remember {
-        mutableStateOf("")
-    }
-
     if (appState.showAddMoodDialog.value) {
         AlertDialog(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
             onDismissRequest = { appState.showAddMoodDialog.value = false },
-            title = { Text("Add Custom Mood") },
+            title = { Text("Add Custom Mood", color = Color(0xFF4F4F4F)) },
             text = {
-                Column {
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     TextField(
                         colors = TextFieldDefaults.colors(),
                         value = appState.newMoodLabel.value,
-                        onValueChange = { appState.newMoodLabel.value = it },
-                        label = { Text("Mood Text") }
+                        onValueChange = {
+                            appState.newMoodLabel.value = it
+                            appState.isNewMoodLabelValid.value = appState.newMoodLabel.value.isNotEmpty()
+                        },
+                        label = { Text("Mood Text", color = Color(0xFF4F4F4F)) },
+                        isError = !appState.isNewMoodLabelValid.value
                     )
-                    TextField(
-                        colors = TextFieldDefaults.colors(),
-                        value = appState.newMoodEmoji.value,
-                        onValueChange = { appState.newMoodEmoji.value = it },
-                        label = { Text("Mood Emoji") }
-                    )
+                    Box(
+                        modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        ComposeEmojiPickerEmojiUI(
+                            emojiCharacter = appState.newMoodEmoji.value,
+                            onClick = {
+                                appState.isModalBottomSheetVisible.value = true
+                            },
+                            fontSize = 48.sp,
+                        )
+                    }
                 }
             },
             confirmButton = {
                 Button(onClick = {
-                        appState.selectedMoods.value = appState.selectedMoods.value + (appState.newMoodLabel.value + "," + appState.newMoodEmoji.value)
+                        appState.currSelectedCustomMoods.value = appState.currSelectedCustomMoods.value + (appState.newMoodLabel.value + "," + appState.newMoodEmoji.value)
                         appState.newMoodLabel.value = ""
-                        appState.newMoodEmoji.value = ""
+                        appState.newMoodEmoji.value = "😃"
                         appState.showAddMoodDialog.value = false
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1))
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
+                    enabled = appState.isNewMoodLabelValid.value
                 ) {
                     Text(color = Color(0xFF4F4F4F), text = "Save")
                 }
@@ -254,6 +339,12 @@ fun CustomMoodDialog(appState: AppState) {
 
 @Composable
 fun JournalPage3(appState: AppState) {
+    DisposableEffect(Unit) {
+        onDispose {
+            appState.journalEntry.value = ""
+        }
+    }
+
     val charLimit = 2000
     val coroutineScope = rememberCoroutineScope()
 
@@ -280,7 +371,7 @@ fun JournalPage3(appState: AppState) {
                 .padding(top = 24.dp)
         ) {
             Text(
-                text = "What is something you accomplished today?",
+                text = "What happened today?",
                 style = MaterialTheme.typography.headlineMedium,
                 textAlign = TextAlign.Center,
                 color = Color(0xFF3D3D3D)
@@ -369,12 +460,13 @@ fun JournalPage3(appState: AppState) {
                             val selectedMoodsInWords = appState.selectedMoods.value.map { emoji ->
                                 emojiToWordMap[emoji] ?: "Unknown"
                             }
+                            val selectedMoodsAndCustomMoods = selectedMoodsInWords + appState.selectedCustomMoods.value
                             coroutineScope.launch {
                                 val journalRequest = JournalRequest(
                                     year = appState.selectedDate.value.year,
                                     month = appState.selectedDate.value.monthValue,
                                     day = appState.selectedDate.value.dayOfMonth,
-                                    moods = selectedMoodsInWords,
+                                    moods = selectedMoodsAndCustomMoods,
                                     content = appState.journalEntry.value,
                                     userId = appState.userId.value // Hardcoded test user for now
                                 )
@@ -392,6 +484,7 @@ fun JournalPage3(appState: AppState) {
 
                                     appState.journalEntry.value = ""
                                     appState.selectedMoods.value = listOf("")
+                                    appState.selectedCustomMoods.value = listOf("")
 
                                     if (journalResponse != null) {
                                         appState.pastJournalEntry.value = journalResponse.content
@@ -431,10 +524,11 @@ fun JournalPage3(appState: AppState) {
 fun PastJournalPage(appState: AppState)
 {
     DisposableEffect(Unit) {
+        appState.editableContent.value = appState.pastJournalEntry.value
         onDispose {
             appState.pastDate.value = LocalDate.now()
-            appState.pastSelectedMoods.value = listOf<String>()
             appState.pastJournalEntry.value = ""
+            appState.isEditing.value = false
         }
     }
 
@@ -462,7 +556,14 @@ fun PastJournalPage(appState: AppState)
             modifier = Modifier.padding(top = 2.dp, start = 16.dp, end = 16.dp, bottom = 2.dp)
         ) {
             items(appState.pastSelectedMoods.value) { mood ->
-                val emoji = wordToEmojiMap[mood] ?: "❓"
+                val parts = mood.split(",")
+                val (label, emoji) = if (parts.size > 1) {
+                    // If it's a "label,emoji" format, split it
+                    Pair(parts[0], parts[1])
+                } else {
+                    // Original
+                    Pair(mood, wordToEmojiMap[mood] ?: "?")
+                }
 
                 Box(
                     modifier = Modifier
@@ -473,7 +574,7 @@ fun PastJournalPage(appState: AppState)
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(text = emoji, fontSize = 40.sp)
                         Spacer(modifier = Modifier.height(4.dp))
-                        Text(text = mood, fontSize = 12.sp)
+                        Text(text = label, fontSize = 12.sp)
                     }
                 }
             }
@@ -484,7 +585,7 @@ fun PastJournalPage(appState: AppState)
                 .padding(top = 12.dp)
         ) {
             Text(
-                text = "What is something you accomplished today?",
+                text = "What happened today?",
                 style = MaterialTheme.typography.headlineMedium,
                 textAlign = TextAlign.Center,
                 color = Color(0xFF3D3D3D)
@@ -497,16 +598,44 @@ fun PastJournalPage(appState: AppState)
                 .size(width = 500.dp, height = 200.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(color = Color.White, shape = RoundedCornerShape(16.dp))
-            ) {
-                Text(
-                    text = appState.pastJournalEntry.value,
-                    color = Color.Black,
+            if (appState.isEditing.value) {
+                OutlinedTextField(
+                    value = appState.editableContent.value,
+                    onValueChange = { newValue ->
+                        appState.editableContent.value = newValue
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+//                        .weight(1f),
+//                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = Color.Black),
+//                    maxLines = 10,
+//                    singleLine = false,
+//                    shape = RoundedCornerShape(16.dp)
                 )
+                Button(
+                    onClick = {
+                        // Update the journal entry in your database here
+                        appState.pastJournalEntry.value = appState.editableContent.value
+                        appState.isEditing.value = false
+                        // Add your database update logic here
+                    },
+                    modifier = Modifier.padding(top = 8.dp)
+                ) {
+                    Text("Save")
+                }
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(color = Color.White, shape = RoundedCornerShape(16.dp))
+                ) {
+                    Text(
+                        text = appState.pastJournalEntry.value,
+                        color = Color.Black,
+                    )
+                }
             }
+
         }
 
         Column(

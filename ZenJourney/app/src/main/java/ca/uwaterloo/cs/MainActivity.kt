@@ -77,11 +77,23 @@ class AppState(val context: Context) {
     val pastJournalEntry = mutableStateOf("")
     val pastSelectedMoods = mutableStateOf(listOf<String>())
     val pastDate = mutableStateOf(LocalDate.now())
+
     val showAddMoodDialog = mutableStateOf(false)
+    val searchText = mutableStateOf("")
+
+    val selectedCustomMoods = mutableStateOf(listOf<String>())
+
+    val currSelectedMoods = mutableStateOf(listOf<String>())
+    val currSelectedCustomMoods = mutableStateOf(listOf<String>())
+
     val newMoodLabel = mutableStateOf("")
-    val newMoodEmoji = mutableStateOf("")
+    val newMoodEmoji = mutableStateOf("😃")
+    val isNewMoodLabelValid = mutableStateOf(false)
+    val isModalBottomSheetVisible = mutableStateOf(false)
     var currMonthJournals = mutableStateOf(listOf<LocalDate>())
 
+    val isEditing = mutableStateOf(false)
+    val editableContent = mutableStateOf("")
     // meditation
     val selectedTune = mutableStateOf(R.raw.once_in_paris)
     val playingTuneId = mutableStateOf(selectedTune.value)

@@ -43,19 +43,41 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 fun generateFeelingStatement(moods: List<String>): String {
-    val moodMap = moodEmojisWithLabels.map { it.first to it.second.lowercase() }.toMap()
-    val feelings = moods.mapNotNull { moodMap[it] }
+    val feelings = moods.mapNotNull { mood ->
+        val parts = mood.split(",")
+        if (parts.size > 1) {
+            parts[0].lowercase()
+        } else {
+            mood.lowercase()
+        }
+    }
 
     val feelingString = when {
         feelings.isEmpty() -> "No specific feelings"
         feelings.size == 1 -> "I'm feeling ${feelings.first()}"
-        else -> "I'm feeling ${feelings.first()} and ..."
+        feelings.size == 2 -> "I'm feeling ${feelings.joinToString(" and ")}"
+        else -> {
+            val allButLast = feelings.dropLast(1).joinToString(", ")
+            "I'm feeling $allButLast, and ${feelings.last()}"
+        }
     }
     return feelingString
 }
 
+
 @Composable
 fun WithInfo(today: LocalDate, todayJournalData: JournalResponse, appState: AppState) {
+    val firstMood = todayJournalData.moods.first()
+
+    val parts = firstMood.split(",")
+    val (label, emoji) = if (parts.size > 1) {
+        // If it's a "label,emoji" format, split it
+        Pair(parts[0].replaceFirstChar(Char::titlecase), parts[1])
+    } else {
+        // Original
+        Pair(firstMood, wordToEmojiMap[firstMood] ?: "?")
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth(),
@@ -89,7 +111,7 @@ fun WithInfo(today: LocalDate, todayJournalData: JournalResponse, appState: AppS
             Text(
                 // assumes len(todayJournalData.moods) >= 1, we only show
                 // WithInfo if moods is not empty
-                text = todayJournalData.moods[0],
+                text = emoji,
                 style = TextStyle(
                     fontSize = 40.sp
                 )

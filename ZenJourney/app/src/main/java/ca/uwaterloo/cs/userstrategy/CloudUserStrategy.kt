@@ -170,7 +170,19 @@ class CloudUserStrategy : UserStrategy {
         }
     }
 
-
+    override suspend fun updateJournal(appState: AppState, journalRequest: JournalRequest, id: String) {
+        return withContext(Dispatchers.IO){
+            try {
+                JournalApiService.updateJournal(
+                    id = id,
+                    journalRequest = journalRequest,
+                    jwt = appState.dataStore.getJwt()
+                )
+            } catch (e: Exception) {
+                println(e.message)
+            }
+        }
+    }
     override fun clearJWT(appState: AppState) {
         runBlocking {
             appState.dataStore.setJwt("")

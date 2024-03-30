@@ -161,6 +161,28 @@ class LocalUserStrategy : UserStrategy {
             }
         }
     }
+
+    override suspend fun updateJournal(appState: AppState, journalRequest: JournalRequest, id: String) {
+        return withContext(Dispatchers.IO){
+            val database = JournalDB.getDB(appState.context)
+            val journalDao = database.journalDao()
+
+            try {
+                val updatedJournal: Journal = Journal(
+                    id = id.toInt(),
+                    year = journalRequest.year,
+                    month = journalRequest.month,
+                    day = journalRequest.day,
+                    moods = journalRequest.moods,
+                    content = journalRequest.content
+                )
+
+                journalDao.update(updatedJournal)
+            } catch (e: Exception) {
+                println(e.message)
+            }
+        }
+    }
     override fun deleteAccount(appState: AppState): Pair<Boolean, Boolean> { return Pair(false, false) }
 
     override fun clearJWT(appState: AppState) {}

@@ -20,7 +20,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -51,7 +50,6 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.text.input.KeyboardCapitalization
 
 @Composable
 fun JournalPage1(appState: AppState) {
@@ -479,8 +477,6 @@ fun JournalPage3(appState: AppState) {
                                     userId = appState.userId.value // Hardcoded test user for now
                                 )
                                 try {
-                                    // we can change this flow in the future, but this current creation doesnt return
-                                    // the actual journal response, so we just query it agai
                                     if (appState.isEditing.value) {
                                         appState.userStrategy?.updateJournal(appState, journalRequest, appState.journalId.value)
                                         appState.isEditing.value = false

@@ -17,7 +17,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -118,13 +120,18 @@ fun JournalPage2(appState: AppState) {
                     Box(
                         modifier = Modifier
                             .padding(8.dp)
-                            .background(if (isSelected) Color.LightGray else Color.Transparent, RoundedCornerShape(8.dp))
+                            .background(
+                                if (isSelected) Color.LightGray else Color.Transparent,
+                                RoundedCornerShape(8.dp)
+                            )
                             .clickable {
                                 // Toggle selection
                                 if (isSelected) {
-                                    appState.selectedMoods.value = appState.selectedMoods.value - emoji
+                                    appState.selectedMoods.value =
+                                        appState.selectedMoods.value - emoji
                                 } else {
-                                    appState.selectedMoods.value = appState.selectedMoods.value + emoji
+                                    appState.selectedMoods.value =
+                                        appState.selectedMoods.value + emoji
                                 }
                             },
                         contentAlignment = Alignment.Center
@@ -198,40 +205,36 @@ fun JournalPage3(appState: AppState) {
                 .padding(top = 24.dp)
         ) {
             Text(
-                text = "What is something you accomplished today?",
+                text = "Write about your day",
                 style = MaterialTheme.typography.headlineMedium,
                 textAlign = TextAlign.Center,
                 color = Color(0xFF3D3D3D)
             )
         }
 
-        Box(
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .padding(all = 20.dp)
                 .size(width = 500.dp, height = 400.dp)
                 .clip(RoundedCornerShape(16.dp))
                 .background(Color.White)
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                OutlinedTextField(
-                    value = appState.journalEntry.value,
-                    onValueChange = { newValue ->
-                        if (newValue.length <= charLimit) {
-                            appState.journalEntry.value = newValue
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = Color.Black),
-                    placeholder = { Text("Type something...") },
-                    maxLines = 10,
-                    singleLine = false,
-                    shape = RoundedCornerShape(16.dp)
-                )
-            }
+            OutlinedTextField(
+                value = appState.journalEntry.value,
+                onValueChange = { newValue ->
+                    if (newValue.length <= charLimit) {
+                        appState.journalEntry.value = newValue
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f),
+                textStyle = MaterialTheme.typography.bodyMedium.copy(color = Color.Black),
+                placeholder = { Text("Type something...") },
+                singleLine = false,
+                shape = RoundedCornerShape(16.dp)
+            )
         }
 
         Row(
@@ -240,7 +243,10 @@ fun JournalPage3(appState: AppState) {
                 .padding(end = 8.dp),
             horizontalArrangement = Arrangement.End
         ) {
-            Text("${appState.journalEntry.value.length} / $charLimit", style = MaterialTheme.typography.bodySmall)
+            Text(
+                "${appState.journalEntry.value.length} / $charLimit",
+                style = MaterialTheme.typography.bodySmall
+            )
         }
 
         Column(
@@ -252,7 +258,8 @@ fun JournalPage3(appState: AppState) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween)
+                horizontalArrangement = Arrangement.SpaceBetween
+            )
             {
                 Box(
                     modifier = Modifier
@@ -314,7 +321,11 @@ fun JournalPage3(appState: AppState) {
                                     if (journalResponse != null) {
                                         appState.pastJournalEntry.value = journalResponse.content
                                         appState.pastSelectedMoods.value = journalResponse.moods
-                                        appState.pastDate.value = LocalDate.of(journalResponse.year, journalResponse.month, journalResponse.day)
+                                        appState.pastDate.value = LocalDate.of(
+                                            journalResponse.year,
+                                            journalResponse.month,
+                                            journalResponse.day
+                                        )
                                         appState.pageState.value = PageStates.PAST_JOURNAL
                                     } else {
                                         appState.pageState.value = PageStates.HOME
@@ -346,8 +357,7 @@ fun JournalPage3(appState: AppState) {
 }
 
 @Composable
-fun PastJournalPage(appState: AppState)
-{
+fun PastJournalPage(appState: AppState) {
     DisposableEffect(Unit) {
         onDispose {
             appState.pastDate.value = LocalDate.now()
@@ -398,11 +408,10 @@ fun PastJournalPage(appState: AppState)
         }
 
         Column(
-            Modifier
-                .padding(top = 12.dp)
+            Modifier.padding(top = 8.dp)
         ) {
             Text(
-                text = "What is something you accomplished today?",
+                text = "Write about your day",
                 style = MaterialTheme.typography.headlineMedium,
                 textAlign = TextAlign.Center,
                 color = Color(0xFF3D3D3D)
@@ -411,14 +420,16 @@ fun PastJournalPage(appState: AppState)
 
         Column(
             modifier = Modifier
-                .padding(top = 4.dp, start = 20.dp, end = 20.dp)
-                .size(width = 500.dp, height = 200.dp),
+                .padding(20.dp)
+                .size(width = 500.dp, height = 270.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(color = Color.White, shape = RoundedCornerShape(16.dp))
+                    .padding(10.dp)
+                    .verticalScroll(rememberScrollState())
             ) {
                 Text(
                     text = appState.pastJournalEntry.value,
@@ -429,28 +440,22 @@ fun PastJournalPage(appState: AppState)
 
         Column(
             modifier = Modifier
-                .padding(top = 8.dp, start = 20.dp, end = 20.dp)
+                .padding(start = 20.dp, end = 20.dp)
                 .size(width = 460.dp, height = 75.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box(
-                modifier = Modifier
-                    .size(400.dp, 80.dp)
-                    .background(color = Color(0xFF7BB6A1), shape = RoundedCornerShape(16.dp))
+            Button(
+                onClick = { appState.pageState.value = PageStates.HOME },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
+                modifier = Modifier.size(400.dp, 80.dp),
+                shape = RoundedCornerShape(16.dp)
             ) {
-                Button(
-                    onClick = { appState.pageState.value = PageStates.HOME },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
-                    modifier = Modifier
-                        .fillMaxSize()
-                ) {
-                    Text(
-                        text = "Done",
-                        style = MaterialTheme.typography.headlineSmall,
-                        textAlign = TextAlign.Center,
-                        color = Color.White
-                    )
-                }
+                Text(
+                    text = "Done",
+                    style = MaterialTheme.typography.headlineSmall,
+                    textAlign = TextAlign.Center,
+                    color = Color.White
+                )
             }
         }
     }

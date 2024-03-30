@@ -170,6 +170,7 @@ fun Day(
                             appState.pastJournalEntry.value = journalRes.content
                             appState.pastSelectedMoods.value = journalRes.moods
                             appState.pastDate.value = LocalDate.of(journalRes.year, journalRes.month, journalRes.day)
+                            appState.pastJournalId.value = journalRes.id
                             appState.pageState.value = PageStates.PAST_JOURNAL
                         }
                     }

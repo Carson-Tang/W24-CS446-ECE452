@@ -77,6 +77,7 @@ class AppState(val context: Context) {
     val pastJournalEntry = mutableStateOf("")
     val pastSelectedMoods = mutableStateOf(listOf<String>())
     val pastDate = mutableStateOf(LocalDate.now())
+    val pastJournalId = mutableStateOf("")
 
     val showAddMoodDialog = mutableStateOf(false)
     val searchText = mutableStateOf("")

@@ -180,7 +180,8 @@ fun JournalPage2(appState: AppState) {
             LazyVerticalGrid(
                 columns = GridCells.Fixed(3),
                 contentPadding = PaddingValues(16.dp),
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier.padding(16.dp),
+                horizontalArrangement = Arrangement.Center
             ) {
                 items(moodEmojisWithLabels) { (emoji, label) ->
                     val isSelected = emoji in appState.currSelectedMoods.value
@@ -500,6 +501,7 @@ fun JournalPage3(appState: AppState) {
                                             journalResponse.month,
                                             journalResponse.day
                                         )
+                                        appState.pastJournalId.value = journalResponse.id
                                         appState.pageState.value = PageStates.PAST_JOURNAL
                                     } else {
                                         appState.pageState.value = PageStates.HOME
@@ -538,8 +540,11 @@ fun PastJournalPage(appState: AppState) {
             appState.pastDate.value = LocalDate.now()
             appState.pastJournalEntry.value = ""
             appState.isEditing.value = false
+            appState.pastJournalId.value = ""
         }
     }
+
+    val coroutineScope = rememberCoroutineScope()
 
     Column(
         Modifier
@@ -562,15 +567,14 @@ fun PastJournalPage(appState: AppState) {
         LazyVerticalGrid(
             columns = GridCells.Fixed(3), // need to make this dynamic in future
             contentPadding = PaddingValues(16.dp),
-            modifier = Modifier.padding(top = 2.dp, start = 16.dp, end = 16.dp, bottom = 2.dp)
+            modifier = Modifier.padding(top = 2.dp, start = 16.dp, end = 16.dp, bottom = 2.dp),
+            horizontalArrangement = Arrangement.Center
         ) {
             items(appState.pastSelectedMoods.value) { mood ->
                 val parts = mood.split(",")
                 val (label, emoji) = if (parts.size > 1) {
-                    // If it's a "label,emoji" format, split it
                     Pair(parts[0], parts[1])
                 } else {
-                    // Original
                     Pair(mood, wordToEmojiMap[mood] ?: "?")
                 }
 
@@ -604,38 +608,32 @@ fun PastJournalPage(appState: AppState) {
             modifier = Modifier
                 .padding(20.dp)
                 .size(width = 500.dp, height = 270.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             if (appState.isEditing.value) {
                 OutlinedTextField(
                     value = appState.editableContent.value,
-                    onValueChange = { newValue ->
-                        appState.editableContent.value = newValue
-                    },
+                    onValueChange = { newValue -> appState.editableContent.value = newValue },
                     modifier = Modifier
-                        .fillMaxWidth()
-//                        .weight(1f),
-//                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = Color.Black),
-//                    maxLines = 10,
-//                    singleLine = false,
-//                    shape = RoundedCornerShape(16.dp)
+                        .fillMaxSize()
+                        .background(Color.White, RoundedCornerShape(16.dp))
+                        .clip(RoundedCornerShape(16.dp))
+                        .verticalScroll(rememberScrollState()),
+                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = Color.Black),
+                    maxLines = 10,
+                    singleLine = false,
+                    shape = RoundedCornerShape(16.dp)
                 )
-                Button(
-                    onClick = {
-                        // Update the journal entry in your database here
-                        appState.pastJournalEntry.value = appState.editableContent.value
-                        appState.isEditing.value = false
-                        // Add your database update logic here
-                    },
-                    modifier = Modifier.padding(top = 8.dp)
-                ) {
-                    Text("Save")
-                }
             } else {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(color = Color.White, shape = RoundedCornerShape(16.dp))
+                        .padding(10.dp)
+                        .verticalScroll(rememberScrollState())
+                        .clickable {
+                            appState.isEditing.value = true
+                        }
                 ) {
                     Text(
                         text = appState.pastJournalEntry.value,
@@ -645,23 +643,114 @@ fun PastJournalPage(appState: AppState) {
             }
 
         }
-
-        Column(
-            modifier = Modifier
-                .padding(top = 8.dp, start = 20.dp, end = 20.dp)
-                .size(width = 460.dp, height = 75.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Box(
+        if(appState.isEditing.value){
+            Column(
                 modifier = Modifier
-                    .size(400.dp, 80.dp)
-                    .background(color = Color(0xFF7BB6A1), shape = RoundedCornerShape(16.dp))
+                    .padding(start = 20.dp, end = 20.dp)
+                    .size(width = 460.dp, height = 75.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Button(
+                        onClick = {
+                            appState.isEditing.value = false
+                            appState.editableContent.value = appState.pastJournalEntry.value
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
+                        modifier = Modifier
+                            .height(56.dp)
+                            .weight(1f),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Text(
+                            text = "Cancel",
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = Color.White
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Button(
+                        onClick = {
+                            val updatedJournal = JournalRequest(
+                                year = appState.pastDate.value.year,
+                                month = appState.pastDate.value.monthValue,
+                                day = appState.pastDate.value.dayOfMonth,
+                                moods = appState.pastSelectedMoods.value,
+                                content = appState.editableContent.value,
+                                userId = appState.userId.value,
+                            )
+
+                            coroutineScope.launch{
+                                try {
+                                    appState.userStrategy?.updateJournal(
+                                        appState = appState,
+                                        journalRequest = updatedJournal,
+                                        id = appState.pastJournalId.value
+                                    )
+
+                                    // update information
+                                    val journalResponse = appState.userStrategy?.getJournalByDate(
+                                        appState = appState,
+                                        year = appState.pastDate.value.year,
+                                        month = appState.pastDate.value.monthValue,
+                                        day = appState.pastDate.value.dayOfMonth,
+                                    )
+
+                                    appState.journalEntry.value = ""
+                                    appState.selectedMoods.value = listOf("")
+                                    appState.selectedCustomMoods.value = listOf("")
+
+                                    if (journalResponse != null) {
+                                        appState.pastJournalEntry.value = journalResponse.content
+                                        appState.pastSelectedMoods.value = journalResponse.moods
+                                        appState.pastDate.value = LocalDate.of(
+                                            journalResponse.year,
+                                            journalResponse.month,
+                                            journalResponse.day
+                                        )
+                                        appState.pastJournalId.value = journalResponse.id
+                                        appState.pageState.value = PageStates.PAST_JOURNAL
+                                    } else {
+                                        appState.pageState.value = PageStates.HOME
+                                    }
+                                } catch (e: Exception) {
+                                    println(e)
+                                }
+
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
+                        modifier = Modifier
+                            .height(56.dp)
+                            .weight(1f),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Text(
+                            text = "Save",
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = Color.White
+                        )
+                    }
+                }
+            }
+
+        }
+        else {
+            Column(
+                modifier = Modifier
+                    .padding(start = 20.dp, end = 20.dp)
+                    .size(width = 460.dp, height = 75.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Button(
                     onClick = { appState.pageState.value = PageStates.HOME },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
-                    modifier = Modifier
-                        .fillMaxSize()
+                    modifier = Modifier.size(400.dp, 80.dp),
+                    shape = RoundedCornerShape(16.dp)
                 ) {
                     Text(
                         text = "Done",
@@ -672,6 +761,7 @@ fun PastJournalPage(appState: AppState) {
                 }
             }
         }
+
     }
 }
 

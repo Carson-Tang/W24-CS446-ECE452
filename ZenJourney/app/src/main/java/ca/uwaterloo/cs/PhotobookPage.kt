@@ -30,6 +30,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -39,9 +40,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ca.uwaterloo.cs.api.PhotoApiService
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -98,6 +99,7 @@ fun capitalize(s: String): String {
 }
 
 // bitmap -> base64 string
+@OptIn(ExperimentalEncodingApi::class)
 fun encodeImage(image: Bitmap): String {
     val stream = ByteArrayOutputStream()
     image.compress(Bitmap.CompressFormat.PNG, 100, stream)
@@ -124,34 +126,23 @@ fun PhotobookPage(appState: AppState) {
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
     LaunchedEffect(Unit) {
-        try {
-            val response = PhotoApiService.getAllUserPhotos(userid, appState.dataStore.getJwt())
-            if (response.status == HttpStatusCode.OK) {
-                val listResponse: ListResponse<PhotoResponse> = response.body()
-                val photoList = listResponse.list.map { photoRes ->
-                    val date = LocalDate.of(photoRes.year.toInt(), photoRes.month.toInt(), photoRes.day.toInt())
-                    val datestr = "${date.dayOfMonth} ${
-                        capitalize(date.dayOfWeek.toString().take(3))
-                    }"
-                    PhotobookPhoto(
-                        datestr, decodeImage(photoRes.photoBase64)
-                    )
-                }
-                appState.photos.clear()
-                appState.photos.addAll(photoList.reversed())
-            } else {
-                val statusResponse: StatusResponse = response.body()
-                println("getting photolist failed")
-                println(statusResponse.body)
-                // TODO:handle failed image creation
-                appState.pageState.value = PageStates.HOME
-            }
-        } catch (e: Exception) {
-            // TODO: handle error
-            println("some error occured while fetching photolist")
-            println(e)
+        val photos = appState.userStrategy!!.getAllPhotos(appState)
+        val photoList = photos?.map { photoRes ->
+            val date =
+                LocalDate.of(photoRes.year, photoRes.month, photoRes.day)
+            val datestr = "${date.dayOfMonth} ${
+                capitalize(date.dayOfWeek.toString().take(3))
+            }"
+            PhotobookPhoto(
+                datestr, decodeImage(photoRes.photoBase64)
+            )
+        }
+        appState.photos.clear()
+        if (photoList != null) {
+            appState.photos.addAll(photoList.reversed())
         }
     }
+    val showPhotoErrorDialogue = remember { mutableStateOf(false) }
 
     fun addImageToPhotoState(image: Bitmap) {
         coroutineScope.launch {
@@ -159,29 +150,22 @@ fun PhotobookPage(appState: AppState) {
                 PhotoRequest(
                     userid,
                     encodeImage(image),
-                    currentDate.year.toString(),
-                    currentDate.month.toString(),
-                    currentDate.dayOfMonth.toString()
+                    currentDate.year,
+                    currentDate.monthValue,
+                    currentDate.dayOfMonth
                 )
-            try {
-                val response = PhotoApiService.createPhoto(photoRequest, appState.dataStore.getJwt())
-                if (response.status != HttpStatusCode.Created) {
-                    val statusResponse: StatusResponse = response.body()
-                    // TODO: handle failed image creation
-                    println(statusResponse.body)
-                    appState.pageState.value = PageStates.HOME
-                }
-            } catch (e: Exception) {
-                // TODO: handle error
-                println(e.message)
+            showPhotoErrorDialogue.value =
+                !(appState.userStrategy!!.createPhoto(appState, photoRequest))
+
+            if (!showPhotoErrorDialogue.value) {
+                appState.photos.add(
+                    0, PhotobookPhoto(
+                        "${currentDate.dayOfMonth} ${
+                            capitalize(currentDate.dayOfWeek.toString().take(3))
+                        }", image
+                    )
+                )
             }
-            appState.photos.add(
-                0, PhotobookPhoto(
-                    "${currentDate.dayOfMonth} ${
-                        capitalize(currentDate.dayOfWeek.toString().take(3))
-                    }", image
-                )
-            )
         }
     }
 
@@ -274,6 +258,30 @@ fun PhotobookPage(appState: AppState) {
                 Text(
                     color = Color(0xFF4F4F4F),
                     text = "Camera permission is required for this feature.",
+                    fontSize = 16.sp
+                )
+            })
+    }
+
+    if (showPhotoErrorDialogue.value) {
+        AlertDialog(
+            onDismissRequest = {
+                showPhotoErrorDialogue.value = false
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showPhotoErrorDialogue.value = false
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7BB6A1)),
+                ) {
+                    Text("OK")
+                }
+            },
+            text = {
+                Text(
+                    color = Color(0xFF4F4F4F),
+                    text = "Failed to add photo to the photobook.",
                     fontSize = 16.sp
                 )
             })

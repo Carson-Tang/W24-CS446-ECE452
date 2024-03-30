@@ -37,6 +37,7 @@ class PhotoRepositoryImpl(
         }
         return 0
     }
+
     override suspend fun deleteByUserId(userid: ObjectId): Long {
         try {
             val result = mongoDatabase.getCollection<Photo>(PHOTO_COLLECTION)
@@ -47,13 +48,27 @@ class PhotoRepositoryImpl(
         }
         return -1
     }
-    override suspend fun findByUserId(userid: ObjectId): List<Photo> =
-        mongoDatabase.getCollection<Photo>(PHOTO_COLLECTION)
-            .find(Filters.eq("userid", userid))
-            .sort(Document(mapOf("year" to 1, "month" to 1, "day" to 1)))
-            .toList()
-    override suspend fun findById(id: ObjectId): Photo? =
-        mongoDatabase.getCollection<Photo>(PHOTO_COLLECTION)
-            .find(Filters.eq("_id", id))
-            .firstOrNull()
+
+    override suspend fun findByUserId(userid: ObjectId): List<Photo> {
+        return try {
+            mongoDatabase.getCollection<Photo>(PHOTO_COLLECTION)
+                .find(Filters.eq("userid", userid))
+                .sort(Document(mapOf("year" to 1, "month" to 1, "day" to 1)))
+                .toList()
+        } catch (e: MongoException) {
+            System.err.println("Unable to findByUserId due to an error: $e")
+            emptyList()
+        }
+    }
+
+    override suspend fun findById(id: ObjectId): Photo? {
+        return try {
+            mongoDatabase.getCollection<Photo>(PHOTO_COLLECTION)
+                .find(Filters.eq("_id", id))
+                .firstOrNull()
+        } catch (e: MongoException) {
+            System.err.println("Unable to findByUserId due to an error: $e")
+            null
+        }
+    }
 }

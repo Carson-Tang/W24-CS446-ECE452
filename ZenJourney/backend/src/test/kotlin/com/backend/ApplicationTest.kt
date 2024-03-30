@@ -36,7 +36,7 @@ class ApplicationTest {
         }
         val gson = Gson()
         val userid = "65e3652d9501eb63529692fa"
-        val req = PhotoRequest(userid, "arbitrarytestvalue", "2024", "3", "1")
+        val req = PhotoRequest(userid, "arbitrarytestvalue", 2024, 3, 1)
         client.post("/photo") {
             setBody(gson.toJson(req))
             contentType(ContentType.Application.Json)
@@ -68,7 +68,7 @@ class ApplicationTest {
         }
         val gson = Gson()
         val userid = "65e3652d9501eb63529692fa"
-        val req = PhotoRequest(userid, "arbitrarytestvalue", "2024", "3", "1")
+        val req = PhotoRequest(userid, "arbitrarytestvalue", 2024, 3, 1)
         client.post("/photo") {
             setBody(gson.toJson(req))
             contentType(ContentType.Application.Json)

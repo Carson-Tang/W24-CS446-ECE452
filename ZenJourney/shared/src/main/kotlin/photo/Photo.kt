@@ -16,8 +16,8 @@ data class Photo(
         id = id.toString(),
         userid = userid.toString(),
         photoBase64 = photoBase64,
-        year = year.toString(),
-        month = month.toString(),
-        day = day.toString()
+        year = year,
+        month = month,
+        day = day
     )
 }

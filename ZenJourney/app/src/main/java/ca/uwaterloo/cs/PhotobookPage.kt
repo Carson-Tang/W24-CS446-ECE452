@@ -12,13 +12,17 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -61,6 +65,7 @@ import java.time.format.TextStyle
 import java.util.Locale
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
+import kotlin.math.abs
 import kotlin.math.ceil
 
 
@@ -86,6 +91,7 @@ fun ScrollablePhotoList(photoList: List<PhotobookPhoto>) {
 }
 
 @Composable
+@OptIn(ExperimentalEncodingApi::class)
 fun ScrollablePhotoListWithMonth(appState: AppState, photos: List<PhotobookPhoto>) {
     val monthYearPairs = photos.groupBy { it.year to it.month }.keys
     val photosByMonth = photos.groupBy { it.year to it.month }
@@ -96,46 +102,52 @@ fun ScrollablePhotoListWithMonth(appState: AppState, photos: List<PhotobookPhoto
         Box(
             modifier = Modifier
                 .padding(top=monthDelta.dp)
+                .fillMaxSize()
         ) {
-            TextButton(
-                onClick = {
-                    appState.selectedMonth.value = month
-                    appState.pageState.value = PageStates.PHOTOBOOK_MONTH
-                }
-            ) {
-                Text(
-                    text = "${getMonthName(month)} $year",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = Color(0xFF5B907D),
-                    )
-            }
-            LazyVerticalGrid(
-                columns = GridCells.Adaptive(100.dp),
-                contentPadding = PaddingValues(
-                    top = 48.dp,
-                    end = 20.dp,
-                    bottom = 12.dp
-                ),
-                content = {
-                    photosByMonth[Pair(year, month)]?.let {
-                        items(it.size) { idx ->
-                            photosByMonth[Pair(year, month)]?.get(idx)?.image?.let { it1 ->
-                                Image(
-                                    bitmap = it1.asImageBitmap(),
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .size(75.dp)
-                                        .padding(start = 20.dp)
-                                        .background(color = Color.Red)
-                                )
-                            }
-                        }
+            LazyColumn() {
+                item {
+                    TextButton(onClick = {
+                        appState.selectedPhotoMonth.value = month
+                        appState.selectedPhotoYear.value = year
+                        appState.pageState.value = PageStates.PHOTOBOOK_MONTH
+                    }) {
+                        Text(
+                            text = "${getMonthName(month)} $year",
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = Color(0xFF5B907D),
+                            modifier = Modifier
+                                .padding(all = 10.dp)
+                        )
                     }
                 }
-            )
+                item{
+                    LazyVerticalGrid(
+                        modifier = Modifier.heightIn(max = monthDelta.dp),
+                        columns = GridCells.Adaptive(100.dp),
+                        contentPadding = PaddingValues(
+                            end = 20.dp,
+                        ),
+                        content = {
+                            photosByMonth[Pair(year, month)]?.let {
+                                items(it.size) { idx ->
+                                    photosByMonth[Pair(year, month)]?.get(idx)?.image?.let { it1 ->
+                                        Image(
+                                            bitmap = it1.asImageBitmap(),
+                                            contentDescription = null,
+                                            modifier = Modifier
+                                                .size(75.dp)
+                                                .padding(start = 20.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    )
+                }
+            }
         }
         // we have 3 photos per row
-        monthDelta += 100 * ceil((photosByMonth[Pair(year, month)]?.size ?: 0) / 3.0).toInt()
+        monthDelta += 95 * ceil((photosByMonth[Pair(year, month)]?.size ?: 0) / 3.0).toInt()
     }
 }
 
@@ -400,7 +412,7 @@ fun PhotobookPage(appState: AppState) {
         val photos = appState.userStrategy!!.getAllPhotos(appState)
         val photoList = photos?.map { photoRes ->
             PhotobookPhoto(
-                currentYear, currentMonth, currentDay, decodeImage(photoRes.photoBase64)
+                photoRes.year, photoRes.month, photoRes.day, decodeImage(photoRes.photoBase64)
             )
         }
         appState.photos.clear()
@@ -564,7 +576,7 @@ fun PhotobookPage(appState: AppState) {
                 .size(width = 500.dp, height = 620.dp),
         ) {
             Text(
-                text = "${getMonthName(appState.selectedMonth.value)} $currentYear",
+                text = "${getMonthName(appState.selectedPhotoMonth.value)} ${appState.selectedPhotoYear.value}",
                 color = Color(0xFF649E8A),
                 style = MaterialTheme.typography.headlineLarge,
             )
@@ -577,7 +589,12 @@ fun PhotobookPage(appState: AppState) {
                         .background(color = Color.White, shape = RoundedCornerShape(16.dp))
                         .padding(top = 20.dp)
                 ) {
-                    ScrollablePhotoList(appState.photos)
+                    val photosByMonth = appState.photos.groupBy { it.year to it.month }
+                    photosByMonth[Pair(appState.selectedPhotoYear.value, appState.selectedPhotoMonth.value)]?.let {
+                        ScrollablePhotoList(
+                            it
+                        )
+                    }
                     FloatingActionButton(modifier = Modifier.align(Alignment.BottomEnd),
                         shape = CircleShape,
                         containerColor = Color.DarkGray,
@@ -587,7 +604,9 @@ fun PhotobookPage(appState: AppState) {
                         )
                     }
                     FloatingActionButton(
-                        modifier = Modifier.align(Alignment.BottomEnd).padding(end = 75.dp),
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(end = 75.dp),
                         shape = CircleShape,
                         containerColor = Color.DarkGray,
                         onClick = { appState.pageState.value = PageStates.PHOTOBOOK_ALL }) {

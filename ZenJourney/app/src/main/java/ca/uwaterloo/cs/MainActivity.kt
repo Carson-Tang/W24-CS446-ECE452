@@ -69,7 +69,8 @@ class AppState(val context: Context) {
 
     //photos
     val photos = mutableStateListOf<PhotobookPhoto>()
-    val selectedMonth = mutableStateOf(0)
+    val selectedPhotoMonth = mutableStateOf(0)
+    val selectedPhotoYear = mutableStateOf(0)
 
     // journal
     val selectedDate = mutableStateOf(LocalDate.now())

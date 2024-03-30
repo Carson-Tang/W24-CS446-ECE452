@@ -375,7 +375,7 @@ fun HomePage(appState: AppState) {
                                     .size(height = 86.dp, width = 120.dp)
                             ) {
                                 Button(
-                                    onClick = { appState.pageState.value = PageStates.PHOTOBOOK },
+                                    onClick = { appState.pageState.value = PageStates.PHOTOBOOK_ALL },
                                     colors = ButtonDefaults.buttonColors(containerColor = Color.White),
                                     modifier = Modifier
                                         .align(Alignment.Center)

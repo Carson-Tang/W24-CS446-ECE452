@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -50,6 +51,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.text.input.KeyboardCapitalization
 
 @Composable
 fun JournalPage1(appState: AppState) {
@@ -188,7 +190,7 @@ fun JournalPage2(appState: AppState) {
                         modifier = Modifier
                             .padding(8.dp)
                             .background(
-                                if (isSelected) Color.LightGray else Color.Transparent,
+                                if (isSelected) Color(0xFF74B49D) else Color.Transparent,
                                 RoundedCornerShape(8.dp)
                             )
                             .clickable {
@@ -301,8 +303,8 @@ fun CustomMoodDialog(appState: AppState) {
                             appState.newMoodLabel.value = it
                             appState.isNewMoodLabelValid.value = appState.newMoodLabel.value.isNotEmpty()
                         },
-                        label = { Text("Mood Text", color = Color(0xFF4F4F4F)) },
-                        isError = !appState.isNewMoodLabelValid.value
+                        label = { Text("Mood", color = Color(0xFF4F4F4F)) },
+                        isError = !appState.isNewMoodLabelValid.value,
                     )
                     Box(
                         modifier = Modifier.fillMaxWidth().padding(top = 4.dp),

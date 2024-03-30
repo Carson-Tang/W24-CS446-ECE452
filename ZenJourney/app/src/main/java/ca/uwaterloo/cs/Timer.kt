@@ -1,6 +1,5 @@
 package ca.uwaterloo.cs
 
-import android.media.MediaPlayer
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -70,8 +69,6 @@ fun TimerScreen(appState: AppState) {
 
     var isTimePickerVisible by remember { mutableStateOf(false) }
 
-    var mediaPlayer: MediaPlayer? by remember { mutableStateOf(null) }
-
     Column() {
         if (isTimePickerVisible) {
             TimePickerPopup(appState.defaultTimeMs.value) { hour, minute, second ->
@@ -133,6 +130,7 @@ fun TimerScreen(appState: AppState) {
                     }
                 }
                 Spacer(modifier = Modifier.width(24.dp))
+                // REFRESH
                 Box(
                     modifier = Modifier
                         .background(color = Color(0xFF7BB6A1), shape = RoundedCornerShape(6.dp))
@@ -150,6 +148,7 @@ fun TimerScreen(appState: AppState) {
                     }
                 }
                 Spacer(modifier = Modifier.width(24.dp))
+                // PLAY
                 Box(
                     modifier = Modifier
                         .background(color = Color(0xFF7BB6A1), shape = RoundedCornerShape(6.dp))
@@ -170,6 +169,7 @@ fun TimerScreen(appState: AppState) {
                     }
                 }
                 Spacer(modifier = Modifier.width(24.dp))
+                // PAUSE
                 Box(
                     modifier = Modifier
                         .background(color = Color(0xFF7BB6A1), shape = RoundedCornerShape(6.dp))

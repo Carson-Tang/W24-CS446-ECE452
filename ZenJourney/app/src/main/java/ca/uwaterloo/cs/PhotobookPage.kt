@@ -61,6 +61,7 @@ import java.time.format.TextStyle
 import java.util.Locale
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
+import kotlin.math.ceil
 
 
 data class PhotobookPhoto(
@@ -88,11 +89,13 @@ fun ScrollablePhotoList(photoList: List<PhotobookPhoto>) {
 fun ScrollablePhotoListWithMonth(appState: AppState, photos: List<PhotobookPhoto>) {
     val monthYearPairs = photos.groupBy { it.year to it.month }.keys
     val photosByMonth = photos.groupBy { it.year to it.month }
-
+    // for each month, year pair overlaps when rendered so we
+    // add a delta to the top padding
+    var monthDelta = 0
     monthYearPairs.toList().forEach {(year, month) ->
-        println("month: " + month)
-        Column(
-            horizontalAlignment = Alignment.Start
+        Box(
+            modifier = Modifier
+                .padding(top=monthDelta.dp)
         ) {
             TextButton(
                 onClick = {
@@ -100,14 +103,16 @@ fun ScrollablePhotoListWithMonth(appState: AppState, photos: List<PhotobookPhoto
                     appState.pageState.value = PageStates.PHOTOBOOK_MONTH
                 }
             ) {
-                Text(text = "${getMonthName(month)} $year",
+                Text(
+                    text = "${getMonthName(month)} $year",
                     style = MaterialTheme.typography.headlineSmall,
-                    color = Color(0xFF5B907D),)
+                    color = Color(0xFF5B907D),
+                    )
             }
-            LazyVerticalGrid (
+            LazyVerticalGrid(
                 columns = GridCells.Adaptive(100.dp),
                 contentPadding = PaddingValues(
-                    top = 16.dp,
+                    top = 48.dp,
                     end = 20.dp,
                     bottom = 12.dp
                 ),
@@ -121,6 +126,7 @@ fun ScrollablePhotoListWithMonth(appState: AppState, photos: List<PhotobookPhoto
                                     modifier = Modifier
                                         .size(75.dp)
                                         .padding(start = 20.dp)
+                                        .background(color = Color.Red)
                                 )
                             }
                         }
@@ -128,6 +134,8 @@ fun ScrollablePhotoListWithMonth(appState: AppState, photos: List<PhotobookPhoto
                 }
             )
         }
+        // we have 3 photos per row
+        monthDelta += 100 * ceil((photosByMonth[Pair(year, month)]?.size ?: 0) / 3.0).toInt()
     }
 }
 
@@ -194,7 +202,7 @@ fun AllPhotosPage(appState: AppState) {
         val photos = appState.userStrategy!!.getAllPhotos(appState)
         val photoList = photos?.map { photoRes ->
             PhotobookPhoto(
-                currentYear, currentMonth, currentDay, decodeImage(photoRes.photoBase64)
+                photoRes.year, photoRes.month, photoRes.day, decodeImage(photoRes.photoBase64)
             )
         }
         appState.photos.clear()

@@ -69,6 +69,7 @@ class AppState(val context: Context) {
 
     //photos
     val photos = mutableStateListOf<PhotobookPhoto>()
+    val selectedMonth = mutableStateOf(0)
 
     // journal
     val selectedDate = mutableStateOf(LocalDate.now())
@@ -202,7 +203,8 @@ fun PageContent(appState: AppState) {
         PageStates.MEDITATE -> MeditatePage(appState)
         PageStates.MEDITATE_PICK_TUNE -> MeditatePickTune(appState)
         PageStates.AFFIRMATION -> AffirmationPage(appState)
-        PageStates.PHOTOBOOK -> PhotobookPage(appState)
+        PageStates.PHOTOBOOK_ALL -> AllPhotosPage(appState)
+        PageStates.PHOTOBOOK_MONTH -> PhotobookPage(appState)
         PageStates.JOURNAL_STEP1 -> JournalPage1(appState)
         PageStates.JOURNAL_STEP2 -> JournalPage2(appState)
         PageStates.JOURNAL_STEP3 -> JournalPage3(appState)

@@ -20,8 +20,8 @@ import androidx.compose.ui.unit.dp
 fun Footer(appState: AppState) {
     NavigationBar(Modifier.fillMaxWidth()) {
         NavigationBarItem(
-            selected = appState.pageState.value == PageStates.PHOTOBOOK,
-            onClick = { appState.pageState.value = PageStates.PHOTOBOOK },
+            selected = appState.pageState.value == PageStates.PHOTOBOOK_ALL || appState.pageState.value == PageStates.PHOTOBOOK_MONTH,
+            onClick = { appState.pageState.value = PageStates.PHOTOBOOK_ALL },
             icon = {
                 Icon(
                     Icons.Outlined.Image,

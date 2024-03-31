@@ -12,6 +12,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,6 +28,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyGridItemScope
+import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -90,6 +94,12 @@ fun ScrollablePhotoList(photoList: List<PhotobookPhoto>) {
     }
 }
 
+fun LazyGridScope.header(
+    content: @Composable LazyGridItemScope.() -> Unit
+) {
+    item(span = { GridItemSpan(this.maxLineSpan) }, content = content)
+}
+
 @Composable
 @OptIn(ExperimentalEncodingApi::class)
 fun ScrollablePhotoListWithMonth(appState: AppState, photos: List<PhotobookPhoto>) {
@@ -101,50 +111,43 @@ fun ScrollablePhotoListWithMonth(appState: AppState, photos: List<PhotobookPhoto
     monthYearPairs.toList().forEach {(year, month) ->
         Box(
             modifier = Modifier
-                .padding(top=monthDelta.dp)
+                .padding(top = monthDelta.dp)
                 .fillMaxSize()
         ) {
-            LazyColumn() {
-                item {
-                    TextButton(onClick = {
-                        appState.selectedPhotoMonth.value = month
-                        appState.selectedPhotoYear.value = year
-                        appState.pageState.value = PageStates.PHOTOBOOK_MONTH
-                    }) {
-                        Text(
-                            text = "${getMonthName(month)} $year",
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = Color(0xFF5B907D),
-                            modifier = Modifier
-                                .padding(all = 10.dp)
-                        )
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(100.dp),
+                content = {
+                    header {
+                        TextButton(onClick = {
+                            appState.selectedPhotoMonth.value = month
+                            appState.selectedPhotoYear.value = year
+                            appState.pageState.value = PageStates.PHOTOBOOK_MONTH
+                        }) {
+                            Text(
+                                text = "${getMonthName(month)} $year",
+                                style = MaterialTheme.typography.headlineSmall,
+                                color = Color(0xFF5B907D),
+                                modifier = Modifier
+                                    .padding(all = 5.dp)
+                            )
+                        }
                     }
-                }
-                item{
-                    LazyVerticalGrid(
-                        modifier = Modifier.heightIn(max = monthDelta.dp),
-                        columns = GridCells.Adaptive(100.dp),
-                        contentPadding = PaddingValues(
-                            end = 20.dp,
-                        ),
-                        content = {
-                            photosByMonth[Pair(year, month)]?.let {
-                                items(it.size) { idx ->
-                                    photosByMonth[Pair(year, month)]?.get(idx)?.image?.let { it1 ->
-                                        Image(
-                                            bitmap = it1.asImageBitmap(),
-                                            contentDescription = null,
-                                            modifier = Modifier
-                                                .size(75.dp)
-                                                .padding(start = 20.dp)
-                                        )
-                                    }
-                                }
+                    photosByMonth[Pair(year, month)]?.let {
+                        items(it.size) { idx ->
+                            photosByMonth[Pair(year, month)]?.get(idx)?.image?.let { it1 ->
+                                Image(
+                                    bitmap = it1.asImageBitmap(),
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(75.dp)
+                                        .border(2.dp, Color.Black)
+                                        .padding(start = 10.dp)
+                                )
                             }
                         }
-                    )
+                    }
                 }
-            }
+            )
         }
         // we have 3 photos per row
         monthDelta += 95 * ceil((photosByMonth[Pair(year, month)]?.size ?: 0) / 3.0).toInt()
@@ -566,27 +569,29 @@ fun PhotobookPage(appState: AppState) {
         Modifier
             .background(color = MaterialTheme.colorScheme.background)
             .fillMaxSize()
-            .padding(top = 50.dp),
+            .padding(top = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Column(
             modifier = Modifier
                 .padding(all = 20.dp)
-                .size(width = 500.dp, height = 620.dp),
+                .size(width = 500.dp, height = 600.dp),
         ) {
             Text(
                 text = "${getMonthName(appState.selectedPhotoMonth.value)} ${appState.selectedPhotoYear.value}",
                 color = Color(0xFF649E8A),
                 style = MaterialTheme.typography.headlineLarge,
+                modifier = Modifier.padding(bottom = 10.dp)
             )
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .background(color = Color.White, shape = RoundedCornerShape(16.dp))
                         .padding(top = 20.dp)
+                        .fillMaxSize()
+                        .background(color = Color.White, shape = RoundedCornerShape(16.dp)
+                        )
                 ) {
                     val photosByMonth = appState.photos.groupBy { it.year to it.month }
                     photosByMonth[Pair(appState.selectedPhotoYear.value, appState.selectedPhotoMonth.value)]?.let {

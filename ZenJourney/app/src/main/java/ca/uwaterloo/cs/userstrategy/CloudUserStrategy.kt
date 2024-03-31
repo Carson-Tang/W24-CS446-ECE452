@@ -28,6 +28,7 @@ import photo.PhotoRequest
 import photo.PhotoResponse
 import user.UserRequest
 import user.UserResponse
+import java.time.LocalDate
 
 class CloudUserStrategy : UserStrategy {
     override val forgotPINLabel = "Log out"
@@ -123,6 +124,7 @@ class CloudUserStrategy : UserStrategy {
 
                 if (response.status == HttpStatusCode.OK) {
                     val journalResponse: JournalResponse = response.body()
+
                     journalResponse
                 } else {
                     null
@@ -166,7 +168,8 @@ class CloudUserStrategy : UserStrategy {
         return withContext(Dispatchers.IO){
             try {
                 JournalApiService.createJournal(
-                    journalRequest = journalRequest, jwt = appState.dataStore.getJwt()
+                    journalRequest = journalRequest,
+                    jwt = appState.dataStore.getJwt()
                 )
             } catch (e: Exception) {
                 println(e.message)
@@ -221,7 +224,19 @@ class CloudUserStrategy : UserStrategy {
         }
     }
 
-
+    override suspend fun updateJournal(appState: AppState, journalRequest: JournalRequest, id: String) {
+        return withContext(Dispatchers.IO){
+            try {
+                JournalApiService.updateJournal(
+                    id = id,
+                    journalRequest = journalRequest,
+                    jwt = appState.dataStore.getJwt()
+                )
+            } catch (e: Exception) {
+                println(e.message)
+            }
+        }
+    }
     override fun clearJWT(appState: AppState) {
         runBlocking {
             appState.dataStore.setJwt("")

@@ -39,12 +39,15 @@ object JournalApiService {
         }
     }
 
-    suspend fun updateJournal(id: String, journalRequest: JournalRequest): HttpResponse {
+    suspend fun updateJournal(id: String, journalRequest: JournalRequest, jwt: String): HttpResponse {
         val journalJson = gson.toJson(journalRequest)
         return withContext(Dispatchers.IO) {
             HttpClientSetup.httpClient.put("$baseUrl/$id") {
                 contentType(ContentType.Application.Json)
                 setBody(journalJson)
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer $jwt")
+                }
             }
         }
     }

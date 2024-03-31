@@ -20,5 +20,6 @@ interface UserStrategy {
     suspend fun createPhoto(appState: AppState, photoRequest: PhotoRequest):Boolean
     suspend fun getAllPhotos(appState: AppState): List<PhotoResponse>?
     suspend fun getUserPhotosByYearMonth(appState: AppState, year: Int, month: Int): List<PhotoResponse>?
+    suspend fun updateJournal(appState: AppState, journalRequest: JournalRequest, id: String)
     fun clearJWT(appState: AppState)
 }

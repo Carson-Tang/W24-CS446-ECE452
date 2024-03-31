@@ -43,19 +43,39 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 fun generateFeelingStatement(moods: List<String>): String {
-    val moodMap = moodEmojisWithLabels.map { it.first to it.second.lowercase() }.toMap()
-    val feelings = moods.mapNotNull { moodMap[it] }
+    val feelings = moods.mapNotNull { mood ->
+        val parts = mood.split(",")
+        if (parts.size > 1) {
+            parts[0].lowercase()
+        } else {
+            mood.lowercase()
+        }
+    }
 
     val feelingString = when {
         feelings.isEmpty() -> "No specific feelings"
         feelings.size == 1 -> "I'm feeling ${feelings.first()}"
-        else -> "I'm feeling ${feelings.first()} and ..."
+        feelings.size == 2 -> "I'm feeling ${feelings.joinToString(" and ")}"
+        else -> {
+            val allButLast = feelings.dropLast(1).joinToString(", ")
+            "I'm feeling $allButLast, and ${feelings.last()}"
+        }
     }
     return feelingString
 }
 
+
 @Composable
 fun WithInfo(today: LocalDate, todayJournalData: JournalResponse, appState: AppState) {
+    val firstMood = todayJournalData.moods.first()
+
+    val parts = firstMood.split(",")
+    val (label, emoji) = if (parts.size > 1) {
+        Pair(parts[0].replaceFirstChar(Char::titlecase), parts[1])
+    } else {
+        Pair(firstMood, wordToEmojiMap[firstMood] ?: "?")
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth(),
@@ -82,14 +102,13 @@ fun WithInfo(today: LocalDate, todayJournalData: JournalResponse, appState: AppS
             modifier = Modifier
                 .background(color = Color.White, shape = RoundedCornerShape(16.dp))
                 .padding(5.dp)
-                .fillMaxWidth()
-                .size(height = 60.dp, width = 140.dp),
+                .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 // assumes len(todayJournalData.moods) >= 1, we only show
                 // WithInfo if moods is not empty
-                text = todayJournalData.moods[0],
+                text = emoji,
                 style = TextStyle(
                     fontSize = 40.sp
                 )
@@ -375,7 +394,7 @@ fun HomePage(appState: AppState) {
                                     .size(height = 86.dp, width = 120.dp)
                             ) {
                                 Button(
-                                    onClick = { appState.pageState.value = PageStates.PHOTOBOOK },
+                                    onClick = { appState.pageState.value = PageStates.PHOTOBOOK_ALL },
                                     colors = ButtonDefaults.buttonColors(containerColor = Color.White),
                                     modifier = Modifier
                                         .align(Alignment.Center)

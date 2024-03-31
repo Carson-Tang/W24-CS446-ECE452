@@ -1,5 +1,6 @@
 package ca.uwaterloo.cs
 
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
@@ -25,9 +26,15 @@ import com.auth0.android.jwt.JWT
 import java.time.LocalDate
 
 class MainActivity : ComponentActivity() {
-    val appState = AppState(this)
+    companion object {
+        @SuppressLint("StaticFieldLeak")
+        lateinit var appState: AppState
+            private set
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        appState = AppState(this)
+
         val onBackPressedCallback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 appState.backButtonTriggered.value = true
@@ -69,6 +76,8 @@ class AppState(val context: Context) {
 
     //photos
     val photos = mutableStateListOf<PhotobookPhoto>()
+    val selectedPhotoMonth = mutableStateOf(0)
+    val selectedPhotoYear = mutableStateOf(0)
 
     // journal
     val selectedDate = mutableStateOf(LocalDate.now())
@@ -77,8 +86,25 @@ class AppState(val context: Context) {
     val pastJournalEntry = mutableStateOf("")
     val pastSelectedMoods = mutableStateOf(listOf<String>())
     val pastDate = mutableStateOf(LocalDate.now())
+    val pastJournalId = mutableStateOf("")
+    val journalId = mutableStateOf("")
+
+    val showAddMoodDialog = mutableStateOf(false)
+    val searchText = mutableStateOf("")
+
+    val selectedCustomMoods = mutableStateOf(listOf<String>())
+
+    val currSelectedMoods = mutableStateOf(listOf<String>())
+    val currSelectedCustomMoods = mutableStateOf(listOf<String>())
+
+    val newMoodLabel = mutableStateOf("")
+    val newMoodEmoji = mutableStateOf("😃")
+    val isNewMoodLabelValid = mutableStateOf(false)
+    val isModalBottomSheetVisible = mutableStateOf(false)
     var currMonthJournals = mutableStateOf(listOf<LocalDate>())
 
+    val isEditing = mutableStateOf(false)
+    val editableContent = mutableStateOf("")
     // meditation
     val selectedTune = mutableStateOf(R.raw.once_in_paris)
     val playingTuneId = mutableStateOf(selectedTune.value)
@@ -202,7 +228,8 @@ fun PageContent(appState: AppState) {
         PageStates.MEDITATE -> MeditatePage(appState)
         PageStates.MEDITATE_PICK_TUNE -> MeditatePickTune(appState)
         PageStates.AFFIRMATION -> AffirmationPage(appState)
-        PageStates.PHOTOBOOK -> PhotobookPage(appState)
+        PageStates.PHOTOBOOK_ALL -> AllPhotosPage(appState)
+        PageStates.PHOTOBOOK_MONTH -> PhotobookPage(appState)
         PageStates.JOURNAL_STEP1 -> JournalPage1(appState)
         PageStates.JOURNAL_STEP2 -> JournalPage2(appState)
         PageStates.JOURNAL_STEP3 -> JournalPage3(appState)

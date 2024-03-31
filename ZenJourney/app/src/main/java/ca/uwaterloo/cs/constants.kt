@@ -7,7 +7,7 @@ enum class PageStates {
     AFFIRMATION,
     JOURNAL_STEP1, JOURNAL_STEP2, JOURNAL_STEP3, PAST_JOURNAL,
     MEDITATE, MEDITATE_PICK_TUNE,
-    PHOTOBOOK,
+    PHOTOBOOK_MONTH, PHOTOBOOK_ALL,
     SETTINGS, DISCLAIMER,
     LOADING
 }
@@ -32,9 +32,8 @@ val moodEmojisWithLabels = listOf(
     "\uD83D\uDE31" to "Shocked",
     "\uD83D\uDE1E" to "Disappointed",
     "\uD83D\uDE0D" to "Loved",
-    "\uD83E\uDD2F" to "Mind Blown",
-    "\uD83D\uDE0E" to "Cool",
-    "\uD83E\uDD73" to "Party"
+    "\uD83D\uDE30" to "Anxious",
+    "\uD83D\uDE0C" to "Relieved",
 )
 
 // same as above but map
@@ -56,52 +55,96 @@ val meditationMusic = listOf(
 
 val customizationTitles = arrayOf("Notifications", "Personalized Affirmations", "PIN")
 
-val affirmations = listOf(
-    "You got this",
-    "You'll figure it out",
-    "You're a smart cookie",
-    "I believe in you",
-    "Sucking at something is the first step towards being good at something",
-    "Struggling is part of learning",
-    "Everything has cracks - that's how the light gets in",
-    "Mistakes don't make you less capable",
-    "We are all works in progress",
-    "You are a capable human",
-    "You know more than you think",
-    "10x engineers are a myth",
-    "If everything was easy you'd be bored",
-    "I admire you for taking this on",
-    "You're resourceful and clever",
-    "You'll find a way",
-    "I know you'll sort it out",
-    "Struggling means you're learning",
-    "You're doing a great job",
-    "It'll feel magical when it's working",
-    "I'm rooting for you",
-    "Your mind is full of brilliant ideas",
-    "You make a difference in the world by simply existing in it",
-    "You are learning valuable lessons from yourself every day",
-    "You are worthy and deserving of respect",
-    "You know more than you knew yesterday",
-    "You're an inspiration",
-    "Your life is already a miracle of chance waiting for you to shape its destiny",
-    "Your life is about to be incredible",
-    "Nothing is impossible. The word itself says 'I’m possible!'",
-    "Failure is just another way to learn how to do something right",
-    "I give myself permission to do what is right for me",
-    "You can do it",
-    "It is not a sprint, it is a marathon. One step at a time",
-    "Success is the progressive realization of a worthy goal",
-    "People with goals succeed because they know where they’re going",
-    "All you need is the plan, the roadmap, and the courage to press on to your destination",
-    "The opposite of courage in our society is not cowardice... it is conformity",
-    "Whenever we’re afraid, it’s because we don’t know enough. If we understood enough, we would never be afraid",
-    "The past does not equal the future",
-    "The path to success is to take massive, determined action",
-    "It’s what you practice in private that you will be rewarded for in public",
-    "Small progress is still progress",
-    "Don't worry if you find flaws in your past creations, it's because you've evolved",
-    "Starting is the most difficult step - but you can do it",
-    "Don't forget to enjoy the journey",
-    "It's not a mistake, it's a learning opportunity"
+/* Taken from:
+* https://www.wondermind.com/article/daily-affirmations/,
+* https://www.mentalhelp.net/blogs/120-daily-positive-mental-health-affirmations/
+*  */
+val customAffirmations = listOf(
+    "Sad" to listOf(
+        "I am allowed to feel sad.",
+        "Being open with others about feeling sad makes me stronger.",
+        "I am doing my best to manage my sadness.",
+        "My sadness does not define me; it encourages me to take care of myself.",
+    ),
+    "Angry" to listOf(
+        "There is nothing wrong with feeling angry.",
+        "I am open to what my anger is trying to tell me about myself.",
+        "My anger does not always have to result in a strong reaction.",
+        "I inhale in peace and exhale anger.",
+        "How I choose to express my anger is my responsibility.",
+    ),
+    "Happy" to listOf(
+        "I deserve to live a happy and healthy life.",
+        "I no longer wait for something bad to ruin my happiness.",
+        "I am allowed to prioritize my happiness.",
+        "I create my own version of happiness every day.",
+        "I choose to let go of the things that no longer make me happy.",
+    ),
+    "Anxious" to listOf(
+        "I always make it through these tough moments.",
+        "I will not allow what is stressing me out to ruin my entire day.",
+        "I am choosing to focus on things that bring me peace.",
+        "I give myself permission to release my anxious thoughts.",
+        "I trust that I will be able to move past all of this anxiety.",
+    ),
+    "Relieved" to listOf(
+        "I am worthy of love and acceptance, just as I am.",
+        "I trust in my ability to handle any situation that comes my way.",
+        "I release the need to impress others and instead focus on being authentic and true to myself.",
+        "I choose to focus on the present moment and enjoy the company of those around me.",
+    ),
+    "Loved" to listOf(
+        "I deserve to feel happy and full of life.",
+        "I am deserving of contentment, joy, and peace.",
+        "I am kind to others and inspire others to be kind and that feels great.",
+        "Love is a birthright for each and every one of us, me included.",
+        "I am worthy of love just for being who I am.",
+    ),
+    "Shocked" to listOf(
+        "I will keep breathing, no matter what.",
+        "Changes aren’t always bad things — the seasons change from winter to spring and flowers bloom.",
+        "It’s a gift and a superpower to be able to adapt to my surroundings",
+        "I know it’s ok to shift my course."
+    ),
+    "Disappointed" to listOf(
+        "I am in control of my thoughts, feelings, and actions and I can achieve my goals and fulfill my dreams.",
+        "I know that failure is not a sign of weakness, but rather an opportunity to learn and grow.",
+        "I am committed to creating a life that brings me joy and satisfaction.",
+        "I am grateful for all that I have and look forward to what the future holds.",
+        "I am confident in my abilities and believe in myself.",
+    )
+).toMap()
+
+/* Taken from https://www.betterup.com/blog/positive-affirmations */
+val randAffirmations = listOf(
+    "I am enough. I have enough.",
+    "I am in the right place, at the right time, doing the right thing.",
+    "I can do hard things.",
+    "I allow myself to be more fully me.",
+    "I believe in myself.",
+    "I am grateful for another day of life.",
+    "I am worthy of what I desire.",
+    "I choose myself.",
+    "I am resilient in the face of challenges.",
+    "I am proud of myself and my achievements.",
+    "I will accomplish everything I need to do today.",
+    "I do my best, and my best is good enough.",
+    "I prioritize my well-being.",
+    "I overcome my fears by getting out of my comfort zone.",
+    "I am love, and I am loved.",
+    "Money comes frequently and easily to me.",
+    "I trust my inner guidance and follow it.",
+    "I accept my emotions and let them move through me.",
+    "I take care of myself, mind, body, and spirit.",
+    "I trust myself to make the right decisions.",
+    "I give myself permission to take up space.",
+    "I use my voice to speak up for myself and others.",
+    "I trust that I’m heading in the right direction.",
+    "I allow myself to make mistakes as they help me grow.",
+    "I accept myself exactly as I am without judgment.",
+    "I have everything I need to achieve my goals.",
+    "I am constantly generating brilliant ideas.",
+    "I am safe and supported.",
+    "I love and accept myself.",
+    "I am kind to myself and others."
 )

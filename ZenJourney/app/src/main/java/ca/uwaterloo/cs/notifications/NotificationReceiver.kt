@@ -8,21 +8,29 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.icu.util.Calendar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import ca.uwaterloo.cs.MainActivity
+import ca.uwaterloo.cs.MainActivity.Companion.appState
 import ca.uwaterloo.cs.R
-import ca.uwaterloo.cs.affirmations
+import ca.uwaterloo.cs.customAffirmations
+import ca.uwaterloo.cs.randAffirmations
+import kotlinx.coroutines.runBlocking
+import java.time.LocalDate
 
 // https://developer.android.com/reference/android/content/BroadcastReceiver
-class NotificationReceiver : BroadcastReceiver() {
+class NotificationReceiver() : BroadcastReceiver() {
     @SuppressLint("UnsafeProtectedBroadcastReceiver")
     override fun onReceive(context: Context, intent: Intent) {
-        sendNotification(context)
+        runBlocking {
+            sendNotification(context)
+        }
     }
 
-    private fun sendNotification(context: Context) {
+    private suspend fun sendNotification(context: Context) {
         val showHomePageIntent = Intent(context, MainActivity::class.java)
         val pendingIntent: PendingIntent =
             PendingIntent.getActivity(
@@ -33,7 +41,7 @@ class NotificationReceiver : BroadcastReceiver() {
             )
         val notificationBuilder = NotificationCompat.Builder(context, "1")
             .setContentTitle("ZenJourney")
-            .setContentText(affirmations.random())
+            .setContentText(if (appState.useJournalForAffirmations.value) getCustomAffirmation() else randAffirmations.random())
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
@@ -50,5 +58,39 @@ class NotificationReceiver : BroadcastReceiver() {
             notify(1, notificationBuilder.build())
         }
         NotificationScheduler.scheduleNotification(context, Calendar.getInstance().get(Calendar.HOUR_OF_DAY), Calendar.getInstance().get(Calendar.MINUTE))
+    }
+
+    private suspend fun getCustomAffirmation(): String? {
+        val currentDate = LocalDate.now()
+        val yesterday = LocalDate.now().minusDays(1)
+        try {
+            val response = appState.userStrategy?.getJournalByDate(
+                appState = appState,
+                day = currentDate.dayOfMonth,
+                month = currentDate.monthValue,
+                year = currentDate.year
+            )
+            if (response != null) {
+                val validMoods = response.moods.filter { customAffirmations.keys.contains(it) }
+                return customAffirmations[validMoods.random()]?.random()
+            }
+        } catch (e: Exception) {
+            println(e.message)
+        }
+        try {
+            val response = appState.userStrategy?.getJournalByDate(
+                appState = appState,
+                day = yesterday.dayOfMonth,
+                month = yesterday.monthValue,
+                year = yesterday.year
+            )
+            if (response != null) {
+                val validMoods = response.moods.filter { customAffirmations.keys.contains(it) }
+                return customAffirmations[validMoods.random()]?.random()
+            }
+        } catch (e: Exception) {
+            println(e.message)
+        }
+        return randAffirmations.random()
     }
 }

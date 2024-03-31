@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Settings
@@ -137,20 +138,20 @@ fun WithInfo(today: LocalDate, todayJournalData: JournalResponse, appState: AppS
 }
 
 @Composable
-fun WithoutInfo() {
+fun WithoutInfo(affirmation: String) {
     Text(
         text = "\uD83E\uDD20\n Stay positive!",
         style = MaterialTheme.typography.headlineLarge,
         textAlign = TextAlign.Center,
         color = Color(0xFF3D3D3D),
     )
-
     Column(
         Modifier
             .padding(top = 48.dp)
+            .width(200.dp)
     ) {
         Text(
-            text = "Start logging your mood to\nsee your mood entries here!",
+            text = affirmation,
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,
             color = Color(0xFF579981)
@@ -177,6 +178,7 @@ fun HomePage(appState: AppState) {
             )
         )
     }
+    val affirmation = remember { mutableStateOf("") }
     if (!isCustomDefaultNotificationSet) {
         // default notification time (if not custom set) is 12PM
         scheduleNotification(appState.context, 12, 0)
@@ -202,6 +204,8 @@ fun HomePage(appState: AppState) {
             } catch (e: Exception) {
                 println(e.message)
             }
+            affirmation.value =
+                if (appState.useJournalForAffirmations.value) getCustomAffirmation().toString() else randAffirmations.random()
         }
     }
 
@@ -266,7 +270,7 @@ fun HomePage(appState: AppState) {
                     if (todayJournalData.moods.isNotEmpty()) {
                         WithInfo(today, todayJournalData, appState)
                     } else {
-                        WithoutInfo()
+                        WithoutInfo(affirmation.value)
                     }
                 }
 
@@ -394,7 +398,9 @@ fun HomePage(appState: AppState) {
                                     .size(height = 86.dp, width = 120.dp)
                             ) {
                                 Button(
-                                    onClick = { appState.pageState.value = PageStates.PHOTOBOOK_ALL },
+                                    onClick = {
+                                        appState.pageState.value = PageStates.PHOTOBOOK_ALL
+                                    },
                                     colors = ButtonDefaults.buttonColors(containerColor = Color.White),
                                     modifier = Modifier
                                         .align(Alignment.Center)

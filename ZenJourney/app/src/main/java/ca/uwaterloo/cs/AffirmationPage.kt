@@ -25,6 +25,39 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
+suspend fun getCustomAffirmation(): String? {
+    val currentDate = LocalDate.now()
+    val yesterday = LocalDate.now().minusDays(1)
+    try {
+        val response = MainActivity.appState.userStrategy?.getJournalByDate(
+            appState = MainActivity.appState,
+            day = currentDate.dayOfMonth,
+            month = currentDate.monthValue,
+            year = currentDate.year
+        )
+        if (response != null) {
+            val validMoods = response.moods.filter { customAffirmations.keys.contains(it) }
+            return customAffirmations[validMoods.random()]?.random()
+        }
+    } catch (e: Exception) {
+        println(e.message)
+    }
+    try {
+        val response = MainActivity.appState.userStrategy?.getJournalByDate(
+            appState = MainActivity.appState,
+            day = yesterday.dayOfMonth,
+            month = yesterday.monthValue,
+            year = yesterday.year
+        )
+        if (response != null) {
+            val validMoods = response.moods.filter { customAffirmations.keys.contains(it) }
+            return customAffirmations[validMoods.random()]?.random()
+        }
+    } catch (e: Exception) {
+        println(e.message)
+    }
+    return randAffirmations.random()
+}
 
 @Composable
 fun AffirmationPage(appState: AppState) {

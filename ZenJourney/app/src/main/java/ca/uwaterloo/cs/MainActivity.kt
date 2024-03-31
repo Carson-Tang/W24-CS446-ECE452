@@ -1,5 +1,6 @@
 package ca.uwaterloo.cs
 
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
@@ -25,9 +26,15 @@ import com.auth0.android.jwt.JWT
 import java.time.LocalDate
 
 class MainActivity : ComponentActivity() {
-    val appState = AppState(this)
+    companion object {
+        @SuppressLint("StaticFieldLeak")
+        lateinit var appState: AppState
+            private set
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        appState = AppState(this)
+
         val onBackPressedCallback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 appState.backButtonTriggered.value = true

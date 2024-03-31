@@ -3,7 +3,6 @@
 package ca.uwaterloo.cs
 
 import android.Manifest
-import android.R.attr.password
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
@@ -61,7 +60,6 @@ import java.util.Locale
 import javax.crypto.Cipher
 import javax.crypto.SecretKey
 import javax.crypto.SecretKeyFactory
-import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.PBEKeySpec
 import javax.crypto.spec.SecretKeySpec
 import kotlin.io.encoding.Base64
@@ -205,22 +203,63 @@ fun decodeImage(encodedImage: String): Bitmap {
     return image
 }
 
+
+fun generateSymmetricKeyFromUserid(userid: String): SecretKey {
+    val factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1")
+    val salt = ByteArray(100)
+    salt.fill(1)
+    val spec: KeySpec = PBEKeySpec(userid.toCharArray(), salt, 65536, 256)
+    return SecretKeySpec(factory.generateSecret(spec).encoded, "AES")
+}
+
+fun getCipherFromSecretKey(secretKey: SecretKey): Cipher {
+    val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
+    cipher.init(Cipher.ENCRYPT_MODE, secretKey)
+    return cipher
+}
+
+@OptIn(ExperimentalEncodingApi::class)
+fun secretKeyToStr(key: SecretKey): String {
+    return Base64.encode(key.encoded)
+}
+
+fun StrToSecretKey(keystr: String): SecretKey {
+    val decodedKey: ByteArray = Base64.decode(keystr)
+    return SecretKeySpec(decodedKey, 0, decodedKey.size, "AES")
+}
+
+suspend fun refreshPhotoList(appState: AppState){
+    val photos = appState.userStrategy!!.getAllPhotos(appState)
+    val photoList = photos?.map { photoRes ->
+        PhotobookPhoto(
+            photoRes.year, photoRes.month, photoRes.day, decodeImage(photoRes.photoBase64)
+        )
+    }
+    appState.photos.clear()
+    if (photoList != null) {
+        appState.photos.addAll(photoList.reversed())
+    }
+}
+
+fun generateKeyIfnotAvail(appState: AppState){
+    val symkey = "photo_encryption_key"
+    val prefs = appState.encryptedKeyValStore
+    if(!prefs.contains(symkey)){
+        val secretkey = generateSymmetricKeyFromUserid(appState.userId.value)
+        val keystr = secretKeyToStr(secretkey)
+        prefs.edit().putString(symkey, keystr).apply()
+    }
+}
+
+
 @Composable
 @OptIn(ExperimentalPermissionsApi::class)
 fun AllPhotosPage(appState: AppState) {
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
-        val photos = appState.userStrategy!!.getAllPhotos(appState)
-        val photoList = photos?.map { photoRes ->
-            PhotobookPhoto(
-                photoRes.year, photoRes.month, photoRes.day, decodeImage(photoRes.photoBase64)
-            )
-        }
-        appState.photos.clear()
-        if (photoList != null) {
-            appState.photos.addAll(photoList.reversed())
-        }
+        refreshPhotoList(appState)
+        generateKeyIfnotAvail(appState)
     }
     val showPhotoErrorDialogue = remember { mutableStateOf(false) }
 
@@ -401,19 +440,6 @@ fun AllPhotosPage(appState: AppState) {
     }
 }
 
-fun generateSymmetricKeyFromUserid(userid: String): Cipher {
-    val factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1")
-    val salt = ByteArray(100)
-    salt.fill(1)
-    val spec: KeySpec = PBEKeySpec(userid.toCharArray(), salt, 65536, 256)
-    val secret: SecretKey = SecretKeySpec(factory.generateSecret(spec).encoded, "AES")
-
-    val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
-    cipher.init(Cipher.ENCRYPT_MODE, secret)
-
-    return cipher
-}
-
 @Composable
 @OptIn(ExperimentalPermissionsApi::class)
 fun PhotobookPage(appState: AppState) {
@@ -421,16 +447,8 @@ fun PhotobookPage(appState: AppState) {
     val userid = appState.userId.value
 
     LaunchedEffect(Unit) {
-        val photos = appState.userStrategy!!.getAllPhotos(appState)
-        val photoList = photos?.map { photoRes ->
-            PhotobookPhoto(
-                photoRes.year, photoRes.month, photoRes.day, decodeImage(photoRes.photoBase64)
-            )
-        }
-        appState.photos.clear()
-        if (photoList != null) {
-            appState.photos.addAll(photoList.reversed())
-        }
+        refreshPhotoList(appState)
+        generateKeyIfnotAvail(appState)
     }
     val showPhotoErrorDialogue = remember { mutableStateOf(false) }
 

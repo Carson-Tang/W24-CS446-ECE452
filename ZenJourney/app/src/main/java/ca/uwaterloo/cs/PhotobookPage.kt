@@ -3,8 +3,7 @@
 package ca.uwaterloo.cs
 
 import android.Manifest
-import android.R
-import android.content.Context
+import android.R.attr.password
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
@@ -12,16 +11,11 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -59,13 +53,19 @@ import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.launch
 import photo.PhotoRequest
 import java.io.ByteArrayOutputStream
+import java.security.spec.KeySpec
 import java.text.DateFormatSymbols
 import java.time.LocalDate
 import java.time.format.TextStyle
 import java.util.Locale
+import javax.crypto.Cipher
+import javax.crypto.SecretKey
+import javax.crypto.SecretKeyFactory
+import javax.crypto.spec.IvParameterSpec
+import javax.crypto.spec.PBEKeySpec
+import javax.crypto.spec.SecretKeySpec
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
-import kotlin.math.abs
 import kotlin.math.ceil
 
 
@@ -101,7 +101,7 @@ fun ScrollablePhotoListWithMonth(appState: AppState, photos: List<PhotobookPhoto
     monthYearPairs.toList().forEach {(year, month) ->
         Box(
             modifier = Modifier
-                .padding(top=monthDelta.dp)
+                .padding(top = monthDelta.dp)
                 .fillMaxSize()
         ) {
             LazyColumn() {
@@ -399,6 +399,19 @@ fun AllPhotosPage(appState: AppState) {
             }
         }
     }
+}
+
+fun generateSymmetricKeyFromUserid(userid: String): Cipher {
+    val factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1")
+    val salt = ByteArray(100)
+    salt.fill(1)
+    val spec: KeySpec = PBEKeySpec(userid.toCharArray(), salt, 65536, 256)
+    val secret: SecretKey = SecretKeySpec(factory.generateSecret(spec).encoded, "AES")
+
+    val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
+    cipher.init(Cipher.ENCRYPT_MODE, secret)
+
+    return cipher
 }
 
 @Composable

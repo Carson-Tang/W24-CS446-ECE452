@@ -53,8 +53,9 @@ dependencies {
   implementation("androidx.compose.material3:material3-android:1.2.1")
 
   implementation("com.github.Abhimanyu14:compose-emoji-picker:1.0.0-alpha14")
+  implementation("androidx.security:security-crypto:1.0.0")
 
-  testImplementation("junit:junit:4.13.2")
+    testImplementation("junit:junit:4.13.2")
   testImplementation("androidx.test.ext:junit:1.1.5")
   androidTestUtil("androidx.test:orchestrator:1.4.2")
   androidTestImplementation("androidx.test:runner:1.5.2")

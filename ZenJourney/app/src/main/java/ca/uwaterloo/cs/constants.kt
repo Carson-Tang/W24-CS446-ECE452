@@ -102,12 +102,12 @@ val customAffirmations = listOf(
     ),
     "Shocked" to listOf(
         "I will keep breathing, no matter what.",
-        "Changes aren’t always bad things — when the seasons change from winter to spring, flowers bloom, and birds sing.",
-        "It’s a gift and a superpower to be able to adapt to my surroundings — adapting will allow me to persevere.",
+        "Changes aren’t always bad things — the seasons change from winter to spring and flowers bloom.",
+        "It’s a gift and a superpower to be able to adapt to my surroundings",
         "I know it’s ok to shift my course."
     ),
     "Disappointed" to listOf(
-        "I am in control of my thoughts, feelings, and actions, and I use this power to achieve my goals and fulfill my dreams.",
+        "I am in control of my thoughts, feelings, and actions and I can achieve my goals and fulfill my dreams.",
         "I know that failure is not a sign of weakness, but rather an opportunity to learn and grow.",
         "I am committed to creating a life that brings me joy and satisfaction.",
         "I am grateful for all that I have and look forward to what the future holds.",

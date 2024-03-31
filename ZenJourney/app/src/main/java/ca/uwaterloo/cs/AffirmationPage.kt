@@ -53,7 +53,6 @@ fun AffirmationPage(appState: AppState) {
                         if (response != null) {
                             // get a random mood
                             todayMoods.addAll(response.moods)
-                            println("today moods "+todayMoods.toString())
                             val customAffirmation =
                                 customAffirmations[todayMoods.random()]?.random()
                             if (customAffirmation != null) {
@@ -63,7 +62,7 @@ fun AffirmationPage(appState: AppState) {
                     } catch (e: Exception) {
                         println(e.message)
                     }
-                    if (todayMoods.isNotEmpty()) {
+                    if (todayMoods.isEmpty()) {
                         // if today empty check yesterday
                         try {
                             val yestResponse = appState.userStrategy?.getJournalByDate(
@@ -75,7 +74,6 @@ fun AffirmationPage(appState: AppState) {
                             if (yestResponse != null) {
                                 // get a random mood
                                 yestMoods.addAll(yestResponse.moods)
-                                println("yest moods "+yestMoods.toString())
                                 val customAffirmation =
                                     customAffirmations[yestMoods.random()]?.random()
                                 if (customAffirmation != null) {

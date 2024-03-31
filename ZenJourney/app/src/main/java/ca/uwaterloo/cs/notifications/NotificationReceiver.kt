@@ -41,7 +41,7 @@ class NotificationReceiver() : BroadcastReceiver() {
             )
         val notificationBuilder = NotificationCompat.Builder(context, "1")
             .setContentTitle("ZenJourney")
-            .setContentText(getCustomAffirmation())
+            .setContentText(if (appState.useJournalForAffirmations.value) getCustomAffirmation() else randAffirmations.random())
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)

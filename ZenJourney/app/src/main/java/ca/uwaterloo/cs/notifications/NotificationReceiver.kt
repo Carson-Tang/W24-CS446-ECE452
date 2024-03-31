@@ -41,7 +41,7 @@ class NotificationReceiver() : BroadcastReceiver() {
             )
         val notificationBuilder = NotificationCompat.Builder(context, "1")
             .setContentTitle("ZenJourney")
-            .setContentText(getCustomAffirmation())
+            .setContentText(if (appState.useJournalForAffirmations.value) getCustomAffirmation() else randAffirmations.random())
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
@@ -71,7 +71,8 @@ class NotificationReceiver() : BroadcastReceiver() {
                 year = currentDate.year
             )
             if (response != null) {
-                return customAffirmations[response.moods.random()]?.random()
+                val validMoods = response.moods.filter { customAffirmations.keys.contains(it) }
+                return customAffirmations[validMoods.random()]?.random()
             }
         } catch (e: Exception) {
             println(e.message)
@@ -84,7 +85,8 @@ class NotificationReceiver() : BroadcastReceiver() {
                 year = yesterday.year
             )
             if (response != null) {
-                return customAffirmations[response.moods.random()]?.random()
+                val validMoods = response.moods.filter { customAffirmations.keys.contains(it) }
+                return customAffirmations[validMoods.random()]?.random()
             }
         } catch (e: Exception) {
             println(e.message)

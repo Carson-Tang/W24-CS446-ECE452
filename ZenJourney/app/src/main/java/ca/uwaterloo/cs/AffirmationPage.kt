@@ -52,7 +52,8 @@ fun AffirmationPage(appState: AppState) {
                         // if today not empty
                         if (response != null) {
                             // get a random mood
-                            todayMoods.addAll(response.moods)
+                            val validMoods = response.moods.filter { customAffirmations.keys.contains(it) }
+                            todayMoods.addAll(validMoods)
                             val customAffirmation =
                                 customAffirmations[todayMoods.random()]?.random()
                             if (customAffirmation != null) {
@@ -73,7 +74,8 @@ fun AffirmationPage(appState: AppState) {
                             )
                             if (yestResponse != null) {
                                 // get a random mood
-                                yestMoods.addAll(yestResponse.moods)
+                                val validMoods = yestResponse.moods.filter { customAffirmations.keys.contains(it) }
+                                yestMoods.addAll(validMoods)
                                 val customAffirmation =
                                     customAffirmations[yestMoods.random()]?.random()
                                 if (customAffirmation != null) {

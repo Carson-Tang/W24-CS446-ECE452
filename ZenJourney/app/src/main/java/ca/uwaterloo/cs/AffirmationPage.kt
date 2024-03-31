@@ -53,36 +53,38 @@ fun AffirmationPage(appState: AppState) {
                         if (response != null) {
                             // get a random mood
                             todayMoods.addAll(response.moods)
+                            println("today moods "+todayMoods.toString())
                             val customAffirmation =
                                 customAffirmations[todayMoods.random()]?.random()
                             if (customAffirmation != null) {
                                 setCurrAffirmation(customAffirmation)
                             }
                         }
-                        // if today empty check yesterday
-                        else {
-                            try {
-                                val yestdResponse = appState.userStrategy?.getJournalByDate(
-                                    appState = appState,
-                                    day = yesterday.dayOfMonth,
-                                    month = yesterday.monthValue,
-                                    year = yesterday.year
-                                )
-                                if (yestdResponse != null) {
-                                    // get a random mood
-                                    yestMoods.addAll(yestdResponse.moods)
-                                    val customAffirmation =
-                                        customAffirmations[yestMoods.random()]?.random()
-                                    if (customAffirmation != null) {
-                                        setCurrAffirmation(customAffirmation)
-                                    }
-                                }
-                            } catch (e: Exception) {
-                                println(e.message)
-                            }
-                        }
                     } catch (e: Exception) {
                         println(e.message)
+                    }
+                    if (todayMoods.isNotEmpty()) {
+                        // if today empty check yesterday
+                        try {
+                            val yestResponse = appState.userStrategy?.getJournalByDate(
+                                appState = appState,
+                                day = yesterday.dayOfMonth,
+                                month = yesterday.monthValue,
+                                year = yesterday.year
+                            )
+                            if (yestResponse != null) {
+                                // get a random mood
+                                yestMoods.addAll(yestResponse.moods)
+                                println("yest moods "+yestMoods.toString())
+                                val customAffirmation =
+                                    customAffirmations[yestMoods.random()]?.random()
+                                if (customAffirmation != null) {
+                                    setCurrAffirmation(customAffirmation)
+                                }
+                            }
+                        } catch (e: Exception) {
+                            println(e.message)
+                        }
                     }
                 }
             }

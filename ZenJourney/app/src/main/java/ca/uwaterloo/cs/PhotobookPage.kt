@@ -3,27 +3,20 @@
 package ca.uwaterloo.cs
 
 import android.Manifest
-import android.R
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -69,7 +62,6 @@ import java.time.format.TextStyle
 import java.util.Locale
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
-import kotlin.math.abs
 import kotlin.math.ceil
 
 
@@ -99,32 +91,44 @@ fun LazyGridScope.header(
 ) {
     item(span = { GridItemSpan(this.maxLineSpan) }, content = content)
 }
+@Composable
+fun GridItem(photosByMonth: Map<Pair<Int, Int>, List<PhotobookPhoto>>, year: Int, month: Int, idx: Int) {
+    photosByMonth[Pair(year, month)]?.get(idx)?.image?.let { it1 ->
+        Image(
+            bitmap = it1.asImageBitmap(),
+            contentDescription = null,
+            modifier = Modifier
+                .size(75.dp)
+                .border(2.dp, Color(0xFFF1F1F1))
+                .padding(start = 10.dp)
+        )
+    }
+}
 
 @Composable
-@OptIn(ExperimentalEncodingApi::class)
+@OptIn(ExperimentalEncodingApi::class, ExperimentalLayoutApi::class,
+    ExperimentalFoundationApi::class
+)
 fun ScrollablePhotoListWithMonth(appState: AppState, photos: List<PhotobookPhoto>) {
-    val monthYearPairs = photos.groupBy { it.year to it.month }.keys
     val photosByMonth = photos.groupBy { it.year to it.month }
     // for each month, year pair overlaps when rendered so we
     // add a delta to the top padding
     var monthDelta = 0
-    monthYearPairs.toList().forEach {(year, month) ->
         Box(
             modifier = Modifier
                 .padding(top = monthDelta.dp)
                 .fillMaxSize()
         ) {
-            LazyVerticalGrid(
-                columns = GridCells.Adaptive(100.dp),
-                content = {
+            LazyVerticalGrid(columns = GridCells.Fixed(4), content = {
+                photosByMonth.forEach() { (date, photos) ->
                     header {
                         TextButton(onClick = {
-                            appState.selectedPhotoMonth.value = month
-                            appState.selectedPhotoYear.value = year
+                            appState.selectedPhotoMonth.value = date.second
+                            appState.selectedPhotoYear.value = date.first
                             appState.pageState.value = PageStates.PHOTOBOOK_MONTH
                         }) {
                             Text(
-                                text = "${getMonthName(month)} $year",
+                                text = "${getMonthName(date.second)} ${date.first}",
                                 style = MaterialTheme.typography.headlineSmall,
                                 color = Color(0xFF5B907D),
                                 modifier = Modifier
@@ -132,26 +136,15 @@ fun ScrollablePhotoListWithMonth(appState: AppState, photos: List<PhotobookPhoto
                             )
                         }
                     }
-                    photosByMonth[Pair(year, month)]?.let {
-                        items(it.size) { idx ->
-                            photosByMonth[Pair(year, month)]?.get(idx)?.image?.let { it1 ->
-                                Image(
-                                    bitmap = it1.asImageBitmap(),
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .size(75.dp)
-                                        .border(2.dp, Color.Black)
-                                        .padding(start = 10.dp)
-                                )
-                            }
+                    photosByMonth[Pair(date.first, date.second)]?.size?.let {
+                        items(it) { idx ->
+                            GridItem(photosByMonth, date.first, date.second, idx)
                         }
                     }
+                    monthDelta += 95 * ceil((photosByMonth[Pair(date.first, date.second)]?.size ?: 0) / 4.0).toInt()
                 }
-            )
+                })
         }
-        // we have 3 photos per row
-        monthDelta += 95 * ceil((photosByMonth[Pair(year, month)]?.size ?: 0) / 3.0).toInt()
-    }
 }
 
 @Composable
@@ -588,9 +581,9 @@ fun PhotobookPage(appState: AppState) {
             ) {
                 Box(
                     modifier = Modifier
-                        .padding(top = 20.dp)
                         .fillMaxSize()
-                        .background(color = Color.White, shape = RoundedCornerShape(16.dp)
+                        .background(
+                            color = Color.White, shape = RoundedCornerShape(16.dp)
                         )
                 ) {
                     val photosByMonth = appState.photos.groupBy { it.year to it.month }

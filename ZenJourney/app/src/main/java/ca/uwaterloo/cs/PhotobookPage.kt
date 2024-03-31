@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.sp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import photo.PhotoRequest
 import java.io.ByteArrayOutputStream
@@ -187,67 +188,94 @@ fun getMonthName(month: Int): String {
 
 // bitmap -> base64 string
 @OptIn(ExperimentalEncodingApi::class)
-fun encodeImage(image: Bitmap): String {
+fun encodeImage(image: Bitmap): ByteArray {
     val stream = ByteArrayOutputStream()
     image.compress(Bitmap.CompressFormat.PNG, 100, stream)
-    val imageByteArray = stream.toByteArray()
-    val str = Base64.encode(imageByteArray)
-    return str
+    return stream.toByteArray()
 }
 
 // base64 string -> bitmap
 @OptIn(ExperimentalEncodingApi::class)
-fun decodeImage(encodedImage: String): Bitmap {
-    val decodedByte = Base64.decode(encodedImage)
-    val image = BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.size)
-    return image
+fun decodeImage(decodedByte: ByteArray): Bitmap {
+    return BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.size)
 }
 
+//****************************
+// encryption methods
 
-fun generateSymmetricKeyFromUserid(userid: String): SecretKey {
+// string -> secretkey
+fun generateSymmetricKeyFromString(str: String): SecretKey {
     val factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1")
     val salt = ByteArray(100)
     salt.fill(1)
-    val spec: KeySpec = PBEKeySpec(userid.toCharArray(), salt, 65536, 256)
+    val spec: KeySpec = PBEKeySpec(str.toCharArray(), salt, 65536, 256)
     return SecretKeySpec(factory.generateSecret(spec).encoded, "AES")
 }
 
-fun getCipherFromSecretKey(secretKey: SecretKey): Cipher {
+// secretkey -> cipher
+fun getCipherFromSecretKey(secretKey: SecretKey, isEncrypt: Boolean): Cipher {
     val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
-    cipher.init(Cipher.ENCRYPT_MODE, secretKey)
+    if (isEncrypt) {
+        cipher.init(Cipher.ENCRYPT_MODE, secretKey)
+    } else {
+        cipher.init(Cipher.DECRYPT_MODE, secretKey)
+    }
     return cipher
 }
 
-@OptIn(ExperimentalEncodingApi::class)
+// secretkey.toString
 fun secretKeyToStr(key: SecretKey): String {
     return Base64.encode(key.encoded)
 }
 
-fun StrToSecretKey(keystr: String): SecretKey {
+// string.toSecretKey (string must be representation of existing secretkey)
+fun strToSecretKey(keystr: String): SecretKey {
     val decodedKey: ByteArray = Base64.decode(keystr)
     return SecretKeySpec(decodedKey, 0, decodedKey.size, "AES")
 }
 
-suspend fun refreshPhotoList(appState: AppState){
+// add a new symmetric key to prefs if it doesn't exist already
+fun addKeyToPrefs(appState: AppState, symkey: String) {
+    val prefs = appState.encryptedKeyValStore
+    val userid = appState.userId.value
+    if (!prefs.contains(symkey)) {
+        val secretkey = generateSymmetricKeyFromString(userid)
+        val keystr = secretKeyToStr(secretkey)
+        prefs.edit().putString(symkey, keystr).apply()
+    }
+}
+
+fun getCipherFromPrefs(appState: AppState, isEncrypt: Boolean): Cipher {
+    val symkey = "photo_encryption_key"
+    addKeyToPrefs(appState, symkey)
+
+    val prefs = appState.encryptedKeyValStore
+    val secretKeyStr = prefs.getString(symkey, "")
+
+    val secretkey = if (secretKeyStr == null || secretKeyStr == "") {
+        // this shouldn't ever run if addKeyToPrefs worked properly
+        println("did not find key in prefs")
+        generateSymmetricKeyFromString(appState.userId.value)
+    } else {
+        strToSecretKey(secretKeyStr)
+    }
+
+    return getCipherFromSecretKey(secretkey, isEncrypt)
+}
+
+
+suspend fun refreshPhotoList(appState: AppState) {
     val photos = appState.userStrategy!!.getAllPhotos(appState)
+    val cipher = getCipherFromPrefs(appState, isEncrypt = false)
     val photoList = photos?.map { photoRes ->
+        val decryptedBytes = cipher.doFinal(Base64.decode(photoRes.photoBase64))
         PhotobookPhoto(
-            photoRes.year, photoRes.month, photoRes.day, decodeImage(photoRes.photoBase64)
+            photoRes.year, photoRes.month, photoRes.day, decodeImage(decryptedBytes)
         )
     }
     appState.photos.clear()
     if (photoList != null) {
         appState.photos.addAll(photoList.reversed())
-    }
-}
-
-fun generateKeyIfnotAvail(appState: AppState){
-    val symkey = "photo_encryption_key"
-    val prefs = appState.encryptedKeyValStore
-    if(!prefs.contains(symkey)){
-        val secretkey = generateSymmetricKeyFromUserid(appState.userId.value)
-        val keystr = secretKeyToStr(secretkey)
-        prefs.edit().putString(symkey, keystr).apply()
     }
 }
 
@@ -259,7 +287,6 @@ fun AllPhotosPage(appState: AppState) {
 
     LaunchedEffect(Unit) {
         refreshPhotoList(appState)
-        generateKeyIfnotAvail(appState)
     }
     val showPhotoErrorDialogue = remember { mutableStateOf(false) }
 
@@ -272,14 +299,14 @@ fun AllPhotosPage(appState: AppState) {
 
     fun addImageToPhotoState(image: Bitmap) {
         coroutineScope.launch {
-            val photoRequest =
-                PhotoRequest(
-                    appState.userId.value,
-                    encodeImage(image),
-                    currentDate.year,
-                    currentDate.monthValue,
-                    currentDate.dayOfMonth
-                )
+            val cipher = getCipherFromPrefs(appState, isEncrypt = true)
+            val photoRequest = PhotoRequest(
+                appState.userId.value,
+                Base64.encode(cipher.doFinal(encodeImage(image))),
+                currentDate.year,
+                currentDate.monthValue,
+                currentDate.dayOfMonth
+            )
             showPhotoErrorDialogue.value =
                 !(appState.userStrategy!!.createPhoto(appState, photoRequest))
 
@@ -448,20 +475,19 @@ fun PhotobookPage(appState: AppState) {
 
     LaunchedEffect(Unit) {
         refreshPhotoList(appState)
-        generateKeyIfnotAvail(appState)
     }
     val showPhotoErrorDialogue = remember { mutableStateOf(false) }
 
     fun addImageToPhotoState(image: Bitmap) {
         coroutineScope.launch {
-            val photoRequest =
-                PhotoRequest(
-                    userid,
-                    encodeImage(image),
-                    currentDate.year,
-                    currentDate.monthValue,
-                    currentDate.dayOfMonth
-                )
+            val cipher = getCipherFromPrefs(appState, isEncrypt = true)
+            val photoRequest = PhotoRequest(
+                appState.userId.value,
+                Base64.encode(cipher.doFinal(encodeImage(image))),
+                currentDate.year,
+                currentDate.monthValue,
+                currentDate.dayOfMonth
+            )
             showPhotoErrorDialogue.value =
                 !(appState.userStrategy!!.createPhoto(appState, photoRequest))
 

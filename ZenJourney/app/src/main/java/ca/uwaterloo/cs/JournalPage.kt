@@ -214,7 +214,7 @@ fun JournalPage2(appState: AppState) {
                     Box(
                         modifier = Modifier
                             .padding(8.dp)
-                            .background(Color.LightGray, RoundedCornerShape(8.dp))
+                            .background(Color(0xFF74B49D), RoundedCornerShape(8.dp))
                             .clickable {
                                 appState.currSelectedCustomMoods.value = appState.currSelectedCustomMoods.value - customEmotion
                             },

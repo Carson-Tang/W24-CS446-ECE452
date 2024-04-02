@@ -246,6 +246,36 @@ class CloudUserStrategy : UserStrategy {
             }
         }
     }
+
+    override suspend fun getUserPhotosByYearMonth(
+        appState: AppState,
+        year: Int,
+        month: Int
+    ): List<PhotoResponse>? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = PhotoApiService.getUserPhotosByYearMonth(
+                    appState.userId.value, year, month, appState.dataStore.getJwt()
+                )
+                //got photos
+                if (response.status == HttpStatusCode.OK) {
+                    val listResponse: ListResponse<PhotoResponse> = response.body()
+                    listResponse.list
+                } else { // status code is bad
+                    val statusResponse: StatusResponse = response.body()
+                    println("getUserPhotosByYearMonth failed due to response code")
+                    println(statusResponse.body)
+                    null
+                }
+                // some other error occured
+            } catch (e: Exception) {
+                println("getUserPhotosByYearMonth failed")
+                println(e)
+                null
+            }
+        }
+    }
+
     override fun clearJWT(appState: AppState) {
         runBlocking {
             appState.dataStore.setJwt("")

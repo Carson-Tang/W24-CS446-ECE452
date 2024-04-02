@@ -79,4 +79,18 @@ object PhotoApiService {
             }
         }
     }
+
+    suspend fun getUserPhotosByYearMonth(
+        userid: String, year: Int, month: Int, jwt: String
+    ): HttpResponse {
+        return withContext(Dispatchers.IO) {
+            HttpClientSetup.httpClient.get("$baseUrl/byuserid/$userid") {
+                parameter("year", year)
+                parameter("month", month)
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer $jwt")
+                }
+            }
+        }
+    }
 }

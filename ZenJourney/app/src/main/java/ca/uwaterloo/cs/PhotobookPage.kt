@@ -56,10 +56,19 @@ import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.launch
 import photo.PhotoRequest
 import java.io.ByteArrayOutputStream
+import java.security.spec.KeySpec
 import java.text.DateFormatSymbols
 import java.time.LocalDate
 import java.time.format.TextStyle
+import java.util.Arrays
 import java.util.Locale
+import javax.crypto.Cipher
+import javax.crypto.Cipher.SECRET_KEY
+import javax.crypto.SecretKey
+import javax.crypto.SecretKeyFactory
+import javax.crypto.spec.IvParameterSpec
+import javax.crypto.spec.PBEKeySpec
+import javax.crypto.spec.SecretKeySpec
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.math.ceil
@@ -185,21 +194,39 @@ fun getMonthName(month: Int): String {
 
 // bitmap -> base64 string
 @OptIn(ExperimentalEncodingApi::class)
-fun encodeImage(image: Bitmap): String {
+fun encodeImage(image: Bitmap): ByteArray {
     val stream = ByteArrayOutputStream()
     image.compress(Bitmap.CompressFormat.PNG, 100, stream)
-    val imageByteArray = stream.toByteArray()
-    val str = Base64.encode(imageByteArray)
-    return str
+    return stream.toByteArray()
 }
 
 // base64 string -> bitmap
 @OptIn(ExperimentalEncodingApi::class)
-fun decodeImage(encodedImage: String): Bitmap {
-    val decodedByte = Base64.decode(encodedImage)
-    val image = BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.size)
-    return image
+fun decodeImage(decodedByte: ByteArray): Bitmap {
+    return BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.size)
 }
+
+suspend fun refreshPhotoList(appState: AppState) {
+    val photos = appState.userStrategy!!.getAllPhotos(appState)
+    val photoList: List<PhotobookPhoto>? = try {
+        photos?.map { photoRes ->
+            val decryptedPhoto =
+                appState.userStrategy!!.decryptPhoto(appState, photoRes.photoBase64)
+            PhotobookPhoto(
+                photoRes.year, photoRes.month, photoRes.day, decodeImage(decryptedPhoto)
+            )
+        }
+    } catch (e: Exception) {
+        println("Error in refreshPhotoList")
+        println(e.message)
+        emptyList()
+    }
+    appState.photos.clear()
+    if (photoList != null) {
+        appState.photos.addAll(photoList.reversed())
+    }
+}
+
 
 @Composable
 @OptIn(ExperimentalPermissionsApi::class)
@@ -207,16 +234,7 @@ fun AllPhotosPage(appState: AppState) {
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
-        val photos = appState.userStrategy!!.getAllPhotos(appState)
-        val photoList = photos?.map { photoRes ->
-            PhotobookPhoto(
-                photoRes.year, photoRes.month, photoRes.day, decodeImage(photoRes.photoBase64)
-            )
-        }
-        appState.photos.clear()
-        if (photoList != null) {
-            appState.photos.addAll(photoList.reversed())
-        }
+        refreshPhotoList(appState)
     }
     val showPhotoErrorDialogue = remember { mutableStateOf(false) }
 
@@ -229,14 +247,14 @@ fun AllPhotosPage(appState: AppState) {
 
     fun addImageToPhotoState(image: Bitmap) {
         coroutineScope.launch {
-            val photoRequest =
-                PhotoRequest(
-                    appState.userId.value,
-                    encodeImage(image),
-                    currentDate.year,
-                    currentDate.monthValue,
-                    currentDate.dayOfMonth
-                )
+            val encryptedPhoto = appState.userStrategy!!.encryptPhoto(appState, encodeImage(image))
+            val photoRequest = PhotoRequest(
+                appState.userId.value,
+                encryptedPhoto,
+                currentDate.year,
+                currentDate.monthValue,
+                currentDate.dayOfMonth
+            )
             showPhotoErrorDialogue.value =
                 !(appState.userStrategy!!.createPhoto(appState, photoRequest))
 
@@ -404,29 +422,20 @@ fun PhotobookPage(appState: AppState) {
     val userid = appState.userId.value
 
     LaunchedEffect(Unit) {
-        val photos = appState.userStrategy!!.getAllPhotos(appState)
-        val photoList = photos?.map { photoRes ->
-            PhotobookPhoto(
-                photoRes.year, photoRes.month, photoRes.day, decodeImage(photoRes.photoBase64)
-            )
-        }
-        appState.photos.clear()
-        if (photoList != null) {
-            appState.photos.addAll(photoList.reversed())
-        }
+        refreshPhotoList(appState)
     }
     val showPhotoErrorDialogue = remember { mutableStateOf(false) }
 
     fun addImageToPhotoState(image: Bitmap) {
         coroutineScope.launch {
-            val photoRequest =
-                PhotoRequest(
-                    userid,
-                    encodeImage(image),
-                    currentDate.year,
-                    currentDate.monthValue,
-                    currentDate.dayOfMonth
-                )
+            val encryptedPhoto = appState.userStrategy!!.encryptPhoto(appState, encodeImage(image))
+            val photoRequest = PhotoRequest(
+                appState.userId.value,
+                encryptedPhoto,
+                currentDate.year,
+                currentDate.monthValue,
+                currentDate.dayOfMonth
+            )
             showPhotoErrorDialogue.value =
                 !(appState.userStrategy!!.createPhoto(appState, photoRequest))
 

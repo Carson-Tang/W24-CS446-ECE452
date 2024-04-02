@@ -5,6 +5,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
+import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -17,6 +18,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.activity.OnBackPressedCallback
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKeys
 import ca.uwaterloo.cs.notifications.NotificationScheduler
 import ca.uwaterloo.cs.userstrategy.CloudUserStrategy
 import ca.uwaterloo.cs.userstrategy.LocalUserStrategy
@@ -122,6 +125,18 @@ class AppState(val context: Context) {
     val dataStore = AppDataStore(context)
 
     var userStrategy: UserStrategy? = null
+
+    val encryptedKeyValStore: SharedPreferences = let {
+        val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+        // Initialize EncryptedSharedPreferences
+        EncryptedSharedPreferences.create(
+            "secret_shared_prefs",
+            masterKeyAlias,
+            context,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
+    }
 
     fun resetToDefault() {
         userId.value = ""

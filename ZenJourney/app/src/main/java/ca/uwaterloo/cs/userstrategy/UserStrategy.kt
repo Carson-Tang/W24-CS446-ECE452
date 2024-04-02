@@ -20,6 +20,10 @@ interface UserStrategy {
     suspend fun createPhoto(appState: AppState, photoRequest: PhotoRequest):Boolean
     suspend fun getAllPhotos(appState: AppState): List<PhotoResponse>?
 
+    fun encryptPhoto(appState: AppState, photo: ByteArray): String
+
+    fun decryptPhoto(appState: AppState, encryptedPhoto: String): ByteArray
+
     suspend fun updateJournal(appState: AppState, journalRequest: JournalRequest, id: String)
     fun clearJWT(appState: AppState)
 }

@@ -18,6 +18,8 @@ import com.an.room.model.Journal
 import com.an.room.model.Photo
 import photo.PhotoRequest
 import photo.PhotoResponse
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 
 class LocalUserStrategy : UserStrategy {
     override val forgotPINLabel = "Exit, clear all data"
@@ -226,6 +228,17 @@ class LocalUserStrategy : UserStrategy {
             }
         }
     }
+
+    @OptIn(ExperimentalEncodingApi::class)
+    override fun encryptPhoto(appState: AppState, photo: ByteArray): String{
+        return Base64.encode(photo) // we do not perform encryption on local
+    }
+
+    @OptIn(ExperimentalEncodingApi::class)
+    override fun decryptPhoto(appState: AppState, encryptedPhoto: String): ByteArray{
+        return Base64.decode(encryptedPhoto) // we do not perform encryption on local
+    }
+
     override fun deleteAccount(appState: AppState): Pair<Boolean, Boolean> { return Pair(false, false) }
 
     override fun clearJWT(appState: AppState) {}

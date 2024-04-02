@@ -3,15 +3,13 @@ package ca.uwaterloo.cs.userstrategy
 import StatusResponse
 import ca.uwaterloo.cs.AppState
 import ca.uwaterloo.cs.PageStates
-import ca.uwaterloo.cs.PhotobookPhoto
+import ca.uwaterloo.cs.api.Encryption
 import ca.uwaterloo.cs.api.JournalApiService
 import ca.uwaterloo.cs.api.JournalApiService.deleteJournalByUserId
 import ca.uwaterloo.cs.api.PhotoApiService
 import ca.uwaterloo.cs.api.PhotoApiService.deleteUserPhotos
 import ca.uwaterloo.cs.api.UserApiService
 import ca.uwaterloo.cs.api.UserApiService.deleteUser
-import ca.uwaterloo.cs.capitalize
-import ca.uwaterloo.cs.decodeImage
 import com.auth0.android.jwt.JWT
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -28,7 +26,8 @@ import photo.PhotoRequest
 import photo.PhotoResponse
 import user.UserRequest
 import user.UserResponse
-import java.time.LocalDate
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 
 class CloudUserStrategy : UserStrategy {
     override val forgotPINLabel = "Log out"
@@ -224,6 +223,30 @@ class CloudUserStrategy : UserStrategy {
         }
     }
 
+    @OptIn(ExperimentalEncodingApi::class)
+    override fun encryptPhoto(appState: AppState, photo: ByteArray): String {
+        return Encryption.encrypt(appState, photo) ?: return Base64.encode(photo)
+    }
+
+    @OptIn(ExperimentalEncodingApi::class)
+    override fun decryptPhoto(appState: AppState, encryptedPhoto: String): ByteArray {
+        return Encryption.decrypt(appState, encryptedPhoto) ?: return Base64.decode(encryptedPhoto)
+    }
+
+    override suspend fun updateJournal(
+        appState: AppState, journalRequest: JournalRequest, id: String
+    ) {
+        return withContext(Dispatchers.IO) {
+            try {
+                JournalApiService.updateJournal(
+                    id = id, journalRequest = journalRequest, jwt = appState.dataStore.getJwt()
+                )
+            } catch (e: Exception) {
+                println(e.message)
+            }
+        }
+    }
+
     override suspend fun getUserPhotosByYearMonth(
         appState: AppState,
         year: Int,
@@ -253,20 +276,6 @@ class CloudUserStrategy : UserStrategy {
         }
     }
 
-
-    override suspend fun updateJournal(appState: AppState, journalRequest: JournalRequest, id: String) {
-        return withContext(Dispatchers.IO){
-            try {
-                JournalApiService.updateJournal(
-                    id = id,
-                    journalRequest = journalRequest,
-                    jwt = appState.dataStore.getJwt()
-                )
-            } catch (e: Exception) {
-                println(e.message)
-            }
-        }
-    }
     override fun clearJWT(appState: AppState) {
         runBlocking {
             appState.dataStore.setJwt("")

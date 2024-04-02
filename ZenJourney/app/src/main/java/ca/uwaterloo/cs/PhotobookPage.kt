@@ -3,30 +3,27 @@
 package ca.uwaterloo.cs
 
 import android.Manifest
-import android.R
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyGridItemScope
+import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -59,13 +56,21 @@ import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.launch
 import photo.PhotoRequest
 import java.io.ByteArrayOutputStream
+import java.security.spec.KeySpec
 import java.text.DateFormatSymbols
 import java.time.LocalDate
 import java.time.format.TextStyle
+import java.util.Arrays
 import java.util.Locale
+import javax.crypto.Cipher
+import javax.crypto.Cipher.SECRET_KEY
+import javax.crypto.SecretKey
+import javax.crypto.SecretKeyFactory
+import javax.crypto.spec.IvParameterSpec
+import javax.crypto.spec.PBEKeySpec
+import javax.crypto.spec.SecretKeySpec
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
-import kotlin.math.abs
 import kotlin.math.ceil
 
 
@@ -90,65 +95,65 @@ fun ScrollablePhotoList(photoList: List<PhotobookPhoto>) {
     }
 }
 
+fun LazyGridScope.header(
+    content: @Composable LazyGridItemScope.() -> Unit
+) {
+    item(span = { GridItemSpan(this.maxLineSpan) }, content = content)
+}
 @Composable
-@OptIn(ExperimentalEncodingApi::class)
+fun GridItem(photosByMonth: Map<Pair<Int, Int>, List<PhotobookPhoto>>, year: Int, month: Int, idx: Int) {
+    photosByMonth[Pair(year, month)]?.get(idx)?.image?.let { it1 ->
+        Image(
+            bitmap = it1.asImageBitmap(),
+            contentDescription = null,
+            modifier = Modifier
+                .size(75.dp)
+                .border(2.dp, Color(0xFFF1F1F1))
+                .padding(start = 10.dp)
+        )
+    }
+}
+
+@Composable
+@OptIn(ExperimentalEncodingApi::class, ExperimentalLayoutApi::class,
+    ExperimentalFoundationApi::class
+)
 fun ScrollablePhotoListWithMonth(appState: AppState, photos: List<PhotobookPhoto>) {
-    val monthYearPairs = photos.groupBy { it.year to it.month }.keys
     val photosByMonth = photos.groupBy { it.year to it.month }
     // for each month, year pair overlaps when rendered so we
     // add a delta to the top padding
     var monthDelta = 0
-    monthYearPairs.toList().forEach {(year, month) ->
         Box(
             modifier = Modifier
-                .padding(top=monthDelta.dp)
+                .padding(top = monthDelta.dp)
                 .fillMaxSize()
         ) {
-            LazyColumn() {
-                item {
-                    TextButton(onClick = {
-                        appState.selectedPhotoMonth.value = month
-                        appState.selectedPhotoYear.value = year
-                        appState.pageState.value = PageStates.PHOTOBOOK_MONTH
-                    }) {
-                        Text(
-                            text = "${getMonthName(month)} $year",
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = Color(0xFF5B907D),
-                            modifier = Modifier
-                                .padding(all = 10.dp)
-                        )
-                    }
-                }
-                item{
-                    LazyVerticalGrid(
-                        modifier = Modifier.heightIn(max = monthDelta.dp),
-                        columns = GridCells.Adaptive(100.dp),
-                        contentPadding = PaddingValues(
-                            end = 20.dp,
-                        ),
-                        content = {
-                            photosByMonth[Pair(year, month)]?.let {
-                                items(it.size) { idx ->
-                                    photosByMonth[Pair(year, month)]?.get(idx)?.image?.let { it1 ->
-                                        Image(
-                                            bitmap = it1.asImageBitmap(),
-                                            contentDescription = null,
-                                            modifier = Modifier
-                                                .size(75.dp)
-                                                .padding(start = 20.dp)
-                                        )
-                                    }
-                                }
-                            }
+            LazyVerticalGrid(columns = GridCells.Fixed(4), content = {
+                photosByMonth.forEach() { (date, photos) ->
+                    header {
+                        TextButton(onClick = {
+                            appState.selectedPhotoMonth.value = date.second
+                            appState.selectedPhotoYear.value = date.first
+                            appState.pageState.value = PageStates.PHOTOBOOK_MONTH
+                        }) {
+                            Text(
+                                text = "${getMonthName(date.second)} ${date.first}",
+                                style = MaterialTheme.typography.headlineSmall,
+                                color = Color(0xFF5B907D),
+                                modifier = Modifier
+                                    .padding(all = 5.dp)
+                            )
                         }
-                    )
+                    }
+                    photosByMonth[Pair(date.first, date.second)]?.size?.let {
+                        items(it) { idx ->
+                            GridItem(photosByMonth, date.first, date.second, idx)
+                        }
+                    }
+                    monthDelta += 95 * ceil((photosByMonth[Pair(date.first, date.second)]?.size ?: 0) / 4.0).toInt()
                 }
-            }
+                })
         }
-        // we have 3 photos per row
-        monthDelta += 95 * ceil((photosByMonth[Pair(year, month)]?.size ?: 0) / 3.0).toInt()
-    }
 }
 
 @Composable
@@ -189,21 +194,39 @@ fun getMonthName(month: Int): String {
 
 // bitmap -> base64 string
 @OptIn(ExperimentalEncodingApi::class)
-fun encodeImage(image: Bitmap): String {
+fun encodeImage(image: Bitmap): ByteArray {
     val stream = ByteArrayOutputStream()
     image.compress(Bitmap.CompressFormat.PNG, 100, stream)
-    val imageByteArray = stream.toByteArray()
-    val str = Base64.encode(imageByteArray)
-    return str
+    return stream.toByteArray()
 }
 
 // base64 string -> bitmap
 @OptIn(ExperimentalEncodingApi::class)
-fun decodeImage(encodedImage: String): Bitmap {
-    val decodedByte = Base64.decode(encodedImage)
-    val image = BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.size)
-    return image
+fun decodeImage(decodedByte: ByteArray): Bitmap {
+    return BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.size)
 }
+
+suspend fun refreshPhotoList(appState: AppState) {
+    val photos = appState.userStrategy!!.getAllPhotos(appState)
+    val photoList: List<PhotobookPhoto>? = try {
+        photos?.map { photoRes ->
+            val decryptedPhoto =
+                appState.userStrategy!!.decryptPhoto(appState, photoRes.photoBase64)
+            PhotobookPhoto(
+                photoRes.year, photoRes.month, photoRes.day, decodeImage(decryptedPhoto)
+            )
+        }
+    } catch (e: Exception) {
+        println("Error in refreshPhotoList")
+        println(e.message)
+        emptyList()
+    }
+    appState.photos.clear()
+    if (photoList != null) {
+        appState.photos.addAll(photoList.reversed())
+    }
+}
+
 
 @Composable
 @OptIn(ExperimentalPermissionsApi::class)
@@ -211,16 +234,7 @@ fun AllPhotosPage(appState: AppState) {
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
-        val photos = appState.userStrategy!!.getAllPhotos(appState)
-        val photoList = photos?.map { photoRes ->
-            PhotobookPhoto(
-                photoRes.year, photoRes.month, photoRes.day, decodeImage(photoRes.photoBase64)
-            )
-        }
-        appState.photos.clear()
-        if (photoList != null) {
-            appState.photos.addAll(photoList.reversed())
-        }
+        refreshPhotoList(appState)
     }
     val showPhotoErrorDialogue = remember { mutableStateOf(false) }
 
@@ -233,14 +247,14 @@ fun AllPhotosPage(appState: AppState) {
 
     fun addImageToPhotoState(image: Bitmap) {
         coroutineScope.launch {
-            val photoRequest =
-                PhotoRequest(
-                    appState.userId.value,
-                    encodeImage(image),
-                    currentDate.year,
-                    currentDate.monthValue,
-                    currentDate.dayOfMonth
-                )
+            val encryptedPhoto = appState.userStrategy!!.encryptPhoto(appState, encodeImage(image))
+            val photoRequest = PhotoRequest(
+                appState.userId.value,
+                encryptedPhoto,
+                currentDate.year,
+                currentDate.monthValue,
+                currentDate.dayOfMonth
+            )
             showPhotoErrorDialogue.value =
                 !(appState.userStrategy!!.createPhoto(appState, photoRequest))
 
@@ -408,29 +422,20 @@ fun PhotobookPage(appState: AppState) {
     val userid = appState.userId.value
 
     LaunchedEffect(Unit) {
-        val photos = appState.userStrategy!!.getAllPhotos(appState)
-        val photoList = photos?.map { photoRes ->
-            PhotobookPhoto(
-                photoRes.year, photoRes.month, photoRes.day, decodeImage(photoRes.photoBase64)
-            )
-        }
-        appState.photos.clear()
-        if (photoList != null) {
-            appState.photos.addAll(photoList.reversed())
-        }
+        refreshPhotoList(appState)
     }
     val showPhotoErrorDialogue = remember { mutableStateOf(false) }
 
     fun addImageToPhotoState(image: Bitmap) {
         coroutineScope.launch {
-            val photoRequest =
-                PhotoRequest(
-                    userid,
-                    encodeImage(image),
-                    currentDate.year,
-                    currentDate.monthValue,
-                    currentDate.dayOfMonth
-                )
+            val encryptedPhoto = appState.userStrategy!!.encryptPhoto(appState, encodeImage(image))
+            val photoRequest = PhotoRequest(
+                appState.userId.value,
+                encryptedPhoto,
+                currentDate.year,
+                currentDate.monthValue,
+                currentDate.dayOfMonth
+            )
             showPhotoErrorDialogue.value =
                 !(appState.userStrategy!!.createPhoto(appState, photoRequest))
 
@@ -566,18 +571,19 @@ fun PhotobookPage(appState: AppState) {
         Modifier
             .background(color = MaterialTheme.colorScheme.background)
             .fillMaxSize()
-            .padding(top = 50.dp),
+            .padding(top = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Column(
             modifier = Modifier
                 .padding(all = 20.dp)
-                .size(width = 500.dp, height = 620.dp),
+                .size(width = 500.dp, height = 600.dp),
         ) {
             Text(
                 text = "${getMonthName(appState.selectedPhotoMonth.value)} ${appState.selectedPhotoYear.value}",
                 color = Color(0xFF649E8A),
                 style = MaterialTheme.typography.headlineLarge,
+                modifier = Modifier.padding(bottom = 10.dp)
             )
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -585,8 +591,9 @@ fun PhotobookPage(appState: AppState) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(color = Color.White, shape = RoundedCornerShape(16.dp))
-                        .padding(top = 20.dp)
+                        .background(
+                            color = Color.White, shape = RoundedCornerShape(16.dp)
+                        )
                 ) {
                     val photosByMonth = appState.photos.groupBy { it.year to it.month }
                     photosByMonth[Pair(appState.selectedPhotoYear.value, appState.selectedPhotoMonth.value)]?.let {

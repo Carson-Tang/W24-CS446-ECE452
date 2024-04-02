@@ -41,6 +41,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import ca.uwaterloo.cs.timerstate.IdleState
+import ca.uwaterloo.cs.timerstate.PausedState
+import ca.uwaterloo.cs.timerstate.PlayerState
+import ca.uwaterloo.cs.timerstate.PlayingState
 import kotlinx.coroutines.delay
 import java.util.concurrent.TimeUnit
 
@@ -70,8 +74,8 @@ fun TimerScreen(appState: AppState) {
 
     var isTimePickerVisible by remember { mutableStateOf(false) }
 
-    var mediaPlayer: MediaPlayer? by remember { mutableStateOf(null) }
-
+    var mediaPlayer by remember { mutableStateOf<MediaPlayer?>(null) }
+    var playerState by remember { mutableStateOf<PlayerState>(IdleState()) }
     Column() {
         if (isTimePickerVisible) {
             TimePickerPopup(appState.defaultTimeMs.value) { hour, minute, second ->
@@ -138,9 +142,9 @@ fun TimerScreen(appState: AppState) {
                         .background(color = Color(0xFF7BB6A1), shape = RoundedCornerShape(6.dp))
                 ) {
                     IconButton(onClick = {
-                        appState.timeMs.value = appState.defaultTimeMs.value
+                        playerState.restart(appState, mediaPlayer)
+                        playerState = IdleState()
                         isRunning = false
-
                     }) {
                         Icon(
                             imageVector = Icons.Outlined.Refresh,
@@ -158,9 +162,9 @@ fun TimerScreen(appState: AppState) {
                         if (!isRunning) {
                             isRunning = true
                             mediaPlayer = MediaPlayer.create(appState.context, appState.selectedTune.value)
-                            mediaPlayer?.isLooping = true
-                            mediaPlayer?.start()
                         }
+                        playerState.play(appState, mediaPlayer)
+                        playerState = PlayingState()
                     }) {
                         Icon(
                             imageVector = Icons.Outlined.PlayArrow,
@@ -176,7 +180,8 @@ fun TimerScreen(appState: AppState) {
                 ) {
                     IconButton(onClick = {
                         isRunning = false
-                        mediaPlayer?.pause()
+                        playerState.pause(appState, mediaPlayer)
+                        playerState = PausedState()
                     }) {
                         Icon(
                             imageVector = Icons.Outlined.Pause,
@@ -205,8 +210,11 @@ fun TimerScreen(appState: AppState) {
 
 
 @Composable
-fun TimePickerPopup(defaultTimeMs: Long, onTimeSelected: (hour: Int, minute: Int, second: Int) -> Unit) {
-    var time = formatTimeTriple(defaultTimeMs)
+fun TimePickerPopup(
+    defaultTimeMs: Long,
+    onTimeSelected: (hour: Int, minute: Int, second: Int) -> Unit
+) {
+    val time = formatTimeTriple(defaultTimeMs)
     var hour by remember { mutableStateOf(time.first) }
     var minute by remember { mutableStateOf(time.second) }
     var second by remember { mutableStateOf(time.third) }
@@ -220,7 +228,11 @@ fun TimePickerPopup(defaultTimeMs: Long, onTimeSelected: (hour: Int, minute: Int
                 modifier = Modifier.padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(text = "Meditation Time", style = MaterialTheme.typography.headlineSmall, color = Color.Black)
+                Text(
+                    text = "Meditation Time",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = Color.Black
+                )
                 Spacer(modifier = Modifier.height(8.dp))
                 NumberPicker(value = hour, onValueChange = { hour = it }, label = "Hour")
                 NumberPicker(value = minute, onValueChange = { minute = it }, label = "Minute")
@@ -248,7 +260,7 @@ fun NumberPicker(value: Int, onValueChange: (Int) -> Unit, label: String) {
         Text(
             text = label,
             color = Color.Black,
-            )
+        )
         Row(
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxWidth()

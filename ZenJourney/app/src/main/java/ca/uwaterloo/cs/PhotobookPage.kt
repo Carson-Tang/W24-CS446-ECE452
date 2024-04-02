@@ -14,11 +14,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -55,7 +53,6 @@ import androidx.compose.ui.unit.sp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import photo.PhotoRequest
 import java.io.ByteArrayOutputStream
@@ -63,10 +60,13 @@ import java.security.spec.KeySpec
 import java.text.DateFormatSymbols
 import java.time.LocalDate
 import java.time.format.TextStyle
+import java.util.Arrays
 import java.util.Locale
 import javax.crypto.Cipher
+import javax.crypto.Cipher.SECRET_KEY
 import javax.crypto.SecretKey
 import javax.crypto.SecretKeyFactory
+import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.PBEKeySpec
 import javax.crypto.spec.SecretKeySpec
 import kotlin.io.encoding.Base64
@@ -206,78 +206,20 @@ fun decodeImage(decodedByte: ByteArray): Bitmap {
     return BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.size)
 }
 
-//****************************
-// encryption methods
-
-// string -> secretkey
-fun generateSymmetricKeyFromString(str: String): SecretKey {
-    val factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1")
-    val salt = ByteArray(100)
-    salt.fill(1)
-    val spec: KeySpec = PBEKeySpec(str.toCharArray(), salt, 65536, 256)
-    return SecretKeySpec(factory.generateSecret(spec).encoded, "AES")
-}
-
-// secretkey -> cipher
-fun getCipherFromSecretKey(secretKey: SecretKey, isEncrypt: Boolean): Cipher {
-    val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
-    if (isEncrypt) {
-        cipher.init(Cipher.ENCRYPT_MODE, secretKey)
-    } else {
-        cipher.init(Cipher.DECRYPT_MODE, secretKey)
-    }
-    return cipher
-}
-
-// secretkey.toString
-fun secretKeyToStr(key: SecretKey): String {
-    return Base64.encode(key.encoded)
-}
-
-// string.toSecretKey (string must be representation of existing secretkey)
-fun strToSecretKey(keystr: String): SecretKey {
-    val decodedKey: ByteArray = Base64.decode(keystr)
-    return SecretKeySpec(decodedKey, 0, decodedKey.size, "AES")
-}
-
-// add a new symmetric key to prefs if it doesn't exist already
-fun addKeyToPrefs(appState: AppState, symkey: String) {
-    val prefs = appState.encryptedKeyValStore
-    val userid = appState.userId.value
-    if (!prefs.contains(symkey)) {
-        val secretkey = generateSymmetricKeyFromString(userid)
-        val keystr = secretKeyToStr(secretkey)
-        prefs.edit().putString(symkey, keystr).apply()
-    }
-}
-
-fun getCipherFromPrefs(appState: AppState, isEncrypt: Boolean): Cipher {
-    val symkey = "photo_encryption_key"
-    addKeyToPrefs(appState, symkey)
-
-    val prefs = appState.encryptedKeyValStore
-    val secretKeyStr = prefs.getString(symkey, "")
-
-    val secretkey = if (secretKeyStr == null || secretKeyStr == "") {
-        // this shouldn't ever run if addKeyToPrefs worked properly
-        println("did not find key in prefs")
-        generateSymmetricKeyFromString(appState.userId.value)
-    } else {
-        strToSecretKey(secretKeyStr)
-    }
-
-    return getCipherFromSecretKey(secretkey, isEncrypt)
-}
-
-
 suspend fun refreshPhotoList(appState: AppState) {
     val photos = appState.userStrategy!!.getAllPhotos(appState)
-    val cipher = getCipherFromPrefs(appState, isEncrypt = false)
-    val photoList = photos?.map { photoRes ->
-        val decryptedBytes = cipher.doFinal(Base64.decode(photoRes.photoBase64))
-        PhotobookPhoto(
-            photoRes.year, photoRes.month, photoRes.day, decodeImage(decryptedBytes)
-        )
+    val photoList: List<PhotobookPhoto>? = try {
+        photos?.map { photoRes ->
+            val decryptedPhoto =
+                appState.userStrategy!!.decryptPhoto(appState, photoRes.photoBase64)
+            PhotobookPhoto(
+                photoRes.year, photoRes.month, photoRes.day, decodeImage(decryptedPhoto)
+            )
+        }
+    } catch (e: Exception) {
+        println("Error in refreshPhotoList")
+        println(e.message)
+        emptyList()
     }
     appState.photos.clear()
     if (photoList != null) {
@@ -305,10 +247,10 @@ fun AllPhotosPage(appState: AppState) {
 
     fun addImageToPhotoState(image: Bitmap) {
         coroutineScope.launch {
-            val cipher = getCipherFromPrefs(appState, isEncrypt = true)
+            val encryptedPhoto = appState.userStrategy!!.encryptPhoto(appState, encodeImage(image))
             val photoRequest = PhotoRequest(
                 appState.userId.value,
-                Base64.encode(cipher.doFinal(encodeImage(image))),
+                encryptedPhoto,
                 currentDate.year,
                 currentDate.monthValue,
                 currentDate.dayOfMonth
@@ -486,10 +428,10 @@ fun PhotobookPage(appState: AppState) {
 
     fun addImageToPhotoState(image: Bitmap) {
         coroutineScope.launch {
-            val cipher = getCipherFromPrefs(appState, isEncrypt = true)
+            val encryptedPhoto = appState.userStrategy!!.encryptPhoto(appState, encodeImage(image))
             val photoRequest = PhotoRequest(
                 appState.userId.value,
-                Base64.encode(cipher.doFinal(encodeImage(image))),
+                encryptedPhoto,
                 currentDate.year,
                 currentDate.monthValue,
                 currentDate.dayOfMonth

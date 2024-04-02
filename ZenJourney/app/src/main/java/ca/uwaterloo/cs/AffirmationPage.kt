@@ -25,6 +25,39 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
+suspend fun getCustomAffirmation(): String? {
+    val currentDate = LocalDate.now()
+    val yesterday = LocalDate.now().minusDays(1)
+    try {
+        val response = MainActivity.appState.userStrategy?.getJournalByDate(
+            appState = MainActivity.appState,
+            day = currentDate.dayOfMonth,
+            month = currentDate.monthValue,
+            year = currentDate.year
+        )
+        if (response != null) {
+            val validMoods = response.moods.filter { customAffirmations.keys.contains(it) }
+            return customAffirmations[validMoods.random()]?.random()
+        }
+    } catch (e: Exception) {
+        println(e.message)
+    }
+    try {
+        val response = MainActivity.appState.userStrategy?.getJournalByDate(
+            appState = MainActivity.appState,
+            day = yesterday.dayOfMonth,
+            month = yesterday.monthValue,
+            year = yesterday.year
+        )
+        if (response != null) {
+            val validMoods = response.moods.filter { customAffirmations.keys.contains(it) }
+            return customAffirmations[validMoods.random()]?.random()
+        }
+    } catch (e: Exception) {
+        println(e.message)
+    }
+    return randAffirmations.random()
+}
 
 @Composable
 fun AffirmationPage(appState: AppState) {
@@ -52,7 +85,8 @@ fun AffirmationPage(appState: AppState) {
                         // if today not empty
                         if (response != null) {
                             // get a random mood
-                            val validMoods = response.moods.filter { customAffirmations.keys.contains(it) }
+                            val validMoods =
+                                response.moods.filter { customAffirmations.keys.contains(it) }
                             todayMoods.addAll(validMoods)
                             val customAffirmation =
                                 customAffirmations[todayMoods.random()]?.random()
@@ -74,7 +108,8 @@ fun AffirmationPage(appState: AppState) {
                             )
                             if (yestResponse != null) {
                                 // get a random mood
-                                val validMoods = yestResponse.moods.filter { customAffirmations.keys.contains(it) }
+                                val validMoods =
+                                    yestResponse.moods.filter { customAffirmations.keys.contains(it) }
                                 yestMoods.addAll(validMoods)
                                 val customAffirmation =
                                     customAffirmations[yestMoods.random()]?.random()
@@ -89,91 +124,91 @@ fun AffirmationPage(appState: AppState) {
                 }
             }
         }
+    }
 
+    Column(
+        Modifier
+            .background(color = MaterialTheme.colorScheme.background)
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Column(
-            Modifier
-                .background(color = MaterialTheme.colorScheme.background)
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier
+                .padding(all = 20.dp)
+                .size(width = 500.dp, height = 550.dp),
         ) {
             Column(
                 modifier = Modifier
-                    .padding(all = 20.dp)
-                    .size(width = 500.dp, height = 550.dp),
-            ) {
-                Column(
-                    modifier = Modifier
-                        .padding(top = 50.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(color = Color.White, shape = RoundedCornerShape(16.dp)),
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .padding(16.dp)
-                                .align(Alignment.Center)
-                        ) {
-                            Text(
-                                text = currAffirmation,
-                                style = MaterialTheme.typography.headlineLarge,
-                                textAlign = TextAlign.Center,
-                                color = Color(0xFF4F4F4F),
-                            )
-                        }
-                    }
-                }
-            }
-
-            Column(
-                modifier = Modifier
-                    .padding(start = 20.dp, end = 20.dp)
-                    .size(width = 460.dp, height = 75.dp),
+                    .padding(top = 50.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(
                     modifier = Modifier
-                        .size(400.dp, 80.dp)
-                        .background(
-                            color = MaterialTheme.colorScheme.tertiaryContainer,
-                            shape = RoundedCornerShape(16.dp)
-                        )
+                        .fillMaxSize()
+                        .background(color = Color.White, shape = RoundedCornerShape(16.dp)),
                 ) {
-                    Button(
-                        onClick = {
-                            if (!appState.useJournalForAffirmations.value) {
-                                setCurrAffirmation(randAffirmations.random())
-                            } else {
-                                if (todayMoods.isNotEmpty()) {
-                                    customAffirmations[todayMoods.random()]?.let {
-                                        setCurrAffirmation(
-                                            it.random()
-                                        )
-                                    }
-                                } else if (yestMoods.isNotEmpty()) {
-                                    customAffirmations[yestMoods.random()]?.let {
-                                        setCurrAffirmation(
-                                            it.random()
-                                        )
-                                    }
-                                }
-                                else {
-                                    setCurrAffirmation(randAffirmations.random())
-                                }
-                            }
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer),
-                        modifier = Modifier.fillMaxSize()
+                    Column(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .align(Alignment.Center)
                     ) {
                         Text(
-                            text = "Next",
-                            style = MaterialTheme.typography.headlineSmall,
+                            text = currAffirmation,
+                            style = MaterialTheme.typography.headlineLarge,
                             textAlign = TextAlign.Center,
-                            color = Color.White
+                            color = Color(0xFF4F4F4F),
                         )
                     }
+                }
+            }
+        }
+
+        Column(
+            modifier = Modifier
+                .padding(start = 20.dp, end = 20.dp)
+                .size(width = 460.dp, height = 75.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(400.dp, 80.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.tertiaryContainer,
+                        shape = RoundedCornerShape(16.dp)
+                    )
+            ) {
+                Button(
+                    onClick = {
+                        if (!appState.useJournalForAffirmations.value) {
+                            setCurrAffirmation(randAffirmations.random())
+                        } else {
+                            if (todayMoods.isNotEmpty()) {
+                                customAffirmations[todayMoods.random()]?.let {
+                                    setCurrAffirmation(
+                                        it.random()
+                                    )
+                                }
+                            } else if (yestMoods.isNotEmpty()) {
+                                customAffirmations[yestMoods.random()]?.let {
+                                    setCurrAffirmation(
+                                        it.random()
+                                    )
+                                }
+                            }
+                            else {
+                                setCurrAffirmation(randAffirmations.random())
+                            }
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    Text(
+                        text = "Next",
+                        style = MaterialTheme.typography.headlineSmall,
+                        textAlign = TextAlign.Center,
+                        color = Color.White
+                    )
                 }
             }
         }

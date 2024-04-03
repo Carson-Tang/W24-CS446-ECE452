@@ -1,6 +1,5 @@
 package ca.uwaterloo.cs
 
-import android.media.MediaPlayer
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -41,10 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import ca.uwaterloo.cs.timerstate.IdleState
-import ca.uwaterloo.cs.timerstate.PausedState
-import ca.uwaterloo.cs.timerstate.PlayerState
-import ca.uwaterloo.cs.timerstate.PlayingState
+import ca.uwaterloo.cs.timerstate.MeditationPlayer
 import kotlinx.coroutines.delay
 import java.util.concurrent.TimeUnit
 
@@ -73,10 +69,9 @@ fun TimerScreen(appState: AppState) {
     }
 
     var isTimePickerVisible by remember { mutableStateOf(false) }
+    val meditationPlayer = MeditationPlayer
 
-    var mediaPlayer by remember { mutableStateOf<MediaPlayer?>(null) }
-    var playerState by remember { mutableStateOf<PlayerState>(IdleState()) }
-    Column() {
+    Column {
         if (isTimePickerVisible) {
             TimePickerPopup(appState.defaultTimeMs.value) { hour, minute, second ->
                 isTimePickerVisible = false
@@ -142,8 +137,7 @@ fun TimerScreen(appState: AppState) {
                         .background(color = Color(0xFF7BB6A1), shape = RoundedCornerShape(6.dp))
                 ) {
                     IconButton(onClick = {
-                        playerState.restart(appState, mediaPlayer)
-                        playerState = IdleState()
+                        meditationPlayer.restart(appState)
                         isRunning = false
                     }) {
                         Icon(
@@ -159,12 +153,8 @@ fun TimerScreen(appState: AppState) {
                         .background(color = Color(0xFF7BB6A1), shape = RoundedCornerShape(6.dp))
                 ) {
                     IconButton(onClick = {
-                        if (!isRunning) {
-                            isRunning = true
-                            mediaPlayer = MediaPlayer.create(appState.context, appState.selectedTune.value)
-                        }
-                        playerState.play(appState, mediaPlayer)
-                        playerState = PlayingState()
+                        isRunning = true
+                        meditationPlayer.play(appState)
                     }) {
                         Icon(
                             imageVector = Icons.Outlined.PlayArrow,
@@ -180,8 +170,7 @@ fun TimerScreen(appState: AppState) {
                 ) {
                     IconButton(onClick = {
                         isRunning = false
-                        playerState.pause(appState, mediaPlayer)
-                        playerState = PausedState()
+                        meditationPlayer.pause(appState)
                     }) {
                         Icon(
                             imageVector = Icons.Outlined.Pause,
@@ -198,9 +187,7 @@ fun TimerScreen(appState: AppState) {
         while (isRunning) {
             if (appState.timeMs.value == 0L) {
                 isRunning = false
-                mediaPlayer?.stop()
-                mediaPlayer?.release()
-                mediaPlayer = null
+                meditationPlayer.onFinish()
             }
             delay(1000)
             appState.timeMs.value -= 1000

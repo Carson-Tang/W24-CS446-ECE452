@@ -6,27 +6,27 @@ import androidx.compose.runtime.mutableStateOf
 import ca.uwaterloo.cs.AppState
 import android.media.MediaPlayer as AndroidMediaPlayer
 
-abstract class PlayerState {
-    abstract fun play(
+interface PlayerState {
+    fun play(
         appState: AppState,
         mediaPlayer: AndroidMediaPlayer?,
         meditationPlayer: MeditationPlayer
     )
 
-    abstract fun pause(
+    fun pause(
         appState: AppState,
         mediaPlayer: AndroidMediaPlayer?,
         meditationPlayer: MeditationPlayer
     )
 
-    abstract fun restart(
+    fun restart(
         appState: AppState,
         mediaPlayer: AndroidMediaPlayer?,
         meditationPlayer: MeditationPlayer
     )
 }
 
-class IdleState : PlayerState() {
+class IdleState : PlayerState {
     override fun play(
         appState: AppState,
         mediaPlayer: AndroidMediaPlayer?,
@@ -54,7 +54,7 @@ class IdleState : PlayerState() {
     }
 }
 
-class PausedState : PlayerState() {
+class PausedState : PlayerState {
     override fun play(
         appState: AppState,
         mediaPlayer: AndroidMediaPlayer?,
@@ -83,7 +83,7 @@ class PausedState : PlayerState() {
     }
 }
 
-class PlayingState : PlayerState() {
+class PlayingState : PlayerState {
     override fun play(
         appState: AppState,
         mediaPlayer: AndroidMediaPlayer?,

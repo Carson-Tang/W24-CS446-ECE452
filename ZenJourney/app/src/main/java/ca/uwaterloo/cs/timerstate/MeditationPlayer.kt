@@ -8,18 +8,21 @@ import android.media.MediaPlayer as AndroidMediaPlayer
 
 interface PlayerState {
     fun play(
+        isRunning: MutableState<Boolean>,
         appState: AppState,
         mediaPlayer: AndroidMediaPlayer?,
         meditationPlayer: MeditationPlayer
     )
 
     fun pause(
+        isRunning: MutableState<Boolean>,
         appState: AppState,
         mediaPlayer: AndroidMediaPlayer?,
         meditationPlayer: MeditationPlayer
     )
 
     fun restart(
+        isRunning: MutableState<Boolean>,
         appState: AppState,
         mediaPlayer: AndroidMediaPlayer?,
         meditationPlayer: MeditationPlayer
@@ -28,6 +31,7 @@ interface PlayerState {
 
 class IdleState : PlayerState {
     override fun play(
+        isRunning: MutableState<Boolean>,
         appState: AppState,
         mediaPlayer: AndroidMediaPlayer?,
         meditationPlayer: MeditationPlayer
@@ -35,9 +39,11 @@ class IdleState : PlayerState {
         mediaPlayer?.isLooping = true
         mediaPlayer?.start()
         meditationPlayer.setState(PlayingState())
+        isRunning.value = true
     }
 
     override fun pause(
+        isRunning: MutableState<Boolean>,
         appState: AppState,
         mediaPlayer: AndroidMediaPlayer?,
         meditationPlayer: MeditationPlayer
@@ -46,6 +52,7 @@ class IdleState : PlayerState {
     }
 
     override fun restart(
+        isRunning: MutableState<Boolean>,
         appState: AppState,
         mediaPlayer: AndroidMediaPlayer?,
         meditationPlayer: MeditationPlayer
@@ -56,6 +63,7 @@ class IdleState : PlayerState {
 
 class PausedState : PlayerState {
     override fun play(
+        isRunning: MutableState<Boolean>,
         appState: AppState,
         mediaPlayer: AndroidMediaPlayer?,
         meditationPlayer: MeditationPlayer
@@ -63,9 +71,11 @@ class PausedState : PlayerState {
         mediaPlayer?.isLooping = true
         mediaPlayer?.start()
         meditationPlayer.setState(PlayingState())
+        isRunning.value = true
     }
 
     override fun pause(
+        isRunning: MutableState<Boolean>,
         appState: AppState,
         mediaPlayer: AndroidMediaPlayer?,
         meditationPlayer: MeditationPlayer
@@ -74,6 +84,7 @@ class PausedState : PlayerState {
     }
 
     override fun restart(
+        isRunning: MutableState<Boolean>,
         appState: AppState,
         mediaPlayer: AndroidMediaPlayer?,
         meditationPlayer: MeditationPlayer
@@ -85,6 +96,7 @@ class PausedState : PlayerState {
 
 class PlayingState : PlayerState {
     override fun play(
+        isRunning: MutableState<Boolean>,
         appState: AppState,
         mediaPlayer: AndroidMediaPlayer?,
         meditationPlayer: MeditationPlayer
@@ -93,15 +105,18 @@ class PlayingState : PlayerState {
     }
 
     override fun pause(
+        isRunning: MutableState<Boolean>,
         appState: AppState,
         mediaPlayer: AndroidMediaPlayer?,
         meditationPlayer: MeditationPlayer
     ) {
         mediaPlayer?.pause()
         meditationPlayer.setState(PausedState())
+        isRunning.value = false
     }
 
     override fun restart(
+        isRunning: MutableState<Boolean>,
         appState: AppState,
         mediaPlayer: AndroidMediaPlayer?,
         meditationPlayer: MeditationPlayer
@@ -109,6 +124,7 @@ class PlayingState : PlayerState {
         mediaPlayer?.pause()
         appState.timeMs.value = appState.defaultTimeMs.value
         meditationPlayer.setState(IdleState())
+        isRunning.value = false
     }
 }
 
@@ -123,24 +139,25 @@ object MeditationPlayer {
         }
     }
 
-    fun play(appState: AppState) {
+    fun play(appState: AppState, isRunning: MutableState<Boolean>) {
         createMediaPlayer(appState)
-        state.value.play(appState, mediaPlayer, this)
+        state.value.play(isRunning, appState, mediaPlayer, this)
     }
 
-    fun pause(appState: AppState) {
-        state.value.pause(appState, mediaPlayer, this)
+    fun pause(appState: AppState, isRunning: MutableState<Boolean>) {
+        state.value.pause(isRunning, appState, mediaPlayer, this)
     }
 
-    fun restart(appState: AppState) {
-        state.value.restart(appState, mediaPlayer, this)
+    fun restart(appState: AppState, isRunning: MutableState<Boolean>) {
+        state.value.restart(isRunning, appState, mediaPlayer, this)
     }
 
     fun setState(newState: PlayerState) {
         state.value = newState
     }
 
-    fun onFinish() {
+    fun onFinish(isRunning: MutableState<Boolean>) {
+        isRunning.value = false
         mediaPlayer?.stop()
         mediaPlayer?.release()
         mediaPlayer = null

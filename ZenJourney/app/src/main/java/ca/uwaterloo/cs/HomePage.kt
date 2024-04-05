@@ -93,11 +93,6 @@ fun WithInfo(today: LocalDate, todayJournalData: JournalResponse, appState: AppS
     Column(
         modifier = Modifier
             .padding(top = 50.dp, start = 30.dp, end = 30.dp)
-            .clickable(onClick = {
-                // TODO: make sure this clickable actually shows today in past journal
-                // might have to update appState
-                appState.pageState.value = PageStates.PAST_JOURNAL
-            })
     ) {
         Row(
             modifier = Modifier

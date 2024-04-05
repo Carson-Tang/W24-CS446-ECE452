@@ -474,7 +474,7 @@ fun JournalPage3(appState: AppState) {
                                     day = appState.selectedDate.value.dayOfMonth,
                                     moods = selectedMoodsAndCustomMoods,
                                     content = appState.journalEntry.value,
-                                    userId = appState.userId.value // Hardcoded test user for now
+                                    userId = appState.userId.value
                                 )
                                 try {
                                     if (appState.isEditing.value) {

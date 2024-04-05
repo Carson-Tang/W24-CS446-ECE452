@@ -275,7 +275,6 @@ fun AllPhotosPage(appState: AppState) {
     */
     val getCameraContent =
         rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) {
-            /* TODO: upload bitmap to server and update UI */
             if (it != null) {
                 addImageToPhotoState(it)
             }
@@ -457,7 +456,6 @@ fun PhotobookPage(appState: AppState) {
     */
     val getCameraContent =
         rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) {
-            /* TODO: upload bitmap to server and update UI */
             if (it != null) {
                 addImageToPhotoState(it)
             }

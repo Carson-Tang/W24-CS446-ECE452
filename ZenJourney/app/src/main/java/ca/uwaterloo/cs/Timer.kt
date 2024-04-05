@@ -64,9 +64,7 @@ fun formatTimeTriple(ms: Long): Triple<Int, Int, Int> {
 
 @Composable
 fun TimerScreen(appState: AppState) {
-    var isRunning by remember {
-        mutableStateOf(false)
-    }
+    val isRunning = remember { mutableStateOf(false) }
 
     var isTimePickerVisible by remember { mutableStateOf(false) }
     val meditationPlayer = MeditationPlayer
@@ -137,8 +135,7 @@ fun TimerScreen(appState: AppState) {
                         .background(color = Color(0xFF7BB6A1), shape = RoundedCornerShape(6.dp))
                 ) {
                     IconButton(onClick = {
-                        meditationPlayer.restart(appState)
-                        isRunning = false
+                        meditationPlayer.restart(appState, isRunning)
                     }) {
                         Icon(
                             imageVector = Icons.Outlined.Refresh,
@@ -153,8 +150,7 @@ fun TimerScreen(appState: AppState) {
                         .background(color = Color(0xFF7BB6A1), shape = RoundedCornerShape(6.dp))
                 ) {
                     IconButton(onClick = {
-                        isRunning = true
-                        meditationPlayer.play(appState)
+                        meditationPlayer.play(appState, isRunning)
                     }) {
                         Icon(
                             imageVector = Icons.Outlined.PlayArrow,
@@ -169,8 +165,7 @@ fun TimerScreen(appState: AppState) {
                         .background(color = Color(0xFF7BB6A1), shape = RoundedCornerShape(6.dp))
                 ) {
                     IconButton(onClick = {
-                        isRunning = false
-                        meditationPlayer.pause(appState)
+                        meditationPlayer.pause(appState, isRunning)
                     }) {
                         Icon(
                             imageVector = Icons.Outlined.Pause,
@@ -183,11 +178,10 @@ fun TimerScreen(appState: AppState) {
         }
     }
 
-    LaunchedEffect(isRunning) {
-        while (isRunning) {
+    LaunchedEffect(isRunning.value) {
+        while (isRunning.value) {
             if (appState.timeMs.value == 0L) {
-                isRunning = false
-                meditationPlayer.onFinish()
+                meditationPlayer.onFinish(isRunning)
             }
             delay(1000)
             appState.timeMs.value -= 1000

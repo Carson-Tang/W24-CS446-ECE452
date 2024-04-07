@@ -17,7 +17,7 @@
 | 2024/02/07 |  |  |  |  |  |  |  |
 | 2024/02/08 |  |  |  |  |  |  |  |
 | 2024/02/09 |  |  |  |  |  |  |  |
-| 2024/02/10 |  |  |  |  |  |  |  |
+| 2024/02/10 |  |  |  | 1 hour |  |  | D2 Buddy Team's Evaluation |
 | 2024/02/11 |  |  |  |  |  |  |  |
 | 2024/02/12 |  | 1.5 hours |  |  |  |  | D2 Buddy Team's Evaluation |
 | 2024/02/13 | 2 hours |  |  |  |  |  | D2 Buddy Team's Evaluation |
@@ -42,17 +42,19 @@
 | 2024/02/28 | 3.5 hours | 5.5 hours |  |  |  |  | Project/Prototype Demo |
 | 2024/02/28 |  |  |  | 8 hours |  |  | [#7](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/7) Add UI for all the pages |
 | 2024/02/28 |  |  | 2.5 hours  |  |  |  | [#10](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/10) Add mongoDB connection to backend server and create User data model with endpoints |
+| 2024/02/28 |  |  |  | 1 hour |  |  | D3 Project/Prototype Demo |
 | 2024/02/28 | 3.5 hours | 5.5 hours |  |  |  |  | D3 Project/Prototype Demo |
 | 2024/02/28 |  |  |  | 8 hours |  |  | [#7](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/7) Add UI for all the pages |
 | 2024/02/29 | 2 hours | 3 hours |  |  |  |  | D3 Project/Prototype Demo |
 | 2024/02/29 | 2 hours | 3 hours |  |  |  |  | Project/Prototype Demo |
 | 2024/03/01 |  |  | 0.5 hours |  |  |  | D3 Project/Prototype Demo |
-| 2024/03/02 |  | 1 hour |  |  | 1 hour |  | D3 Project/Prototype Demo |
+| 2024/03/01 |  |  |  | 1.5 hours |  |  | D3 Project/Prototype Demo |
+| 2024/03/02 |  | 1 hour |  | 1.5 hours | 1 hour |  | D3 Project/Prototype Demo |
 | 2024/03/02 |  |  |  | 4 hours |  |  | [#17](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/17) Add scrollable photobook page |
 | 2024/03/02 |  |  |  | 2 hours |  |  | [#18](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/18) Add timer for meditate page |
 | 2024/03/03 |  |  |  |  |  |  |  |
-| 2024/03/04 |  |  |  |  |  |  |  |
-| 2024/03/05 |  |  |  |  |  |  |  |
+| 2024/03/04 |  |  |  | 0.5 hours |  |  | D3 Project/Prototype Demo |
+| 2024/03/05 |  |  |  | 0.5 hours |  |  | D3 Project/Prototype Demo |
 | 2024/03/06 |  |  |  |  |  |  |  |
 | 2024/03/07 |  |  |  |  |  |  |  |
 | 2024/03/08 |  |  | 4.5 hours |  |  |  | D3 Project/Prototype Demo |
@@ -70,7 +72,8 @@
 | 2024/03/14 |  |  |  | 5 hours |  |  | [#39](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/39) Add option to use cloud and integrate signup/login with local DB |
 | 2024/03/15 |  |  |  |  |  |  |  |
 | 2024/03/16 |  |  |  |  |  |  |  |
-| 2024/03/17 |  |  |  |  |  |  |  |
+| 2024/03/16 |  |  |  | 1 hour |  |  | D4 Architecture Style Examples |
+| 2024/03/17 |  |  |  | 3 hours |  |  | D4 Architecture Style Examples |
 | 2024/03/17 |  |  |  | 1 hour |  |  | [#43](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/43) Add centralized state to app |
 | 2024/03/17 |  |  |  | 2 hours |  |  | [#45](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/45) Save local user settings on signup |
 | 2024/03/17 |  |  |  | 3 hours |  |  | [#46](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/46) Create local db/dao for journal and photos |
@@ -78,35 +81,42 @@
 | 2024/03/17 |  |  |  | 1 hour |  |  | [#50](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/50) Fix login load local user settings |
 | 2024/03/17 |  |  | 2.5 hours  |  |  |  | [#42](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/42) Add jwt authentication |
 | 2024/03/17 |  |  | 3.5 hours  |  |  |  | [#47](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/47) Meditation page |
-| 2024/03/18 |  |  |  |  |  |  |  |
+| 2024/03/18 |  |  |  | 0.5 hours |  |  | D4 Architecture Style Examples |
+| 2024/03/18 |  |  |  | 0.5 hours |  |  | D5 Design Pattern Examples |
 | 2024/03/19 |  |  |  |  |  |  |  |
 | 2024/03/20 |  |  |  |  |  |  |  |
+| 2024/03/20 |  |  |  | 0.5 hours |  |  | D5 Design Pattern Examples |
+| 2024/03/20 |  |  |  | 0.5 hours |  |  | D6 Arch + Design Document |
+| 2024/03/20 |  |  |  | 0.5 hours |  |  | D7 Final Status Report |
 | 2024/03/20 |  |  |  | 2 hours |  |  | [#56](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/56) Many miscellaneous changes + disclaimer |
 | 2024/03/21 |  |  |  |  |  |  |  |
 | 2024/03/22 |  |  |  |  |  |  |  |
-| 2024/03/23 |  |  |  |  |  |  |  |
+| 2024/03/23 |  |  |  | 0.5 hours |  |  | D5 Design Pattern Examples |
 | 2024/03/23 |  |  | 3 hours  |  |  |  | [#61](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/61) Integrate android back button for app navigation |
 | 2024/03/24 |  |  |  |  |  |  |  |
 | 2024/03/25 |  |  |  |  |  |  |  |
 | 2024/03/25 |  |  | 3 hours  |  |  |  | [#64](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/64) Delete account for cloud user |
-| 2024/03/26 |  |  |  |  |  |  |  |
+| 2024/03/26 |  |  |  | 0.5 hours |  |  | D6 Arch + Design Document |
+| 2024/03/26 |  |  |  | 0.5 hours |  |  | D7 Final Status Report |
 | 2024/03/26 |  |  | 0.5 hours  |  |  |  | [#66](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/66) Refactor delete account |
 | 2024/03/26 |  |  | 1.5 hours  |  |  |  | [#67](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/67) Show loading page before welcome/home |
 | 2024/03/27 |  |  |  |  |  |  |  |
 | 2024/03/28 |  |  |  |  |  |  |  |
-| 2024/03/29 |  |  |  |  |  |  |  |
+| 2024/03/29 |  |  |  | 0.5 hours |  |  | D5 Design Pattern Examples |
+| 2024/03/29 |  |  |  | 0.5 hours |  |  | D6 Arch + Design Document |
 | 2024/03/30 |  |  |  |  |  |  |  |
 | 2024/03/30 |  |  | 3 hours  |  |  |  | [#75](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/75) Photobook FE Updates |
 | 2024/03/30 |  |  | 3 hours  |  |  |  | [#80](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/80) Enable custom affirmations based on today or yesterday's moods |
 | 2024/03/30 |  |  | 0.5 hours  |  |  |  | [#81](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/81) Only give affirmations if the moods are not custom |
-| 2024/03/31 |  |  |  |  |  |  |  |
+| 2024/03/31 |  |  |  | 0.5 hours |  |  | D6 Arch + Design Document |
 | 2024/03/31 |  |  | 0.5 hours  |  |  |  | [#82](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/82) Clean up photobook FE |
-| 2024/04/01 |  |  |  |  |  |  |  |
+| 2024/04/01 |  |  |  | 0.5 hours |  |  | D7 Final Status Report |
 | 2024/04/02 |  |  |  |  |  |  |  |
 | 2024/04/03 |  |  |  |  |  |  |  |
-| 2024/04/04 |  |  |  |  |  |  |  |
-| 2024/04/05 |  |  |  |  |  |  |  |
-| 2024/04/06 |  |  |  |  |  |  |  |
+| 2024/04/04 |  |  |  | 3 hours |  |  | D6 Arch + Design Document |
+| 2024/04/05 |  |  |  | 6 hours |  |  | D6 Arch + Design Document |
+| 2024/04/05 |  |  |  | 0.5 hours |  |  | D7 Final Status Report |
+| 2024/04/06 |  |  |  | 0.5 hours |  |  | D7 Final Status Report |
 | 2024/04/07 |  |  |  |  |  |  |  |
 | 2024/04/08 |  |  |  |  |  |  |  |
 | 2024/04/09 |  |  |  |  |  |  |  |

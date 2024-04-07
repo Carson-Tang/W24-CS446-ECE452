@@ -74,16 +74,17 @@
 | 2024/03/16 |  |  |  |  |  |  |  |
 | 2024/03/16 |  |  |  | 1 hour |  |  | D4 Architecture Style Examples |
 | 2024/03/17 |  |  |  | 3 hours |  |  | D4 Architecture Style Examples |
+| 2024/03/17 |  |  | 1.5 hours |  |  |  | D4 Architecture Style Examples |
 | 2024/03/17 |  |  |  | 1 hour |  |  | [#43](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/43) Add centralized state to app |
 | 2024/03/17 |  |  |  | 2 hours |  |  | [#45](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/45) Save local user settings on signup |
 | 2024/03/17 |  |  |  | 3 hours |  |  | [#46](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/46) Create local db/dao for journal and photos |
 | 2024/03/17 |  |  |  | 1 hour |  |  | [#48](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/48) Add converter for list string type in local DB |
 | 2024/03/17 |  |  |  | 1 hour |  |  | [#50](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/50) Fix login load local user settings |
-| 2024/03/17 |  |  | 2.5 hours  |  |  |  | [#42](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/42) Add jwt authentication |
-| 2024/03/17 |  |  | 3.5 hours  |  |  |  | [#47](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/47) Meditation page |
+| 2024/03/17 |  |  | 3 hours  |  |  |  | [#42](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/42) Add jwt authentication |
+| 2024/03/17 |  |  | 4 hours  |  |  |  | [#47](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/47) Meditation page |
 | 2024/03/18 |  |  |  | 0.5 hours |  |  | D4 Architecture Style Examples |
 | 2024/03/18 |  |  |  | 0.5 hours |  |  | D5 Design Pattern Examples |
-| 2024/03/19 |  |  |  |  |  |  |  |
+| 2024/03/19 |  |  | 1 hours |  |  |  | D4 Architecture Style Examples |
 | 2024/03/20 |  |  |  |  |  |  |  |
 | 2024/03/20 |  |  |  | 0.5 hours |  |  | D5 Design Pattern Examples |
 | 2024/03/20 |  |  |  | 0.5 hours |  |  | D6 Arch + Design Document |
@@ -92,10 +93,10 @@
 | 2024/03/21 |  |  |  |  |  |  |  |
 | 2024/03/22 |  |  |  |  |  |  |  |
 | 2024/03/23 |  |  |  | 0.5 hours |  |  | D5 Design Pattern Examples |
-| 2024/03/23 |  |  | 3 hours  |  |  |  | [#61](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/61) Integrate android back button for app navigation |
+| 2024/03/23 |  |  | 4 hours  |  |  |  | [#61](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/61) Integrate android back button for app navigation |
 | 2024/03/24 |  |  |  |  |  |  |  |
 | 2024/03/25 |  |  |  |  |  |  |  |
-| 2024/03/25 |  |  | 3 hours  |  |  |  | [#64](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/64) Delete account for cloud user |
+| 2024/03/25 |  |  | 4 hours  |  |  |  | [#64](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/64) Delete account for cloud user |
 | 2024/03/26 |  |  |  | 0.5 hours |  |  | D6 Arch + Design Document |
 | 2024/03/26 |  |  |  | 0.5 hours |  |  | D7 Final Status Report |
 | 2024/03/26 |  |  | 0.5 hours  |  |  |  | [#66](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/66) Refactor delete account |
@@ -103,18 +104,21 @@
 | 2024/03/27 |  |  |  |  |  |  |  |
 | 2024/03/28 |  |  |  |  |  |  |  |
 | 2024/03/29 |  |  |  | 0.5 hours |  |  | D5 Design Pattern Examples |
+| 2024/03/29 |  |  | 1 hours | |  |  | D5 Design Pattern Examples |
 | 2024/03/29 |  |  |  | 0.5 hours |  |  | D6 Arch + Design Document |
 | 2024/03/30 |  |  |  |  |  |  |  |
-| 2024/03/30 |  |  | 3 hours  |  |  |  | [#75](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/75) Photobook FE Updates |
-| 2024/03/30 |  |  | 3 hours  |  |  |  | [#80](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/80) Enable custom affirmations based on today or yesterday's moods |
+| 2024/03/30 |  |  | 4 hours  |  |  |  | [#75](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/75) Photobook FE Updates |
+| 2024/03/30 |  |  | 5 hours  |  |  |  | [#80](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/80) Enable custom affirmations based on today or yesterday's moods |
 | 2024/03/30 |  |  | 0.5 hours  |  |  |  | [#81](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/81) Only give affirmations if the moods are not custom |
 | 2024/03/31 |  |  |  | 0.5 hours |  |  | D6 Arch + Design Document |
 | 2024/03/31 |  |  | 0.5 hours  |  |  |  | [#82](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/82) Clean up photobook FE |
 | 2024/04/01 |  |  |  | 0.5 hours |  |  | D7 Final Status Report |
 | 2024/04/02 |  |  |  |  |  |  |  |
 | 2024/04/03 |  |  |  |  |  |  |  |
+| 2024/04/04 |  |  | 4 hours |  |  |  | D6 Arch + Design Document |
 | 2024/04/04 |  |  |  | 3 hours |  |  | D6 Arch + Design Document |
 | 2024/04/05 |  |  |  | 6 hours |  |  | D6 Arch + Design Document |
+| 2024/04/05 |  |  | 7 hours |  |  |  | D6 Arch + Design Document |
 | 2024/04/05 |  |  |  | 0.5 hours |  |  | D7 Final Status Report |
 | 2024/04/06 |  |  |  | 0.5 hours |  |  | D7 Final Status Report |
 | 2024/04/07 |  |  |  |  |  |  |  |

@@ -123,6 +123,6 @@
 | 2024/04/05 |  |  | 7 hours |  |  |  | D6 Arch + Design Document |
 | 2024/04/05 |  |  |  | 0.5 hours |  |  | D7 Final Status Report |
 | 2024/04/06 |  |  |  | 0.5 hours |  |  | D7 Final Status Report |
-| 2024/04/07 |  |  |  |  |  |  |  |
+| 2024/04/07 |  |  |  | 1 hour |  |  |  D7 Final Status Report |
 | 2024/04/08 |  |  |  |  |  |  |  |
 | 2024/04/09 |  |  |  |  |  |  |  |

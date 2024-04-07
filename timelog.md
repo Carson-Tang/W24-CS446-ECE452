@@ -42,7 +42,7 @@
 | 2024/02/27 |  | 1 hour |  |  |  |  | D3 Project/Prototype Demo |
 | 2024/02/28 | 3.5 hours | 5.5 hours |  |  |  |  | Project/Prototype Demo |
 | 2024/02/28 |  |  |  | 8 hours |  |  | [#7](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/7) Add UI for all the pages |
-| 2024/02/28 |  |  | 2.5 hours  |  |  |  | [#10](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/10) Add mongoDB connection to backend server and create User data model with endpoints |
+| 2024/02/28 |  |  | 4 hours  |  |  |  | [#10](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/10) Add mongoDB connection to backend server and create User data model with endpoints |
 | 2024/02/28 |  |  |  | 1 hour |  |  | D3 Project/Prototype Demo |
 | 2024/02/28 | 3.5 hours | 5.5 hours |  |  |  |  | D3 Project/Prototype Demo |
 | 2024/02/28 |  |  |  | 8 hours |  |  | [#7](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/7) Add UI for all the pages |

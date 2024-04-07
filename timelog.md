@@ -16,7 +16,7 @@
 | 2024/02/06 |  |  |  |  |  |  |  |
 | 2024/02/07 |  |  |  |  |  |  |  |
 | 2024/02/08 |  |  |  |  |  |  |  |
-| 2024/02/09 |  |  |  |  |  |  |  |
+| 2024/02/09 |  |  | 2 hours |  |  |  | D2 Buddy Team's Evaluation |
 | 2024/02/10 |  |  |  | 1 hour |  |  | D2 Buddy Team's Evaluation |
 | 2024/02/11 |  |  |  |  |  |  |  |
 | 2024/02/12 |  | 1.5 hours |  |  |  |  | D2 Buddy Team's Evaluation |
@@ -28,6 +28,7 @@
 | 2024/02/18 |  |  |  |  |  |  |  |
 | 2024/02/19 |  |  |  |  |  |  |  |
 | 2024/02/20 |  |  |  |  |  |  |  |
+| 2024/02/21 |  |  | 5.5 hours |  |  |  | Figma Designs https://www.figma.com/file/CPgSzSSaiR5etDACpARzC8/ECE-452?type=design&node-id=0%3A1&mode=design&t=WJkETgtaig7dxKIB-1 |
 | 2024/02/21 |  |  |  | 1 hour |  |  | [#2](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/2) Rename app to ZenJourney |
 | 2024/02/21 |  |  |  | 4 hours |  |  | [#4](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/4) Add local DB and user model and test |
 | 2024/02/22 |  |  |  |  |  |  |  |
@@ -80,8 +81,8 @@
 | 2024/03/17 |  |  |  | 3 hours |  |  | [#46](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/46) Create local db/dao for journal and photos |
 | 2024/03/17 |  |  |  | 1 hour |  |  | [#48](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/48) Add converter for list string type in local DB |
 | 2024/03/17 |  |  |  | 1 hour |  |  | [#50](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/50) Fix login load local user settings |
-| 2024/03/17 |  |  | 3 hours  |  |  |  | [#42](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/42) Add jwt authentication |
-| 2024/03/17 |  |  | 4 hours  |  |  |  | [#47](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/47) Meditation page |
+| 2024/03/17 |  |  | 4 hours  |  |  |  | [#42](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/42) Add jwt authentication |
+| 2024/03/17 |  |  | 5 hours  |  |  |  | [#47](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/47) Meditation page |
 | 2024/03/18 |  |  |  | 0.5 hours |  |  | D4 Architecture Style Examples |
 | 2024/03/18 |  |  |  | 0.5 hours |  |  | D5 Design Pattern Examples |
 | 2024/03/19 |  |  | 1 hours |  |  |  | D4 Architecture Style Examples |
@@ -110,6 +111,7 @@
 | 2024/03/30 |  |  | 4 hours  |  |  |  | [#75](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/75) Photobook FE Updates |
 | 2024/03/30 |  |  | 5 hours  |  |  |  | [#80](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/80) Enable custom affirmations based on today or yesterday's moods |
 | 2024/03/30 |  |  | 0.5 hours  |  |  |  | [#81](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/81) Only give affirmations if the moods are not custom |
+| 2024/03/31 |  |  | 3 hours |  |  |  | D6 Final Presentation |
 | 2024/03/31 |  |  |  | 0.5 hours |  |  | D6 Arch + Design Document |
 | 2024/03/31 |  |  | 0.5 hours  |  |  |  | [#82](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/82) Clean up photobook FE |
 | 2024/04/01 |  |  |  | 0.5 hours |  |  | D7 Final Status Report |

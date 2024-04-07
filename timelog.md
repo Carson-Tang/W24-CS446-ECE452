@@ -1,13 +1,13 @@
 | Date | Alice | Victor | Selena | Carson | Jason | Wanda | Task |
 |------------|--------|--------|--------|--------|--------|--------|------|
-| 2024/01/24 | 1 hour | 1.5 hours |  |  |  |  | Project Proposal |
+| 2024/01/24 | 1 hour | 1.5 hours |  |  |  |  | D1 Project Proposal |
 | 2024/01/25 |  |  |  |  |  |  |  |
-| 2024/01/26 |  |  | 1.5 hours | 4 hours |  |  | Project Proposal |
-| 2024/01/27 | 1 hour |  |  |  |  |  | Project Proposal |
-| 2024/01/28 | 2 hours | 2 hours | 2 hours |  |  |  | Project Proposal |
+| 2024/01/26 |  |  | 1.5 hours | 4 hours |  |  | D1 Project Proposal |
+| 2024/01/27 | 1 hour |  |  |  |  |  | D1 Project Proposal |
+| 2024/01/28 | 2 hours | 2 hours | 2 hours |  |  |  | D1 Project Proposal |
 | 2024/01/29 |  |  |  | 1 hour |  |  | Project Proposal |
-| 2024/01/30 | 2.5 hours | 2 hours |  | 1 hour |  |  | Project Proposal |
-| 2024/01/31 |  |  | 2.5 hours |  |  |  | Project Proposal |
+| 2024/01/30 | 2.5 hours | 2 hours |  | 1 hour |  |  | D1 Project Proposal |
+| 2024/01/31 |  |  | 2.5 hours |  |  |  | D1 Project Proposal |
 | 2024/02/01 |  |  |  |  |  |  |  |
 | 2024/02/02 |  |  |  |  |  |  |  |
 | 2024/02/03 |  |  |  |  |  |  |  |
@@ -19,11 +19,11 @@
 | 2024/02/09 |  |  |  |  |  |  |  |
 | 2024/02/10 |  |  |  |  |  |  |  |
 | 2024/02/11 |  |  |  |  |  |  |  |
-| 2024/02/12 |  | 1.5 hours |  |  |  |  | Buddy Team's Evaluation |
-| 2024/02/13 | 2 hours |  |  |  |  |  | Buddy Team's Evaluation |
+| 2024/02/12 |  | 1.5 hours |  |  |  |  | D2 Buddy Team's Evaluation |
+| 2024/02/13 | 2 hours |  |  |  |  |  | D2 Buddy Team's Evaluation |
 | 2024/02/14 |  |  |  |  |  |  |  |
 | 2024/02/15 |  |  |  |  |  |  |  |
-| 2024/02/16 |  | 1 hour |  |  |  |  | Buddy Team's Evaluation |
+| 2024/02/16 |  | 1 hour |  |  |  |  | D2 Buddy Team's Evaluation |
 | 2024/02/17 |  |  |  | 1 hour |  |  | [#1](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/1) Add starter code |
 | 2024/02/18 |  |  |  |  |  |  |  |
 | 2024/02/19 |  |  |  |  |  |  |  |
@@ -34,13 +34,13 @@
 | 2024/02/23 |  |  |  |  |  |  |  |
 | 2024/02/24 |  |  |  |  |  |  |  |
 | 2024/02/25 |  |  |  |  |  |  |  |
-| 2024/02/26 | 5 hours | 3 hours |  |  |  |  | Project/Prototype Demo |
-| 2024/02/27 |  | 1 hour |  |  |  |  | Project/Prototype Demo |
-| 2024/02/28 | 3.5 hours | 5.5 hours |  |  |  |  | Project/Prototype Demo |
+| 2024/02/26 | 5 hours | 3 hours |  |  |  |  | D3 Project/Prototype Demo |
+| 2024/02/27 |  | 1 hour |  |  |  |  | D3 Project/Prototype Demo |
+| 2024/02/28 | 3.5 hours | 5.5 hours |  |  |  |  | D3 Project/Prototype Demo |
 | 2024/02/28 |  |  |  | 8 hours |  |  | [#7](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/7) Add UI for all the pages |
-| 2024/02/29 | 2 hours | 3 hours |  |  |  |  | Project/Prototype Demo |
+| 2024/02/29 | 2 hours | 3 hours |  |  |  |  | D3 Project/Prototype Demo |
 | 2024/03/01 |  |  |  |  |  |  |  |
-| 2024/03/02 |  | 1 hour |  |  | 1 hour |  | Project/Prototype Demo |
+| 2024/03/02 |  | 1 hour |  |  | 1 hour |  | D3 Project/Prototype Demo |
 | 2024/03/02 |  |  |  | 4 hours |  |  | [#17](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/17) Add scrollable photobook page |
 | 2024/03/02 |  |  |  | 2 hours |  |  | [#18](https://github.com/Carson-Tang/W24-CS446-ECE452/pull/18) Add timer for meditate page |
 | 2024/03/03 |  |  |  |  |  |  |  |
